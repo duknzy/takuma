@@ -358,6 +358,14 @@
                                 <p class="text-[10px] text-red-400 mb-3 uppercase tracking-widest flex items-center gap-2"><span class="text-lg">🚩</span> Flagged Targets</p>
                                 <div class="flex items-end gap-3">
                                     <div class="flex-1">
+                                        <label class="text-[9px] text-yellow-500 font-bold block mb-1">Target Flag</label>
+                                        <select id="flagged-type" class="w-full bg-black text-white p-2 rounded border border-gray-600 text-center text-sm font-mono focus:border-red-500 outline-none appearance-none">
+                                            <option value="all">🚩 & 🟨 (Both)</option>
+                                            <option value="red">🚩 Red Only</option>
+                                            <option value="yellow">🟨 Yellow Only</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1">
                                         <label class="text-[9px] text-yellow-500 font-bold block mb-1">Q's (空欄なら全問)</label>
                                         <input type="number" id="flagged-qty" placeholder="Max" class="w-full bg-black text-white p-2 rounded border border-yellow-600 text-center text-sm font-mono">
                                     </div>
@@ -2620,7 +2628,7 @@ lest: ～しないように
             this.maxStreak = 0; 
             this.dueMistakes = [];
             this.allMistakes = []; 
-            this.bookmarkedOnly = false;
+           this.bookmarkedFilter = 'all'; // 'all', 'red', 'yellow'
 
             this.isPitStopMode = false;
             this.isReverseMode = false;
@@ -2866,34 +2874,38 @@ lest: ～しないように
         }
         // ...既存の createRandomRound() の処理のすぐ下に追加...
 
-        createFlaggedRound() {
-            // クラウドから同期されている全データの中から、フラグ済みのものを抽出
-            const flaggedItems = (this.allMistakes || []).filter(m => m.bookmarked);
+       createFlaggedRound() {
+            const flagType = document.getElementById('flagged-type').value;
+            const flaggedItems = (this.allMistakes || []).filter(m => {
+                // 過去のbookmarked:trueはRedとして扱う
+                const isRed = m.flag === 'red' || m.bookmarked === true;
+                const isYellow = m.flag === 'yellow';
+                if (flagType === 'red') return isRed;
+                if (flagType === 'yellow') return isYellow;
+                return isRed || isYellow; // 'all'の場合
+            });
             
             if (flaggedItems.length === 0) {
-                alert("No flagged words found. まだフラグが立っていない。まずはコースに出て限界を探ってこい。");
+                alert("指定したフラグのデータが見つからない。まずはコースに出て限界を探ってこい。");
                 return;
             }
 
-            // 出題数の取得（入力がなければフラグ全数）
             const qVal = document.getElementById('flagged-qty').value;
             let qty = parseInt(qVal);
             if (isNaN(qty) || qty <= 0) qty = flaggedItems.length;
 
-            // シャッフルして指定された数だけ抽出
             this.shuffle(flaggedItems);
             const targetItems = flaggedItems.slice(0, qty);
-
             const selectedWords = targetItems.map(item => ({ w: item.word || item.w, m: item.meaning || item.m }));
             
-            // ラウンドリストの最前列（ポールポジション）に強制セット
+            let roundTitle = flagType === 'red' ? '🚩 RED GP' : flagType === 'yellow' ? '🟨 YELLOW GP' : '🚩🟨 FLAGGED GP';
+
             this.vocabRounds.unshift({ 
                 id: 'flagged', 
-                name: `🚩 FLAGGED GP (${selectedWords.length} Qs)`, 
+                name: `${roundTitle} (${selectedWords.length} Qs)`, 
                 words: selectedWords 
             });
             
-            // セッティングを更新して即座にアタック開始
             this.initUI();
             document.getElementById('round-selector').value = 0;
             this.updateSummary();
@@ -2966,17 +2978,17 @@ lest: ～しないように
             document.getElementById('fc-meaning-container').classList.add('hidden'); // 裏面を隠す
 
             // --- 追加: フラグ状態の確認と反映 ---
+            // --- 追加: フラグ状態の確認と反映 ---
             const currentWord = q.w;
             const srsData = this.allMistakes ? this.allMistakes.find(m => m.word === currentWord || m.w === currentWord) : null;
-            const isBookmarked = srsData && srsData.bookmarked;
+            const isRed = srsData && (srsData.flag === 'red' || srsData.bookmarked === true);
+            const isYellow = srsData && srsData.flag === 'yellow';
             
             const bookmarkBtn = document.getElementById('fc-bookmark-btn');
             if (bookmarkBtn) {
-                if (isBookmarked) {
-                    bookmarkBtn.innerText = '🚩';
-                } else {
-                    bookmarkBtn.innerText = '🏳️';
-                }
+                if (isRed) bookmarkBtn.innerText = '🚩';
+                else if (isYellow) bookmarkBtn.innerText = '🟨';
+                else bookmarkBtn.innerText = '🏳️';
             }
             
             // 英語が表面なら自動で読み上げ
@@ -3033,16 +3045,16 @@ lest: ～しないように
             await window.toggleBookmark(safeW, safeM);
             
             // 状態を再確認してUIを即座に更新する
+            // 状態を再確認してUIを即座に更新する
             const srsData = this.allMistakes ? this.allMistakes.find(m => m.word === q.w || m.w === q.w) : null;
-            const isBookmarked = srsData && srsData.bookmarked;
+            const isRed = srsData && (srsData.flag === 'red' || srsData.bookmarked === true);
+            const isYellow = srsData && srsData.flag === 'yellow';
             
             const bookmarkBtn = document.getElementById('fc-bookmark-btn');
             if (bookmarkBtn) {
-                if (isBookmarked) {
-                    bookmarkBtn.innerText = '🚩';
-                } else {
-                    bookmarkBtn.innerText = '🏳️';
-                }
+                if (isRed) bookmarkBtn.innerText = '🚩';
+                else if (isYellow) bookmarkBtn.innerText = '🟨';
+                else bookmarkBtn.innerText = '🏳️';
             }
         }
 
@@ -3218,40 +3230,46 @@ lest: ～しないように
              const speakBtn = document.getElementById('speak-btn');
              speakBtn.onclick = () => this.speak(q.w);
 
-             const flagBtn = document.getElementById('flag-btn');
-        if (flagBtn) {
-            // 現在の単語がすでにフラグ済みかデータベースをチェック
-            let isFlagged = false;
-            const currentItem = (this.allMistakes || []).find(m => m.word === q.w || m.w === q.w);
-            if (currentItem && currentItem.bookmarked) isFlagged = true;
+            const flagBtn = document.getElementById('flag-btn');
+             if (flagBtn) {
+                 const currentItem = (this.allMistakes || []).find(m => m.word === q.w || m.w === q.w);
+                 let flagState = 'none';
+                 if (currentItem) {
+                     if (currentItem.flag === 'red' || currentItem.bookmarked === true) flagState = 'red';
+                     else if (currentItem.flag === 'yellow') flagState = 'yellow';
+                 }
 
-            // ボタンの見た目を更新する関数
-            const updateFlagUI = () => {
-                if (isFlagged) {
-                    flagBtn.classList.add('text-red-500', 'border-red-500', 'bg-red-900/20');
-                    flagBtn.classList.remove('text-gray-400', 'border-gray-700', 'bg-black/40');
-                } else {
-                    flagBtn.classList.remove('text-red-500', 'border-red-500', 'bg-red-900/20');
-                    flagBtn.classList.add('text-gray-400', 'border-gray-700', 'bg-black/40');
-                }
-            };
-            
-            updateFlagUI(); // 画面表示時に初期セットアップ
+                 const updateFlagUI = () => {
+                     flagBtn.classList.remove('text-red-500', 'border-red-500', 'bg-red-900/20', 'text-yellow-500', 'border-yellow-500', 'bg-yellow-900/20', 'text-gray-400', 'border-gray-700', 'bg-black/40');
+                     flagBtn.innerHTML = '';
+                     if (flagState === 'red') {
+                         flagBtn.classList.add('text-red-500', 'border-red-500', 'bg-red-900/20');
+                         flagBtn.innerHTML = '<span class="text-2xl">🚩</span>';
+                     } else if (flagState === 'yellow') {
+                         flagBtn.classList.add('text-yellow-500', 'border-yellow-500', 'bg-yellow-900/20');
+                         flagBtn.innerHTML = '<span class="text-2xl">🟨</span>';
+                     } else {
+                         flagBtn.classList.add('text-gray-400', 'border-gray-700', 'bg-black/40');
+                         flagBtn.innerHTML = '<span class="text-2xl">🏳️</span>';
+                     }
+                 };
+                 updateFlagUI();
 
-            flagBtn.onclick = () => {
-                const safeW = encodeURIComponent(q.w);
-                const safeM = encodeURIComponent(q.m);
-                
-                // 既存のグローバル関数を叩いてFirebaseと同期させる
-                if (window.toggleBookmark) {
-                    window.toggleBookmark(safeW, safeM);
-                }
-                
-                // ボタンの見た目をその場で反転
-                isFlagged = !isFlagged;
-                updateFlagUI();
-            };
-        }
+                 flagBtn.onclick = async () => {
+                     const safeW = encodeURIComponent(q.w);
+                     const safeM = encodeURIComponent(q.m);
+                     if (window.toggleBookmark) {
+                         await window.toggleBookmark(safeW, safeM);
+                         const updatedItem = (this.allMistakes || []).find(m => m.word === q.w || m.w === q.w);
+                         if (updatedItem) {
+                             if (updatedItem.flag === 'red' || updatedItem.bookmarked === true) flagState = 'red';
+                             else if (updatedItem.flag === 'yellow') flagState = 'yellow';
+                             else flagState = 'none';
+                         } else flagState = 'none';
+                         updateFlagUI();
+                     }
+                 };
+             }
 
              const stdContainer = document.getElementById('options-container');
              const spellContainer = document.getElementById('spelling-interface');
@@ -3669,20 +3687,29 @@ lest: ～しないように
              document.getElementById('start-screen').classList.remove('hidden');
          }
 
-         openWordBook() {
+        openWordBook() {
              document.getElementById('start-screen').classList.add('hidden');
              document.getElementById('wordbook-screen').classList.remove('hidden');
-             this.bookmarkedOnly = false;
+             this.bookmarkedFilter = 'all';
              document.getElementById('wb-filter-btn').innerText = "ALL";
+             document.getElementById('wb-filter-btn').className = "bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors";
              this.renderWordBook();
          }
 
          toggleBookFilter() {
-             this.bookmarkedOnly = !this.bookmarkedOnly;
-             document.getElementById('wb-filter-btn').innerText = this.bookmarkedOnly ? "FLAGGED" : "ALL";
-             document.getElementById('wb-filter-btn').className = this.bookmarkedOnly 
-                 ? "bg-red-600 text-white px-3 rounded border border-red-800 text-xs font-bold uppercase hover:bg-red-500 transition-colors" 
-                 : "bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors";
+             if (this.bookmarkedFilter === 'all') {
+                 this.bookmarkedFilter = 'red';
+                 document.getElementById('wb-filter-btn').innerText = "🚩 RED";
+                 document.getElementById('wb-filter-btn').className = "bg-red-900/80 text-white px-3 rounded border border-red-500 text-xs font-bold uppercase hover:bg-red-800 transition-colors";
+             } else if (this.bookmarkedFilter === 'red') {
+                 this.bookmarkedFilter = 'yellow';
+                 document.getElementById('wb-filter-btn').innerText = "🟨 YELLOW";
+                 document.getElementById('wb-filter-btn').className = "bg-yellow-900/80 text-white px-3 rounded border border-yellow-500 text-xs font-bold uppercase hover:bg-yellow-800 transition-colors";
+             } else {
+                 this.bookmarkedFilter = 'all';
+                 document.getElementById('wb-filter-btn').innerText = "ALL";
+                 document.getElementById('wb-filter-btn').className = "bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors";
+             }
              this.renderWordBook();
          }
 
@@ -3693,22 +3720,23 @@ lest: ～しないように
              const endVal = parseInt(document.getElementById('wb-end').value);
 
              listEl.innerHTML = '';
-
              let dataSrc = this.masterList.length > 0 ? this.masterList : (this.allMistakes || []);
              
              let merged = dataSrc.map((item, idx) => {
                  const srs = this.allMistakes.find(m => m.word === item.w || m.w === item.w);
-                 return {
-                     w: item.w || item.word,
-                     m: item.m || item.meaning,
-                     id: idx,
-                     srs: srs || null
-                 };
+                 return { w: item.w || item.word, m: item.m || item.meaning, id: idx, srs: srs || null };
              });
 
              const filtered = merged.filter(item => {
                  const matchQ = item.w.toLowerCase().includes(query) || item.m.toLowerCase().includes(query);
-                 const matchBook = this.bookmarkedOnly ? (item.srs && item.srs.bookmarked) : true;
+                 
+                 let matchBook = true;
+                 const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
+                 const isYellow = item.srs && item.srs.flag === 'yellow';
+                 
+                 if (this.bookmarkedFilter === 'red') matchBook = isRed;
+                 if (this.bookmarkedFilter === 'yellow') matchBook = isYellow;
+
                  const wordNum = item.id + 1;
                  const matchRange = (!startVal || wordNum >= startVal) && (!endVal || wordNum <= endVal);
 
@@ -3723,27 +3751,32 @@ lest: ～しないように
              const displayLimit = 100;
              const viewData = filtered.slice(0, displayLimit);
 
-           viewData.forEach(item => {
+             viewData.forEach(item => {
                  const div = document.createElement('div');
-                 // パディングを広げ、ホバー時の視認性を高めたデザインに変更
-                 div.className = "flex items-center justify-between bg-gray-900/60 p-4 rounded-xl border border-gray-700 hover:border-yellow-500 transition-all group shadow-md";
+                 div.className = "flex items-center justify-between bg-gray-900/60 p-4 rounded-xl border border-gray-700 hover:border-blue-500 transition-all group shadow-md";
                  
-                 let statusColor = "bg-gray-700"; 
-                 let statusText = "NEW";
+                 let statusColor = "bg-gray-700"; let statusText = "NEW";
                  if (item.srs) {
                      if (item.srs.interval > 14) { statusColor = "bg-green-500"; statusText = "OK"; }
                      else if (item.srs.interval > 3) { statusColor = "bg-yellow-500"; statusText = "WARN"; }
                      else { statusColor = "bg-red-500"; statusText = "CRIT"; }
                  }
 
-                 const isBookmarked = item.srs && item.srs.bookmarked;
+                 const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
+                 const isYellow = item.srs && item.srs.flag === 'yellow';
+                 let flagIcon = '🏳️';
+                 let flagClass = 'text-gray-600 hover:text-gray-300';
+                 if (isRed) {
+                     flagIcon = '🚩'; flagClass = 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]';
+                 } else if (isYellow) {
+                     flagIcon = '🟨'; flagClass = 'text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]';
+                 }
+
                  const safeW = encodeURIComponent(item.w);
                  const safeM = encodeURIComponent(item.m);
                  const displayW = item.w.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                  const displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-                 // テキストサイズとアイコンサイズを拡大し、情報にメリハリをつける
-                // スマホ用にテキストとタップ領域を極大化し、意味の省略(truncate)を解除
                  div.innerHTML = `
                      <div class="flex items-center gap-3 overflow-hidden w-full">
                          <div class="w-2 h-16 ${statusColor} rounded-full shrink-0 shadow-[0_0_8px_currentColor]"></div>
@@ -3758,14 +3791,13 @@ lest: ～しないように
                      </div>
                      <div class="flex flex-col items-center justify-center gap-1 shrink-0 pl-2 border-l border-gray-700/50">
                          <button class="text-gray-400 hover:text-cyan-400 p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="quiz.speak(decodeURIComponent('${safeW}').replace(/'/g, '\\''))">🔊</button>
-                         <button class="${isBookmarked ? 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'text-gray-600 hover:text-gray-300'} p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="window.toggleBookmark('${safeW}', '${safeM}')">
-                             ${isBookmarked ? '🚩' : '🏳️'}
+                         <button class="${flagClass} p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="window.toggleBookmark('${safeW}', '${safeM}')">
+                             ${flagIcon}
                          </button>
                      </div>
                  `;
                  listEl.appendChild(div);
              });
-             
              if(filtered.length > displayLimit) {
                   const more = document.createElement('div');
                   more.className = "text-center text-xs text-gray-600 py-2";
@@ -4066,26 +4098,36 @@ lest: ～しないように
           } catch (e) { console.error(e); }
       };
 
-      window.toggleBookmark = async (safeWord, safeMeaning) => {
+     window.toggleBookmark = async (safeWord, safeMeaning) => {
           if (!window.currentUser) { alert("Sign in required."); return; }
           const word = decodeURIComponent(safeWord);
           const meaning = decodeURIComponent(safeMeaning);
 
           let currentItem = window.quiz.allMistakes.find(m => m.word === word || m.w === word);
-          const isCurrentlyBookmarked = currentItem && currentItem.bookmarked === true;
-          const newValue = !isCurrentlyBookmarked;
+          
+          let currentFlag = 'none';
+          if (currentItem) {
+              if (currentItem.flag === 'red' || currentItem.bookmarked === true) currentFlag = 'red';
+              else if (currentItem.flag === 'yellow') currentFlag = 'yellow';
+          }
+
+          let nextFlag = 'none';
+          if (currentFlag === 'none') nextFlag = 'red';
+          else if (currentFlag === 'red') nextFlag = 'yellow';
+          else if (currentFlag === 'yellow') nextFlag = 'none';
 
           if (currentItem) {
-              currentItem.bookmarked = newValue;
+              currentItem.flag = nextFlag;
+              currentItem.bookmarked = (nextFlag === 'red'); 
           } else {
               window.quiz.allMistakes.push({ 
-                   word: word, meaning: meaning, bookmarked: newValue, 
+                   word: word, meaning: meaning, flag: nextFlag, bookmarked: (nextFlag === 'red'), 
                    interval: 0, repetitions: 0, easeFactor: 2.5,
                    nextReviewSeconds: Date.now() / 1000 
               });
               currentItem = window.quiz.allMistakes.find(m => m.word === word);
           }
-          window.quiz.renderWordBook(); 
+          if(window.quiz.renderWordBook) window.quiz.renderWordBook(); 
 
           const mistakesRef = collection(db, "users", window.currentUser.uid, "mistakes");
           const docId = btoa(encodeURIComponent(word)).replace(/\//g, '_').replace(/\+/g, '-');
@@ -4100,14 +4142,14 @@ lest: ～しないように
               await setDoc(targetRef, {
                   word: word,
                   meaning: meaning,
-                  bookmarked: newValue,
+                  flag: nextFlag,
+                  bookmarked: (nextFlag === 'red'), // 旧データとの互換性用
                   interval: currentItem ? (currentItem.interval || 0) : 0,
                   repetitions: currentItem ? (currentItem.repetitions || 0) : 0,
                   easeFactor: currentItem ? (currentItem.easeFactor || 2.5) : 2.5,
                   nextReview: safeNextReview
               }, { merge: true });
 
-              // --- ここから追加：ローカルキャッシュの同期システム ---
               const CACHE_KEY = `srs_data_${window.currentUser.uid}`;
               const rawString = localStorage.getItem(CACHE_KEY);
               if (rawString) {
@@ -4115,13 +4157,15 @@ lest: ～しないように
                   const index = localData.findIndex(item => item.word === word || item.id === docId);
                   
                   if (index !== -1) {
-                      localData[index].bookmarked = newValue;
+                      localData[index].flag = nextFlag;
+                      localData[index].bookmarked = (nextFlag === 'red');
                   } else {
                       localData.push({
                           id: docId,
                           word: word,
                           meaning: meaning,
-                          bookmarked: newValue,
+                          flag: nextFlag,
+                          bookmarked: (nextFlag === 'red'),
                           interval: 0,
                           repetitions: 0,
                           easeFactor: 2.5,
@@ -4130,12 +4174,14 @@ lest: ～しないように
                   }
                   localStorage.setItem(CACHE_KEY, JSON.stringify(localData));
               }
-              // --- ここまで ---
-
           } catch(e) {
               console.error("Bookmark Error:", e);
-              if(currentItem) currentItem.bookmarked = !newValue;
-              window.quiz.renderWordBook();
+              // ロールバック
+              if(currentItem) {
+                  currentItem.flag = currentFlag;
+                  currentItem.bookmarked = (currentFlag === 'red');
+              }
+              if(window.quiz.renderWordBook) window.quiz.renderWordBook();
           }
       };
 
