@@ -2886,7 +2886,7 @@ lest: ～しないように
             });
             
             if (flaggedItems.length === 0) {
-                alert("指定したフラグのデータが見つからない。まずはコースに出て限界を探ってこい。");
+                alert("まだ何もない");
                 return;
             }
 
@@ -3130,7 +3130,7 @@ lest: ～しないように
                 
                 const existingData = (this.allMistakes || []).find(item => item.word === target.w || item.w === target.w) || {};
 
-                return { 
+               return { 
                     w: target.w, 
                     m: target.m, 
                     qText: qText, 
@@ -3139,7 +3139,8 @@ lest: ～しないように
                     docId: existingData.id || null, 
                     interval: existingData.interval || 0,
                     repetitions: existingData.repetitions || 0,
-                    easeFactor: existingData.easeFactor || 2.5
+                    easeFactor: existingData.easeFactor || 2.5,
+                    lastMissedSeconds: existingData.lastMissedSeconds || null // ★これを追加して記録を保持
                 };
             });
             this.questions.sort(() => Math.random() - 0.5);
@@ -3985,24 +3986,33 @@ lest: ～しないように
         }
       };
 
-      window.handleSRSUpdate = async (questionObj, isCorrect) => {
+     window.handleSRSUpdate = async (questionObj, isCorrect) => {
         if (!window.currentUser) return;
         
         const mistakesRef = collection(db, "users", window.currentUser.uid, "mistakes");
         const now = new Date();
         const safeWordId = questionObj.docId || btoa(encodeURIComponent(questionObj.w)).replace(/\//g, '_').replace(/\+/g, '-');
         const targetRef = doc(mistakesRef, safeWordId);
+
+        // ★追加パーツ：マシンの最新メモリから履歴を引っ張り出す
+        let existingItem = null;
+        if (window.quiz && window.quiz.allMistakes) {
+            existingItem = window.quiz.allMistakes.find(m => m.id === safeWordId || m.word === questionObj.w || m.w === questionObj.w);
+        }
         
+        // メモリの履歴を最優先で引き継ぐ
         const currentParams = { 
-            interval: questionObj.interval || 0, 
-            repetitions: questionObj.repetitions || 0, 
-            easeFactor: questionObj.easeFactor || 2.5 
+            interval: existingItem ? (existingItem.interval || 0) : (questionObj.interval || 0), 
+            repetitions: existingItem ? (existingItem.repetitions || 0) : (questionObj.repetitions || 0), 
+            easeFactor: existingItem ? (existingItem.easeFactor || 2.5) : (questionObj.easeFactor || 2.5) 
         };
         
         const timeTaken = questionObj.timeTaken || 3.0;
         let nextInterval, nextRepetitions, nextEaseFactor;
-        const nowTs = Math.floor(Date.now() / 1000); // 現在時刻を取得
-        let lastMissedSeconds = questionObj.lastMissedSeconds || null;
+        const nowTs = Math.floor(Date.now() / 1000); 
+
+        // ★バグの根本原因を修正：履歴があれば、再正解時にもミスの記録を消去せずに引き継ぐ
+        let lastMissedSeconds = existingItem ? (existingItem.lastMissedSeconds || null) : (questionObj.lastMissedSeconds || null);
 
         if (!isCorrect) {
             nextRepetitions = 0; 
@@ -4072,20 +4082,28 @@ lest: ～しないように
 
             localStorage.setItem(CACHE_KEY, JSON.stringify(localData));
 
-            if(window.quiz && window.quiz.allMistakes) {
+           if(window.quiz && window.quiz.allMistakes) {
                 const memIndex = window.quiz.allMistakes.findIndex(m => m.id === safeWordId || m.word === questionObj.w);
                 
+                const memoryItem = { 
+                    ...newItemState,
+                    nextReview: { toDate: () => new Date(nextReviewSeconds * 1000) }
+                };
+
                 if(memIndex !== -1) {
+                     // 既にデータが存在する場合は上書き
                      window.quiz.allMistakes[memIndex] = { 
                          ...window.quiz.allMistakes[memIndex], 
-                         ...newItemState,
-                         nextReview: { toDate: () => new Date(nextReviewSeconds * 1000) }
+                         ...memoryItem
                      };
+                } else {
+                     // ★バグ修正：初めてミスした単語をメモリに即座に追加
+                     window.quiz.allMistakes.push(memoryItem);
                 }
                 
-                const nowTs = Date.now() / 1000;
+                const currentNowTs = Date.now() / 1000;
                 window.quiz.dueMistakes = window.quiz.allMistakes.filter(item => 
-                    item.nextReviewSeconds <= nowTs && !item.id.toString().startsWith('idiom_')
+                    item.nextReviewSeconds <= currentNowTs && !item.id.toString().startsWith('idiom_')
                 );
                 window.quiz.updatePitStopButton(window.quiz.dueMistakes.length);
             }
