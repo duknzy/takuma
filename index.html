@@ -3705,6 +3705,10 @@ lest: ～しないように
                  this.bookmarkedFilter = 'yellow';
                  document.getElementById('wb-filter-btn').innerText = "🟨 YELLOW";
                  document.getElementById('wb-filter-btn').className = "bg-yellow-900/80 text-white px-3 rounded border border-yellow-500 text-xs font-bold uppercase hover:bg-yellow-800 transition-colors";
+             } else if (this.bookmarkedFilter === 'yellow') {
+                 this.bookmarkedFilter = '24h';
+                 document.getElementById('wb-filter-btn').innerText = "⏱️ 24H";
+                 document.getElementById('wb-filter-btn').className = "bg-purple-900/80 text-white px-3 rounded border border-purple-500 text-xs font-bold uppercase hover:bg-purple-800 transition-colors";
              } else {
                  this.bookmarkedFilter = 'all';
                  document.getElementById('wb-filter-btn').innerText = "ALL";
@@ -3727,15 +3731,25 @@ lest: ～しないように
                  return { w: item.w || item.word, m: item.m || item.meaning, id: idx, srs: srs || null };
              });
 
-             const filtered = merged.filter(item => {
+            const filtered = merged.filter(item => {
                  const matchQ = item.w.toLowerCase().includes(query) || item.m.toLowerCase().includes(query);
                  
                  let matchBook = true;
                  const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
                  const isYellow = item.srs && item.srs.flag === 'yellow';
                  
+                 // --- 24時間以内のミス判定を追加 ---
+                 const nowTs = Date.now() / 1000;
+                 const is24hMiss = item.srs && (
+                     // 正確なクラッシュ時刻が記録されていれば24時間(86400秒)以内で判定
+                     (item.srs.lastMissedSeconds && (nowTs - item.srs.lastMissedSeconds <= 86400)) ||
+                     // 過去のデータ用：間隔が1(ミス直後)で反復回数が0のものも拾う
+                     (!item.srs.lastMissedSeconds && item.srs.interval <= 1 && item.srs.repetitions === 0)
+                 );
+                 
                  if (this.bookmarkedFilter === 'red') matchBook = isRed;
                  if (this.bookmarkedFilter === 'yellow') matchBook = isYellow;
+                 if (this.bookmarkedFilter === '24h') matchBook = is24hMiss; // 紫フィルター適用
 
                  const wordNum = item.id + 1;
                  const matchRange = (!startVal || wordNum >= startVal) && (!endVal || wordNum <= endVal);
@@ -3987,11 +4001,14 @@ lest: ～しないように
         
         const timeTaken = questionObj.timeTaken || 3.0;
         let nextInterval, nextRepetitions, nextEaseFactor;
+        const nowTs = Math.floor(Date.now() / 1000); // 現在時刻を取得
+        let lastMissedSeconds = questionObj.lastMissedSeconds || null;
 
         if (!isCorrect) {
             nextRepetitions = 0; 
             nextInterval = 1; 
             nextEaseFactor = Math.max(1.3, currentParams.easeFactor - 0.2); 
+            lastMissedSeconds = nowTs; // ★ミスした瞬間のタイムスタンプを刻む
         } else {
             nextRepetitions = currentParams.repetitions + 1;
             
@@ -4014,6 +4031,7 @@ lest: ～しないように
 
         console.log(`[SRS] Time: ${timeTaken.toFixed(2)}s | Next: ${nextInterval} days`);
 
+        // クラウド(Firebase)へのセーブに lastMissedSeconds を追加
         setDoc(targetRef, { 
             word: questionObj.w, 
             meaning: questionObj.meaning || questionObj.m, 
@@ -4021,7 +4039,8 @@ lest: ～しないように
             interval: nextInterval, 
             repetitions: nextRepetitions, 
             easeFactor: nextEaseFactor, 
-            lastReviewed: Timestamp.fromDate(now) 
+            lastReviewed: Timestamp.fromDate(now),
+            lastMissedSeconds: lastMissedSeconds // ★追加
         }, { merge: true })
         .catch((e) => console.error("Telemetry Failed:", e));
 
@@ -4033,6 +4052,7 @@ lest: ～しないように
 
             const index = localData.findIndex(item => item.word === questionObj.w || item.id === safeWordId);
             
+            // ローカルキャッシュにも lastMissedSeconds を追加
             const newItemState = {
                 id: safeWordId,
                 word: questionObj.w,
@@ -4040,7 +4060,8 @@ lest: ～しないように
                 nextReviewSeconds: nextReviewSeconds, 
                 interval: nextInterval,
                 repetitions: nextRepetitions,
-                easeFactor: nextEaseFactor
+                easeFactor: nextEaseFactor,
+                lastMissedSeconds: lastMissedSeconds // ★追加
             };
 
             if (index !== -1) {
