@@ -3843,14 +3843,14 @@ lest: ～しないように
       } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
       const firebaseConfig = {
-        apiKey: "AIzaSyDg2EgiI-DMzmoT20zF4VJfm1MxtmhdJQQ",
-        authDomain: "english-test-8ad4a.firebaseapp.com",
-        projectId: "english-test-8ad4a",
-        storageBucket: "english-test-8ad4a.firebasestorage.app",
-        messagingSenderId: "998730699699",
-        appId: "1:998730699699:web:8245c7259cec7dd20231c6",
-        measurementId: "G-FC2LRFVFGF"
-      };
+  apiKey: "AIzaSyBbOFRbh5oLYYKix2Ms9LKLI5rqFVkPCZs",
+  authDomain: "tango-964ab.firebaseapp.com",
+  projectId: "tango-964ab",
+  storageBucket: "tango-964ab.firebasestorage.app",
+  messagingSenderId: "1086963474480",
+  appId: "1:1086963474480:web:d8e425d704c1084692cdf5",
+  measurementId: "G-Y84L6GWD5Y"
+};
 
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
@@ -3999,7 +3999,7 @@ lest: ～しないように
         
         const mistakesRef = collection(db, "users", window.currentUser.uid, "mistakes");
         const now = new Date();
-        const safeWordId = questionObj.docId || btoa(encodeURIComponent(questionObj.w)).replace(/\//g, '_').replace(/\+/g, '-');
+       const safeWordId = questionObj.docId || questionObj.w.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
         const targetRef = doc(mistakesRef, safeWordId);
 
         // ★追加パーツ：マシンの最新メモリから履歴を引っ張り出す
@@ -4177,7 +4177,7 @@ lest: ～しないように
           if(window.quiz.renderWordBook) window.quiz.renderWordBook(); 
 
           const mistakesRef = collection(db, "users", window.currentUser.uid, "mistakes");
-          const docId = btoa(encodeURIComponent(word)).replace(/\//g, '_').replace(/\+/g, '-');
+         const docId = word.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
           const targetRef = doc(mistakesRef, docId);
 
           let safeNextReview = Timestamp.now();
