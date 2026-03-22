@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rb-hybrid-v7'; // v7にアップデートしたのは良い判断だ
+const CACHE_NAME = 'rb-hybrid-v8'; // v7にアップデートしたのは良い判断だ
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
