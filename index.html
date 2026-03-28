@@ -2679,11 +2679,25 @@ lest: ～しないように
                 document.getElementById('wb-start').addEventListener('input', () => this.renderWordBook());
                 document.getElementById('wb-end').addEventListener('input', () => this.renderWordBook());
 
-                // セッション・タイマーの初期化
-                this.stintActive = false;
-                this.stintTime = 0; // 秒単位
-                this.stintInterval = null;
-                this.initVisibilityListener();
+                // --- セッション・タイマーの初期化 (constructor内) ---
+        this.stintActive = false;
+        
+        // 日付をまたいだらリセットするロジック
+        const todayStr = new Date().toDateString();
+        const savedDate = localStorage.getItem('rb26_stint_date');
+        if (savedDate === todayStr) {
+            this.stintTime = parseInt(localStorage.getItem('rb26_stint_time')) || 0;
+        } else {
+            this.stintTime = 0;
+            localStorage.setItem('rb26_stint_date', todayStr);
+            localStorage.setItem('rb26_stint_time', 0);
+        }
+
+        this.stintInterval = null;
+        this.initVisibilityListener();
+        
+        // アプリ起動時に即座にHUDへ時間を反映
+        setTimeout(() => this.updateStintHUD(), 100);
 
                 this.parseData();
                 this.generateRounds();
@@ -2692,6 +2706,14 @@ lest: ～しないように
             }
 
             // --- セッション監視ロジック ---
+            updateStintHUD() {
+                const h = String(Math.floor(this.stintTime / 3600)).padStart(2, '0');
+                const m = String(Math.floor((this.stintTime % 3600) / 60)).padStart(2, '0');
+                const s = String(this.stintTime % 60).padStart(2, '0');
+                // 1時間を超えたら時間も表示する
+                document.getElementById('stint-clock').innerText = h !== '00' ? `${h}:${m}:${s}` : `${m}:${s}`;
+            }
+
             initVisibilityListener() {
                 document.addEventListener("visibilitychange", () => {
                     if (document.hidden && this.stintActive) {
@@ -2706,7 +2728,7 @@ lest: ～しないように
 
             startStint() {
                 this.stintActive = true;
-                this.stintTime = 0;
+                // 注意: ここでthis.stintTime = 0にしないことで、タイムが蓄積される
                 this.resumeStint();
             }
 
@@ -2717,14 +2739,14 @@ lest: ～しないように
                 
                 this.stintInterval = setInterval(() => {
                     this.stintTime++;
-                    const m = String(Math.floor(this.stintTime / 60)).padStart(2, '0');
-                    const s = String(this.stintTime % 60).padStart(2, '0');
-                    document.getElementById('stint-clock').innerText = `${m}:${s}`;
+                    localStorage.setItem('rb26_stint_time', this.stintTime); // ★毎秒オンボードメモリに保存
+                    this.updateStintHUD();
                 }, 1000);
             }
 
             pauseStint() {
                 clearInterval(this.stintInterval);
+                localStorage.setItem('rb26_stint_time', this.stintTime); // ★裏に回った瞬間も保存
                 const indicator = document.getElementById('red-flag-indicator');
                 indicator.innerHTML = `<div class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div><span class="text-[10px] text-red-500 font-bold uppercase">Red Flag: Paused</span>`;
             }
@@ -2732,6 +2754,7 @@ lest: ～しないように
             stopStint() {
                 this.stintActive = false;
                 clearInterval(this.stintInterval);
+                localStorage.setItem('rb26_stint_time', this.stintTime); // ★セッション終了時も保存
                 const indicator = document.getElementById('red-flag-indicator');
                 indicator.innerHTML = `<div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div><span class="text-[10px] text-yellow-500 font-bold uppercase">Garage: Standby</span>`;
                 return this.stintTime;
