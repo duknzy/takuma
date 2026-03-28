@@ -165,7 +165,6 @@
             animation: slideInRight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* 背景にうっすら走るスキャンライン */
         .radio-box::before {
             content: '';
             position: absolute;
@@ -195,7 +194,6 @@
             box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
         }
 
-        /* 各バーのアニメーションをずらす */
         .wave-bar:nth-child(1) { animation-delay: 0.1s; height: 40%; }
         .wave-bar:nth-child(2) { animation-delay: 0.3s; height: 70%; }
         .wave-bar:nth-child(3) { animation-delay: 0.0s; height: 100%; }
@@ -228,6 +226,17 @@
     </style>
 </head>
 <body class="carbon-bg text-sm md:text-base">
+
+    <div id="stint-timer-hud" class="hidden fixed top-0 left-1/2 -translate-x-1/2 z-[100] bg-black/80 border-b-2 border-red-600 px-6 py-2 rounded-b-xl backdrop-blur-md flex items-center gap-4 shadow-2xl">
+        <div class="flex flex-col items-start">
+            <span class="text-[8px] text-red-500 font-bold uppercase tracking-tighter leading-none">Live Stint Time</span>
+            <span id="stint-clock" class="f1-font text-white text-xl font-bold leading-none">00:00</span>
+        </div>
+        <div id="red-flag-indicator" class="hidden flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div>
+            <span class="text-[10px] text-red-500 font-bold uppercase">Red Flag: Paused</span>
+        </div>
+    </div>
 
     <video autoplay muted loop playsinline poster="./F1.jpg" id="bg-video">
         <source src="./.mp4" type="video/mp4">
@@ -277,13 +286,13 @@
                     </div>
 
                     <div class="mt-auto flex flex-col gap-3">
-    <button onclick="quiz.startFlashcardMode()" class="w-full f1-font bg-gray-800 hover:bg-gray-700 text-gray-200 py-4 rounded-xl font-bold tracking-[0.2em] uppercase transition-all transform active:scale-[0.98] shadow-lg border border-gray-600 text-lg flex items-center justify-center gap-2">
-        <span class="text-blue-400">■</span> Free Practice <span class="text-[10px] text-gray-500 font-mono">(Flashcards)</span>
-    </button>
-    <button onclick="quiz.start()" class="w-full f1-font bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-6 rounded-xl font-bold tracking-[0.2em] uppercase transition-all transform active:scale-[0.98] shadow-lg shadow-red-900/40 text-2xl border-b-4 border-red-900">
-        Start Qualifying
-    </button>
-</div>
+                        <button onclick="quiz.startFlashcardMode()" class="w-full f1-font bg-gray-800 hover:bg-gray-700 text-gray-200 py-4 rounded-xl font-bold tracking-[0.2em] uppercase transition-all transform active:scale-[0.98] shadow-lg border border-gray-600 text-lg flex items-center justify-center gap-2">
+                            <span class="text-blue-400">■</span> Free Practice <span class="text-[10px] text-gray-500 font-mono">(Flashcards)</span>
+                        </button>
+                        <button onclick="quiz.start()" class="w-full f1-font bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-6 rounded-xl font-bold tracking-[0.2em] uppercase transition-all transform active:scale-[0.98] shadow-lg shadow-red-900/40 text-2xl border-b-4 border-red-900">
+                            Start Qualifying
+                        </button>
+                    </div>
                 </div>
 
                 <div class="md:col-span-7 flex flex-col gap-4 border-t md:border-t-0 md:border-l border-gray-700 pt-6 md:pt-0 md:pl-8">
@@ -327,7 +336,8 @@
                                         </button>
                                     </div>
                                 </div>
-                            </div> </div> 
+                            </div> 
+                        </div> 
 
                         <div id="strategy-random" class="hidden space-y-4">
                             <div class="bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-xl">
@@ -514,36 +524,33 @@
         </div>
 
         <div id="flashcard-screen" class="hidden race-card p-6 rounded-2xl shadow-2xl relative flex flex-col justify-between my-auto min-h-[500px] w-full max-w-4xl mx-auto z-20">
-    <div class="flex justify-between items-start mb-6">
-        <div class="flex flex-col text-left">
-            <span id="fc-round-name" class="f1-font text-[10px] text-blue-400 uppercase tracking-widest">FREE PRACTICE</span>
-            <span class="f1-font text-white font-bold text-lg">DATA GATHERING</span>
-        </div>
-        <div class="text-right">
-            <div id="fc-progress" class="f1-font text-2xl text-blue-400 font-mono">1/20</div>
-        </div>
-    </div>
-    
-   <div id="fc-card" onclick="quiz.flipFlashcard()" class="flex-grow flex flex-col items-center justify-center bg-gray-900/60 border-2 border-dashed border-gray-600 hover:border-blue-500 rounded-xl cursor-pointer transition-all active:scale-[0.98] relative p-6 mb-8 group shadow-inner">
-        <span class="absolute top-4 text-[10px] text-gray-500 uppercase tracking-widest font-mono group-hover:text-blue-400 transition-colors animate-pulse">Tap to Reveal</span>
-        
-        <button id="fc-speak-btn" onclick="event.stopPropagation(); quiz.speakFlashcardWord();" class="absolute top-0 left-0 text-3xl p-6 z-20 cursor-pointer hover:scale-110 transition-transform text-gray-400 hover:text-cyan-400 drop-shadow-md">🔊</button>
-
-        <button id="fc-bookmark-btn" onclick="event.stopPropagation(); quiz.toggleFlashcardBookmark(event);" class="absolute top-0 right-0 text-3xl p-6 z-20 cursor-pointer hover:scale-110 transition-transform drop-shadow-md">🏳️</button>
-        
-        <h2 id="fc-word" class="f1-font text-5xl md:text-7xl font-bold text-white tracking-wide break-words text-center mb-6 drop-shadow-lg transition-all mt-4"></h2>
-        
-        <div id="fc-meaning-container" class="hidden w-full border-t border-gray-700 pt-6 mt-2">
-            <h3 id="fc-meaning" class="text-2xl md:text-4xl font-bold text-yellow-400 tracking-wide break-words text-center"></h3>
-        </div>
-    </div>
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex flex-col text-left">
+                    <span id="fc-round-name" class="f1-font text-[10px] text-blue-400 uppercase tracking-widest">FREE PRACTICE</span>
+                    <span class="f1-font text-white font-bold text-lg">DATA GATHERING</span>
+                </div>
+                <div class="text-right">
+                    <div id="fc-progress" class="f1-font text-2xl text-blue-400 font-mono">1/20</div>
+                </div>
+            </div>
             
-    <div class="grid grid-cols-3 gap-4">
-        <button onclick="quiz.prevFlashcard()" class="bg-gray-800 hover:bg-gray-700 text-white py-4 rounded-xl font-bold transition-all uppercase text-sm f1-font active:scale-95 border border-gray-600">◀ Prev</button>
-        <button onclick="quiz.exitFlashcardMode()" class="bg-red-900/40 hover:bg-red-800/80 text-white py-4 rounded-xl font-bold transition-all uppercase text-sm f1-font border border-red-900 active:scale-95">Box (Exit)</button>
-        <button onclick="quiz.nextFlashcard()" class="bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold transition-all uppercase text-sm f1-font shadow-[0_0_15px_rgba(37,99,235,0.4)] active:scale-95">Next ▶</button>
-    </div>
-</div>
+            <div id="fc-card" onclick="quiz.flipFlashcard()" class="flex-grow flex flex-col items-center justify-center bg-gray-900/60 border-2 border-dashed border-gray-600 hover:border-blue-500 rounded-xl cursor-pointer transition-all active:scale-[0.98] relative p-6 mb-8 group shadow-inner">
+                <span class="absolute top-4 text-[10px] text-gray-500 uppercase tracking-widest font-mono group-hover:text-blue-400 transition-colors animate-pulse">Tap to Reveal</span>
+                <button id="fc-speak-btn" onclick="event.stopPropagation(); quiz.speakFlashcardWord();" class="absolute top-0 left-0 text-3xl p-6 z-20 cursor-pointer hover:scale-110 transition-transform text-gray-400 hover:text-cyan-400 drop-shadow-md">🔊</button>
+                <button id="fc-bookmark-btn" onclick="event.stopPropagation(); quiz.toggleFlashcardBookmark(event);" class="absolute top-0 right-0 text-3xl p-6 z-20 cursor-pointer hover:scale-110 transition-transform drop-shadow-md">🏳️</button>
+                <h2 id="fc-word" class="f1-font text-5xl md:text-7xl font-bold text-white tracking-wide break-words text-center mb-6 drop-shadow-lg transition-all mt-4"></h2>
+                
+                <div id="fc-meaning-container" class="hidden w-full border-t border-gray-700 pt-6 mt-2">
+                    <h3 id="fc-meaning" class="text-2xl md:text-4xl font-bold text-yellow-400 tracking-wide break-words text-center"></h3>
+                </div>
+            </div>
+                    
+            <div class="grid grid-cols-3 gap-4">
+                <button onclick="quiz.prevFlashcard()" class="bg-gray-800 hover:bg-gray-700 text-white py-4 rounded-xl font-bold transition-all uppercase text-sm f1-font active:scale-95 border border-gray-600">◀ Prev</button>
+                <button onclick="quiz.exitFlashcardMode()" class="bg-red-900/40 hover:bg-red-800/80 text-white py-4 rounded-xl font-bold transition-all uppercase text-sm f1-font border border-red-900 active:scale-95">Box (Exit)</button>
+                <button onclick="quiz.nextFlashcard()" class="bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold transition-all uppercase text-sm f1-font shadow-[0_0_15px_rgba(37,99,235,0.4)] active:scale-95">Next ▶</button>
+            </div>
+        </div>
 
         <div id="result-screen" class="hidden race-card p-8 rounded-2xl shadow-2xl text-center animate-slide-in my-auto max-w-2xl mx-auto w-full">
             <h2 id="result-title" class="f1-font text-4xl mb-2 font-bold text-white italic tracking-tighter">CHECKERED FLAG</h2>
@@ -576,17 +583,17 @@
     </div>
 
     <script>
-
         if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(reg => console.log('Service Worker Registered'))
-      .catch(err => console.log('Registration Failed', err));
-  });
-}
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                .then(reg => console.log('Service Worker Registered'))
+                .catch(err => console.log('Registration Failed', err));
+            });
+        }
    
-      const rawData = `
-      follow: ～の後に続く、～に従う
+        // ここに自分の単語データを入れる
+        const rawData = `
+        follow: ～の後に続く、～に従う
 consider: ～を考慮する
 increase: 増える、～を増やす
 expect: ～を予期する
@@ -2613,1224 +2620,1243 @@ abruptly: 不意に
 conversely: 逆に
 predominantly: 主に
 lest: ～しないように
-      `; // ★ここに自分の単語データを入れてくれ
+        `; 
 
-    document.addEventListener('dblclick', function(event) { event.preventDefault(); }, { passive: false });
-    document.addEventListener('touchmove', function(event) { if (event.scale !== 1) { event.preventDefault(); } }, { passive: false });
+        document.addEventListener('dblclick', function(event) { event.preventDefault(); }, { passive: false });
+        document.addEventListener('touchmove', function(event) { if (event.scale !== 1) { event.preventDefault(); } }, { passive: false });
 
-    class HybridQuiz {
-        constructor() {
-            this.wordsPerRound = 20; 
-            this.masterList = [];
-            this.vocabRounds = [];
-            this.currentRoundIndex = 0;
-            this.isLocked = false;
-            this.questions = [];
-            this.currentIndex = 0;
-            this.missCount = 0;
-            this.missedWordsLog = [];
-            this.startTime = 0;
-            this.lapStartTime = 0; 
-            this.timerInterval = null;
-            this.currentStreak = 0;
-            this.maxStreak = 0; 
-            this.dueMistakes = [];
-            this.allMistakes = []; 
-           this.bookmarkedFilter = 'all'; // 'all', 'red', 'yellow'
+        class HybridQuiz {
+            constructor() {
+                this.wordsPerRound = 20; 
+                this.masterList = [];
+                this.vocabRounds = [];
+                this.currentRoundIndex = 0;
+                this.isLocked = false;
+                this.questions = [];
+                this.currentIndex = 0;
+                this.missCount = 0;
+                this.missedWordsLog = [];
+                this.startTime = 0;
+                this.lapStartTime = 0; 
+                this.timerInterval = null;
+                this.currentStreak = 0;
+                this.maxStreak = 0; 
+                this.dueMistakes = [];
+                this.allMistakes = []; 
+                this.bookmarkedFilter = 'all';
 
-            this.isPitStopMode = false;
-            this.isReverseMode = false;
-            this.isSpellingMode = false; 
-            this.spellingAns = []; 
-            this.spellingPoolState = []; 
-            
-            // BLIND RADIO
-            this.isRadioMode = false;
-            const radioCheck = document.getElementById('radio-mode');
-            if(radioCheck) {
-                radioCheck.addEventListener('change', (e) => {
-                    this.isRadioMode = e.target.checked;
-                    // ラジオモードONなら自動音声も強制ON
-                    if(this.isRadioMode) this.isAutoAudio = true; 
-                });
-            }
-
-            this.isAutoAudio = localStorage.getItem('vocab_auto_audio') !== 'false';
-            this.synth = window.speechSynthesis;
-            this.englishVoices = [];
-            if (this.synth) { this.synth.onvoiceschanged = () => this.loadVoices(); this.loadVoices(); }
-
-            const audioCheck = document.getElementById('audio-mode');
-            if(audioCheck) {
-                audioCheck.checked = this.isAutoAudio;
-                audioCheck.addEventListener('change', (e) => {
-                    this.isAutoAudio = e.target.checked;
-                    localStorage.setItem('vocab_auto_audio', this.isAutoAudio);
-                });
-            }
-            
-            document.getElementById('wb-search').addEventListener('input', () => this.renderWordBook());
-            document.getElementById('wb-start').addEventListener('input', () => this.renderWordBook());
-            document.getElementById('wb-end').addEventListener('input', () => this.renderWordBook());
-
-            this.parseData();
-            this.generateRounds();
-            this.initUI();
-            this.initSearch(); 
-        }
-
-        loadVoices() {
-            if(!this.synth) return;
-            let attempts = 0;
-            const load = () => {
-                const allVoices = this.synth.getVoices();
-                this.englishVoices = allVoices.filter(v => v.lang.startsWith('en'));
-                if (this.englishVoices.length === 0 && attempts < 10) {
-                    attempts++;
-                    setTimeout(load, 100);
-                } else {
-                    console.log(`[TTS] Engine Ready: ${this.englishVoices.length} voices found.`);
+                this.isPitStopMode = false;
+                this.isReverseMode = false;
+                this.isSpellingMode = false; 
+                this.spellingAns = []; 
+                this.spellingPoolState = []; 
+                
+                // BLIND RADIO
+                this.isRadioMode = false;
+                const radioCheck = document.getElementById('radio-mode');
+                if(radioCheck) {
+                    radioCheck.addEventListener('change', (e) => {
+                        this.isRadioMode = e.target.checked;
+                        if(this.isRadioMode) this.isAutoAudio = true; 
+                    });
                 }
-            };
-            load();
-        }
 
-        speak(text) {
-            if (!this.synth || this.englishVoices.length === 0) {
-                console.warn("[TTS] Engine warming up...");
-                return; 
-            }
-            this.synth.cancel(); 
-            const utterance = new SpeechSynthesisUtterance(text);
-            const preferredVoice = this.englishVoices.find(v => v.name.includes('Google US English')) 
-                                || this.englishVoices.find(v => v.name.includes('Samantha'))
-                                || this.englishVoices.find(v => v.name.includes('Zira'))
-                                || this.englishVoices[0]; 
-            utterance.voice = preferredVoice;
-            utterance.rate = 1.1; 
-            utterance.pitch = 1.0;
-            this.synth.speak(utterance);
-        }
+                this.isAutoAudio = localStorage.getItem('vocab_auto_audio') !== 'false';
+                this.synth = window.speechSynthesis;
+                this.englishVoices = [];
+                if (this.synth) { this.synth.onvoiceschanged = () => this.loadVoices(); this.loadVoices(); }
 
-        parseData() {
-            if(!rawData.trim()) { this.masterList = []; return; }
-            const lines = rawData.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('[source'));
-            this.masterList = [];
-            lines.forEach(line => {
-                let sep = -1;
-                if (line.indexOf('\t') !== -1) sep = line.indexOf('\t');
-                else if (line.indexOf(':') !== -1) sep = line.indexOf(':');
-                else if (line.indexOf('：') !== -1) sep = line.indexOf('：');
-                if (sep !== -1) {
-                    this.masterList.push({ w: line.substring(0, sep).trim(), m: line.substring(sep + 1).trim() });
+                const audioCheck = document.getElementById('audio-mode');
+                if(audioCheck) {
+                    audioCheck.checked = this.isAutoAudio;
+                    audioCheck.addEventListener('change', (e) => {
+                        this.isAutoAudio = e.target.checked;
+                        localStorage.setItem('vocab_auto_audio', this.isAutoAudio);
+                    });
                 }
-            });
-        }
+                
+                document.getElementById('wb-search').addEventListener('input', () => this.renderWordBook());
+                document.getElementById('wb-start').addEventListener('input', () => this.renderWordBook());
+                document.getElementById('wb-end').addEventListener('input', () => this.renderWordBook());
 
-        generateRounds() {
-            const wordCopy = [...this.masterList]; 
-            this.vocabRounds = [];
-            let roundNum = 1;
-            let currentWordIndex = 1; 
-            while (wordCopy.length > 0) {
-                const chunk = wordCopy.splice(0, this.wordsPerRound);
-                if (chunk.length > 0) {
-                    this.vocabRounds.push({ id: roundNum, name: `ROUND ${roundNum} (No.${currentWordIndex} - ${currentWordIndex + chunk.length - 1})`, words: chunk });
-                    roundNum++;
-                    currentWordIndex += chunk.length;
-                }
-            }
-        }
+                // セッション・タイマーの初期化
+                this.stintActive = false;
+                this.stintTime = 0; // 秒単位
+                this.stintInterval = null;
+                this.initVisibilityListener();
 
-        initUI() {
-            const selector = document.getElementById('round-selector');
-            selector.innerHTML = '';
-            if(this.vocabRounds.length === 0) { selector.innerHTML = '<option>Load Data or Login</option>'; }
-            else {
-                this.vocabRounds.forEach((round, index) => {
-                    const opt = document.createElement('option');
-                    opt.value = index;
-                    opt.text = round.name;
-                    selector.appendChild(opt);
-                });
+                this.parseData();
+                this.generateRounds();
+                this.initUI();
+                this.initSearch(); 
             }
 
-            const lastPlayed = localStorage.getItem('rb26_last_round');
-            if (lastPlayed) {
-                const roundIdx = parseInt(lastPlayed);
-                if (!isNaN(roundIdx) && roundIdx < this.vocabRounds.length) {
-                    selector.value = roundIdx;
-                    const option = selector.options[roundIdx];
-                    if (option) option.text = "◀ LAST ▶ " + option.text;
-                }
-            }
-            this.updateSummary();
-        }
-
-        updateSummary() {
-            const selector = document.getElementById('round-selector');
-            let roundName = "Custom / Random";
-            if (selector.selectedIndex >= 0) {
-                roundName = selector.options[selector.selectedIndex].text;
-            }
-            
-            const tire = this.wordsPerRound;
-            const rev = document.getElementById('reverse-mode').checked ? "REV" : "STD";
-            // BLIND RADIO
-            const radio = document.getElementById('radio-mode').checked ? "+RADIO" : "";
-            const spell = document.getElementById('spelling-mode').checked && document.getElementById('reverse-mode').checked ? "+MANUAL" : "";
-            
-            document.getElementById('strategy-summary').innerText = `${roundName} | ${tire} Qs | ${rev}${radio}${spell}`;
-        }
-
-        toggleStrategyMenu() {
-            const panel = document.getElementById('strategy-panel');
-            const btn = document.getElementById('strategy-toggle-btn');
-            if (panel.classList.contains('open')) {
-                panel.classList.remove('open');
-                btn.classList.remove('bg-gray-700', 'text-white');
-                btn.classList.add('bg-gray-800', 'text-gray-400');
-                btn.innerText = "Show Settings ▼";
-            } else {
-                panel.classList.add('open');
-                btn.classList.remove('bg-gray-800', 'text-gray-400');
-                btn.classList.add('bg-gray-700', 'text-white');
-                btn.innerText = "Hide Settings ▲";
-            }
-        }
-
-        switchStrategyTab(tab) {
-            const tabs = ['normal', 'random', 'flagged'];
-            tabs.forEach(t => {
-                const div = document.getElementById(`strategy-${t}`);
-                const btn = document.getElementById(`tab-${t}`);
-                if (t === tab) {
-                    if(div) div.classList.remove('hidden');
-                    if(btn) {
-                        btn.classList.add('text-white', 'border-red-500');
-                        btn.classList.remove('text-gray-500', 'border-transparent');
+            // --- セッション監視ロジック ---
+            initVisibilityListener() {
+                document.addEventListener("visibilitychange", () => {
+                    if (document.hidden && this.stintActive) {
+                        this.pauseStint();
+                        console.log("[TELEMETRY] Red Flag: Session Paused.");
+                    } else if (!document.hidden && this.stintActive) {
+                        this.resumeStint();
+                        console.log("[TELEMETRY] Green Flag: Session Resumed.");
                     }
-                } else {
-                    if(div) div.classList.add('hidden');
-                    if(btn) {
-                        btn.classList.remove('text-white', 'border-red-500');
-                        btn.classList.add('text-gray-500', 'border-transparent');
+                });
+            }
+
+            startStint() {
+                this.stintActive = true;
+                this.stintTime = 0;
+                document.getElementById('stint-timer-hud').classList.remove('hidden');
+                document.getElementById('red-flag-indicator').classList.add('hidden');
+                this.resumeStint();
+            }
+
+            resumeStint() {
+                if (this.stintInterval) clearInterval(this.stintInterval);
+                document.getElementById('red-flag-indicator').classList.add('hidden');
+                this.stintInterval = setInterval(() => {
+                    this.stintTime++;
+                    const m = String(Math.floor(this.stintTime / 60)).padStart(2, '0');
+                    const s = String(this.stintTime % 60).padStart(2, '0');
+                    document.getElementById('stint-clock').innerText = `${m}:${s}`;
+                }, 1000);
+            }
+
+            pauseStint() {
+                clearInterval(this.stintInterval);
+                document.getElementById('red-flag-indicator').classList.remove('hidden');
+            }
+
+            stopStint() {
+                this.stintActive = false;
+                clearInterval(this.stintInterval);
+                document.getElementById('stint-timer-hud').classList.add('hidden');
+                return this.stintTime;
+            }
+            // ------------------------------
+
+            loadVoices() {
+                if(!this.synth) return;
+                let attempts = 0;
+                const load = () => {
+                    const allVoices = this.synth.getVoices();
+                    this.englishVoices = allVoices.filter(v => v.lang.startsWith('en'));
+                    if (this.englishVoices.length === 0 && attempts < 10) {
+                        attempts++;
+                        setTimeout(load, 100);
+                    } else {
+                        console.log(`[TTS] Engine Ready: ${this.englishVoices.length} voices found.`);
                     }
-                }
-            });
-        }
-
-        initSearch() {
-            const input = document.getElementById('search-input');
-            const results = document.getElementById('search-results');
-            input.addEventListener('input', (e) => {
-                const q = e.target.value.toLowerCase().trim();
-                if (!q) { results.classList.add('hidden'); return; }
-                const hits = this.masterList.map((item, index) => ({ ...item, i: index + 1 }))
-                    .filter(item => item.w.toLowerCase().includes(q) || item.m.toLowerCase().includes(q))
-                    .slice(0, 50);
-                if (hits.length > 0) {
-                    results.classList.remove('hidden');
-                    results.innerHTML = hits.map(h => `
-                        <div onclick="quiz.speak('${h.w.replace(/'/g, "\\'")}')" class="p-3 border-b border-gray-800 active:bg-gray-800 cursor-pointer flex justify-between items-center group hover:bg-white/5 transition-colors">
-                            <div class="text-left"><div class="flex items-baseline gap-2"><span class="text-[10px] text-yellow-500 font-mono opacity-70">No.${h.i}</span><span class="text-red-400 font-bold text-xs f1-font">${h.w}</span></div><span class="text-gray-400 text-[10px] pl-1">${h.m}</span></div>
-                            <button class="text-[8px] bg-gray-700 text-white px-2 py-1 rounded-full uppercase">Listen</button>
-                        </div>`).join('');
-                } else {
-                    results.classList.remove('hidden');
-                    results.innerHTML = `<div class="p-3 text-gray-500 text-[10px] text-center">NO DATA</div>`;
-                }
-            });
-            document.addEventListener('click', (e) => { if (!input.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden'); });
-        }
-
-        createCustomRound() {
-            const s = parseInt(document.getElementById('custom-start').value) - 1;
-            const e = parseInt(document.getElementById('custom-end').value);
-            if(isNaN(s) || isNaN(e) || s < 0 || e > this.masterList.length || s >= e) { alert("Invalid Range"); return; }
-            const customWords = this.masterList.slice(s, e);
-            this.vocabRounds.unshift({ id: 'custom', name: `CUSTOM (No.${s+1}-${e})`, words: customWords });
-            this.initUI();
-            document.getElementById('round-selector').value = 0;
-            this.updateSummary();
-        }
-
-        createRandomRound() {
-            const sVal = document.getElementById('rand-start').value;
-            const eVal = document.getElementById('rand-end').value;
-            const qVal = document.getElementById('rand-qty').value;
-            
-            let s = parseInt(sVal) - 1;
-            let e = parseInt(eVal);
-            let qty = parseInt(qVal);
-
-            if (isNaN(s)) s = 0;
-            if (isNaN(e)) e = this.masterList.length;
-            if (isNaN(qty) || qty <= 0) qty = this.wordsPerRound; 
-
-            if (s < 0 || e > this.masterList.length || s >= e) { alert("Invalid Range for Random GP"); return; }
-
-            const rangePool = this.masterList.slice(s, e);
-            this.shuffle(rangePool);
-            const selectedWords = rangePool.slice(0, qty);
-            
-            this.vocabRounds.unshift({ id: 'random', name: `🎲 RANDOM (Range: ${s+1}-${e})`, words: selectedWords });
-            this.initUI();
-            document.getElementById('round-selector').value = 0;
-            this.updateSummary();
-            this.start();
-        }
-        // ...既存の createRandomRound() の処理のすぐ下に追加...
-
-       createFlaggedRound() {
-            const flagType = document.getElementById('flagged-type').value;
-            const flaggedItems = (this.allMistakes || []).filter(m => {
-                // 過去のbookmarked:trueはRedとして扱う
-                const isRed = m.flag === 'red' || m.bookmarked === true;
-                const isYellow = m.flag === 'yellow';
-                if (flagType === 'red') return isRed;
-                if (flagType === 'yellow') return isYellow;
-                return isRed || isYellow; // 'all'の場合
-            });
-            
-            if (flaggedItems.length === 0) {
-                alert("まだ何もない");
-                return;
-            }
-
-            const qVal = document.getElementById('flagged-qty').value;
-            let qty = parseInt(qVal);
-            if (isNaN(qty) || qty <= 0) qty = flaggedItems.length;
-
-            this.shuffle(flaggedItems);
-            const targetItems = flaggedItems.slice(0, qty);
-            const selectedWords = targetItems.map(item => ({ w: item.word || item.w, m: item.meaning || item.m }));
-            
-            let roundTitle = flagType === 'red' ? '🚩 RED GP' : flagType === 'yellow' ? '🟨 YELLOW GP' : '🚩🟨 FLAGGED GP';
-
-            this.vocabRounds.unshift({ 
-                id: 'flagged', 
-                name: `${roundTitle} (${selectedWords.length} Qs)`, 
-                words: selectedWords 
-            });
-            
-            this.initUI();
-            document.getElementById('round-selector').value = 0;
-            this.updateSummary();
-            this.start();
-        }   
-
-
-        setTireStrategy(count, type) {
-            this.wordsPerRound = count;
-            this.generateRounds();
-            this.initUI();
-            document.querySelectorAll('.tire-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`tire-${type}`).classList.add('active');
-            this.updateSummary();
-        }
-
-        toggleSpellingOption() {
-            const isRev = document.getElementById('reverse-mode').checked;
-            const spellOpt = document.getElementById('spelling-option-container');
-            if (isRev) {
-                spellOpt.classList.remove('hidden');
-            } else {
-                spellOpt.classList.add('hidden');
-                document.getElementById('spelling-mode').checked = false;
-            }
-        }
-
-        // --- FREE PRACTICE (FLASHCARD) MODE ---
-        startFlashcardMode() {
-            if(this.vocabRounds.length === 0) { alert("Data not loaded. Check your telemetry."); return; }
-            
-            const selector = document.getElementById('round-selector');
-            this.currentRoundIndex = parseInt(selector.value);
-            const selectedRound = this.vocabRounds[this.currentRoundIndex];
-            
-            // 選択されたラウンドの単語セットをそのままロード
-            this.questions = selectedRound.words.map(target => ({ w: target.w, m: target.m }));
-            this.currentIndex = 0;
-            this.isReverseMode = document.getElementById('reverse-mode').checked;
-            
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('flashcard-screen').classList.remove('hidden');
-            document.getElementById('fc-round-name').innerText = "FP: " + selectedRound.name;
-            
-            this.showFlashcard();
-        }
-
-       showFlashcard() {
-            if (this.questions.length === 0) return;
-            const q = this.questions[this.currentIndex];
-            document.getElementById('fc-progress').innerText = `LAP ${this.currentIndex + 1} / ${this.questions.length}`;
-            
-            // Reverse Modeの状態に応じて表と裏のテキストをセット
-            const displayWord = this.isReverseMode ? q.m : q.w;
-            const displayMeaning = this.isReverseMode ? q.w : q.m;
-
-            const wordEl = document.getElementById('fc-word');
-            wordEl.innerText = displayWord;
-            
-            // 日本語が表（Reverse）の場合はフォントサイズを調整
-            if (this.isReverseMode && displayWord.length > 8) {
-                wordEl.classList.remove('text-5xl', 'md:text-7xl');
-                wordEl.classList.add('text-3xl', 'md:text-5xl');
-            } else {
-                wordEl.classList.add('text-5xl', 'md:text-7xl');
-                wordEl.classList.remove('text-3xl', 'md:text-5xl');
-            }
-
-            document.getElementById('fc-meaning').innerText = displayMeaning;
-            document.getElementById('fc-meaning-container').classList.add('hidden'); // 裏面を隠す
-
-            // --- 追加: フラグ状態の確認と反映 ---
-            // --- 追加: フラグ状態の確認と反映 ---
-            const currentWord = q.w;
-            const srsData = this.allMistakes ? this.allMistakes.find(m => m.word === currentWord || m.w === currentWord) : null;
-            const isRed = srsData && (srsData.flag === 'red' || srsData.bookmarked === true);
-            const isYellow = srsData && srsData.flag === 'yellow';
-            
-            const bookmarkBtn = document.getElementById('fc-bookmark-btn');
-            if (bookmarkBtn) {
-                if (isRed) bookmarkBtn.innerText = '🚩';
-                else if (isYellow) bookmarkBtn.innerText = '🟨';
-                else bookmarkBtn.innerText = '🏳️';
-            }
-            
-            // 英語が表面なら自動で読み上げ
-            if (this.isAutoAudio && !this.isReverseMode) {
-                setTimeout(() => this.speak(q.w), 100);
-            }
-        }
-
-        flipFlashcard() {
-            const container = document.getElementById('fc-meaning-container');
-            container.classList.toggle('hidden');
-            
-            // 裏面が英語（Reverse Mode）なら、めくった瞬間に発音する
-            if (!container.classList.contains('hidden') && this.isReverseMode && this.isAutoAudio) {
-                this.speak(this.questions[this.currentIndex].w);
-            }
-        }
-
-        nextFlashcard() {
-            if (this.currentIndex < this.questions.length - 1) {
-                // まだ同じラウンド内に単語が残っているなら次へ
-                this.currentIndex++;
-                this.showFlashcard();
-            } else {
-                // 現在のラウンドが終了した場合の処理
-                const currentRound = this.vocabRounds[this.currentRoundIndex];
-                
-                // カスタムやランダム等の単発セッションではなく、次のラウンドが存在する場合
-                if (currentRound.id !== 'custom' && currentRound.id !== 'random' && this.currentRoundIndex + 1 < this.vocabRounds.length) {
-                    
-                    // 次のラウンドへギアを上げる（セレクトボックスの表示も同期）
-                    const selector = document.getElementById('round-selector');
-                    selector.value = this.currentRoundIndex + 1;
-                    
-                    // 次のラウンドでFPモードを再スタート
-                    this.startFlashcardMode();
-                    
-                } else {
-                    // 全セクター完了、または特殊ラウンド終了時はガレージへ戻る
-                    this.exitFlashcardMode();
-                }
-            }
-        }
-
-        async toggleFlashcardBookmark(event) {
-            // カード本体のフリップ処理（裏返し）が発動するのをブロックする
-            event.stopPropagation();
-            
-            const q = this.questions[this.currentIndex];
-            const safeW = encodeURIComponent(q.w);
-            const safeM = encodeURIComponent(q.m);
-            
-            // 既存のデータベース同期機能（toggleBookmark）を呼び出す
-            await window.toggleBookmark(safeW, safeM);
-            
-            // 状態を再確認してUIを即座に更新する
-            // 状態を再確認してUIを即座に更新する
-            const srsData = this.allMistakes ? this.allMistakes.find(m => m.word === q.w || m.w === q.w) : null;
-            const isRed = srsData && (srsData.flag === 'red' || srsData.bookmarked === true);
-            const isYellow = srsData && srsData.flag === 'yellow';
-            
-            const bookmarkBtn = document.getElementById('fc-bookmark-btn');
-            if (bookmarkBtn) {
-                if (isRed) bookmarkBtn.innerText = '🚩';
-                else if (isYellow) bookmarkBtn.innerText = '🟨';
-                else bookmarkBtn.innerText = '🏳️';
-            }
-        }
-
-        // --- 手動での音声再生処理 ---
-        speakFlashcardWord() {
-            if (this.questions.length === 0) return;
-            const q = this.questions[this.currentIndex];
-            // 表面が日本語(Reverse Mode)であっても、再生するのは常に英単語
-            this.speak(q.w);
-        }
-
-        prevFlashcard() {
-            if (this.currentIndex > 0) {
-                this.currentIndex--;
-                this.showFlashcard();
-            }
-        }
-
-        exitFlashcardMode() {
-            document.getElementById('flashcard-screen').classList.add('hidden');
-            document.getElementById('start-screen').classList.remove('hidden');
-        }
-
-        start() {
-            this.currentIndex = 0;
-            this.missCount = 0;
-            this.currentStreak = 0; 
-            this.maxStreak = 0;     
-            this.missedWordsLog = [];
-            this.startTime = Date.now();
-            this.startTimer();
-            
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.remove('hidden');
-            
-            // 常にVocabモード
-            this.startVocabMode();
-        }
-
-        startVocabMode() {
-            if(this.vocabRounds.length === 0) { alert("Data not loaded"); this.returnToGrid(); return; }
-            this.isPitStopMode = false;
-            
-            const selector = document.getElementById('round-selector');
-            this.currentRoundIndex = parseInt(selector.value);
-            const selectedRound = this.vocabRounds[this.currentRoundIndex];
-            
-            if (selectedRound.id !== 'custom' && selectedRound.id !== 'random') {
-                localStorage.setItem('rb26_last_round', this.currentRoundIndex);
-            }
-
-            this.isReverseMode = document.getElementById('reverse-mode').checked;
-            this.isSpellingMode = document.getElementById('spelling-mode').checked && this.isReverseMode;
-            // BLIND RADIO
-            this.isRadioMode = document.getElementById('radio-mode').checked;
-
-            let modeTitle = "";
-            if (this.isRadioMode) modeTitle = " [BLIND RADIO]";
-            else if (this.isSpellingMode) modeTitle = " [MANUAL SHIFT]";
-            else if (this.isReverseMode) modeTitle = " [REV]";
-
-            document.getElementById('circuit-name').innerText = selectedRound.name + modeTitle;
-            document.getElementById('question-label').innerText = this.isReverseMode ? "TRANSLATE" : "MEANING";
-
-            this.questions = selectedRound.words.map(target => {
-                const qText = this.isReverseMode ? target.m : target.w;
-                const aText = this.isReverseMode ? target.w : target.m;
-                
-                const options = this.isSpellingMode 
-                    ? [] 
-                    : [aText, ...this.getDistractors(target, this.isReverseMode)].sort(() => Math.random() - 0.5);
-                
-                const existingData = (this.allMistakes || []).find(item => item.word === target.w || item.w === target.w) || {};
-
-               return { 
-                    w: target.w, 
-                    m: target.m, 
-                    qText: qText, 
-                    aText: aText, 
-                    o: options,
-                    docId: existingData.id || null, 
-                    interval: existingData.interval || 0,
-                    repetitions: existingData.repetitions || 0,
-                    easeFactor: existingData.easeFactor || 2.5,
-                    lastMissedSeconds: existingData.lastMissedSeconds || null // ★これを追加して記録を保持
                 };
-            });
-            this.questions.sort(() => Math.random() - 0.5);
-            this.showVocabQuestion();
-        }
-        
-        getDistractors(targetWord, isReverse) {
-             const distractors = [];
-             if (this.masterList.length < 4) return ["Option A", "Option B", "Option C"]; 
-
-             const targetString = isReverse ? targetWord.w : targetWord.m;
-             const targetLen = targetString.length;
-
-             let smartPool = this.masterList.filter(item => {
-                 const str = isReverse ? item.w : item.m;
-                 if (str === targetString) return false;
-                 return Math.abs(str.length - targetLen) <= 2;
-             });
-
-             if (smartPool.length < 10) {
-                 smartPool = this.masterList.filter(item => {
-                     const str = isReverse ? item.w : item.m;
-                     return str !== targetString;
-                 });
-             }
-
-             let attempts = 0;
-             while (distractors.length < 3 && attempts < 100) {
-                 const r = smartPool[Math.floor(Math.random() * smartPool.length)];
-                 const candidate = isReverse ? r.w : r.m;
-                 if (!distractors.includes(candidate)) {
-                     distractors.push(candidate);
-                 }
-                 attempts++;
-             }
-             while (distractors.length < 3) distractors.push("---");
-             return distractors;
-         }
-
-         showVocabQuestion() {
-             const q = this.questions[this.currentIndex];
-             document.getElementById('question-number').innerText = `LAP ${this.currentIndex + 1} / ${this.questions.length}`;
-             
-             const targetDisplay = document.getElementById('target-word');
-
-             // BLIND RADIO: BROADCAST STYLE
-             if (this.isRadioMode) {
-                 // クラスをリセットしてコンテナ化
-                 targetDisplay.className = "w-full flex justify-center py-4"; 
-                 targetDisplay.innerHTML = `
-                    <div class="radio-box">
-                        <div class="radio-content">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="bg-white text-black text-[10px] font-bold px-1.5 rounded-sm">LIVE</span>
-                                <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest font-mono">TEAM RADIO</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="text-white f1-font text-2xl font-bold italic tracking-wider">GP <span class="text-gray-600 text-sm not-italic mx-1">➜</span> YOU</span>
-                            </div>
-                        </div>
-                        
-                        <div class="waveform">
-                            <div class="wave-bar"></div>
-                            <div class="wave-bar"></div>
-                            <div class="wave-bar"></div>
-                            <div class="wave-bar"></div>
-                            <div class="wave-bar"></div>
-                        </div>
-                    </div>
-                 `;
-                 setTimeout(() => this.speak(q.w), 300);
-             } else {
-                 // 通常モード（テキスト表示）
-                 targetDisplay.innerHTML = "";
-                 targetDisplay.innerText = q.qText;
-                 targetDisplay.className = (this.isReverseMode && q.qText.length > 8) 
-                     ? "f1-font text-4xl font-bold text-white tracking-wide break-words px-2 text-center"
-                     : "f1-font text-6xl font-bold text-white tracking-wide drop-shadow-lg break-words px-2 text-center";
-                 
-                 if (this.isAutoAudio && !this.isReverseMode && !this.isSpellingMode) setTimeout(() => this.speak(q.w), 200);
-             }
-
-             this.lapStartTime = Date.now(); 
-
-             document.getElementById('progress-fill').style.width = `${(this.currentIndex / this.questions.length) * 100}%`;
-             document.getElementById('feedback').innerText = '';
-             
-             const speakBtn = document.getElementById('speak-btn');
-             speakBtn.onclick = () => this.speak(q.w);
-
-            const flagBtn = document.getElementById('flag-btn');
-             if (flagBtn) {
-                 const currentItem = (this.allMistakes || []).find(m => m.word === q.w || m.w === q.w);
-                 let flagState = 'none';
-                 if (currentItem) {
-                     if (currentItem.flag === 'red' || currentItem.bookmarked === true) flagState = 'red';
-                     else if (currentItem.flag === 'yellow') flagState = 'yellow';
-                 }
-
-                 const updateFlagUI = () => {
-                     flagBtn.classList.remove('text-red-500', 'border-red-500', 'bg-red-900/20', 'text-yellow-500', 'border-yellow-500', 'bg-yellow-900/20', 'text-gray-400', 'border-gray-700', 'bg-black/40');
-                     flagBtn.innerHTML = '';
-                     if (flagState === 'red') {
-                         flagBtn.classList.add('text-red-500', 'border-red-500', 'bg-red-900/20');
-                         flagBtn.innerHTML = '<span class="text-2xl">🚩</span>';
-                     } else if (flagState === 'yellow') {
-                         flagBtn.classList.add('text-yellow-500', 'border-yellow-500', 'bg-yellow-900/20');
-                         flagBtn.innerHTML = '<span class="text-2xl">🟨</span>';
-                     } else {
-                         flagBtn.classList.add('text-gray-400', 'border-gray-700', 'bg-black/40');
-                         flagBtn.innerHTML = '<span class="text-2xl">🏳️</span>';
-                     }
-                 };
-                 updateFlagUI();
-
-                 flagBtn.onclick = async () => {
-                     const safeW = encodeURIComponent(q.w);
-                     const safeM = encodeURIComponent(q.m);
-                     if (window.toggleBookmark) {
-                         await window.toggleBookmark(safeW, safeM);
-                         const updatedItem = (this.allMistakes || []).find(m => m.word === q.w || m.w === q.w);
-                         if (updatedItem) {
-                             if (updatedItem.flag === 'red' || updatedItem.bookmarked === true) flagState = 'red';
-                             else if (updatedItem.flag === 'yellow') flagState = 'yellow';
-                             else flagState = 'none';
-                         } else flagState = 'none';
-                         updateFlagUI();
-                     }
-                 };
-             }
-
-             const stdContainer = document.getElementById('options-container');
-             const spellContainer = document.getElementById('spelling-interface');
-
-             if (this.isSpellingMode) {
-                 stdContainer.classList.add('hidden');
-                 spellContainer.classList.remove('hidden');
-                 this.renderSpellingInterface(q);
-             } else {
-                 stdContainer.classList.remove('hidden');
-                 spellContainer.classList.add('hidden');
-                 this.renderStandardOptions(q, stdContainer);
-             }
-         }
-
-         renderSpellingInterface(q) {
-             const slotsEl = document.getElementById('spelling-slots');
-             const poolEl = document.getElementById('spelling-pool');
-             
-             if (this.spellingAns.length === 0) {
-                 slotsEl.innerHTML = '';
-                 poolEl.innerHTML = '';
-                 slotsEl.classList.remove('correct-lane', 'wrong-lane');
-                 this.isLocked = false;
-                 
-                 const targetWord = q.w.trim();
-                 const letters = targetWord.split('');
-                 this.spellingPoolState = letters.map((char, i) => ({ char, id: i, used: false })).sort(() => Math.random() - 0.5);
-             } else {
-                 slotsEl.innerHTML = '';
-                 poolEl.innerHTML = '';
-             }
-
-             const targetLen = q.w.trim().length;
-             for(let i=0; i<targetLen; i++) {
-                 const slot = document.createElement('div');
-                 const charObj = this.spellingAns[i]; 
-                 
-                 if (charObj) {
-                     slot.className = "w-10 h-12 border border-white bg-gray-800 rounded mx-1 flex items-center justify-center text-2xl font-bold text-white cursor-pointer active:scale-95 transition-transform";
-                     slot.innerText = charObj.char;
-                     slot.onclick = () => this.handleSpellingUndo(i, q);
-                 } else {
-                     slot.className = "w-10 h-12 border-b-2 border-gray-600 mx-1 flex items-center justify-center text-xl font-bold text-gray-600";
-                     slot.innerText = "_";
-                 }
-                 slotsEl.appendChild(slot);
-             }
-
-             this.spellingPoolState.forEach((item) => {
-                 const btn = document.createElement('button');
-                 btn.className = "letter-chip bg-gray-800 text-white rounded shadow-md border border-gray-600 active:bg-gray-600 transition-all w-12 h-12 text-xl";
-                 btn.innerText = item.char;
-                 
-                 if (item.used) {
-                     btn.classList.add('opacity-0', 'pointer-events-none');
-                 } else {
-                     btn.onclick = () => this.handleSpellingClick(item, q);
-                 }
-                 poolEl.appendChild(btn);
-             });
-         }
-
-         handleSpellingClick(item, q) {
-             if (this.isLocked) return;
-             item.used = true;
-             this.spellingAns.push(item);
-             this.renderSpellingInterface(q);
-             if (this.spellingAns.length === q.w.trim().length) {
-                 this.checkSpellingWin(q);
-             }
-         }
-
-         handleSpellingUndo(index, q) {
-             if (this.isLocked) return; 
-             const removedItem = this.spellingAns.splice(index, 1)[0];
-             const poolItem = this.spellingPoolState.find(p => p.id === removedItem.id);
-             if (poolItem) poolItem.used = false;
-             this.renderSpellingInterface(q);
-         }
-
-         checkSpellingWin(q) {
-             const userWord = this.spellingAns.map(a => a.char).join('');
-             const targetWord = q.w.trim();
-             const slotsEl = document.getElementById('spelling-slots');
-
-             if (userWord === targetWord) {
-                 this.isLocked = true;
-                 slotsEl.classList.add('correct-lane');
-                 const feedback = document.getElementById('feedback');
-                 feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold animate-pulse">🟣 PERFECT SHIFT</span>`;
-                 this.speak(q.w);
-                 
-                 this.currentStreak++;
-                 if (this.currentStreak > this.maxStreak) this.maxStreak = this.currentStreak;
-                 
-                 const timeTaken = (Date.now() - this.lapStartTime) / 1000;
-                 if (window.handleSRSUpdate) {
-                     window.handleSRSUpdate({ ...q, timeTaken: timeTaken }, true);
-                 }
-
-                 setTimeout(() => {
-                     this.currentIndex++;
-                     this.spellingAns = []; 
-                     if (this.currentIndex < this.questions.length) this.showVocabQuestion();
-                     else this.finish();
-                 }, 600);
-
-             } else {
-                 this.isLocked = true; 
-                 this.missCount++;
-                 this.currentStreak = 0;
-                 
-                 slotsEl.classList.add('wrong-lane', 'animate-shake');
-                 document.getElementById('feedback').innerHTML = `<span class="text-red-500 text-xs font-bold">GEARBOX DAMAGE</span>`;
-
-                 if (!this.missedWordsLog.find(item => item.w === q.w)) this.missedWordsLog.push({ w: q.w, m: q.m });
-                 
-                 if (window.handleSRSUpdate) {
-                     window.handleSRSUpdate({ ...q, timeTaken: 5.0 }, false);
-                 }
-
-                 setTimeout(() => {
-                     this.isLocked = false;
-                     slotsEl.classList.remove('wrong-lane', 'animate-shake');
-                     document.getElementById('feedback').innerText = '';
-                     this.spellingAns = [];
-                     this.spellingPoolState.forEach(p => p.used = false);
-                     this.renderSpellingInterface(q); 
-                 }, 1000);
-             }
-         }
-
-         renderStandardOptions(q, container) {
-             container.innerHTML = '';
-             
-             // 選択肢生成関数
-             const renderBtns = () => {
-                 container.innerHTML = '';
-                 q.o.forEach(opt => {
-                     const btn = document.createElement('button');
-                     const fontClass = this.isReverseMode ? "f1-font tracking-wider text-xl" : "text-lg";
-                     btn.className = `option-btn w-full h-full flex items-center text-left p-5 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 active:border-red-500 font-bold shadow-lg ${fontClass} transition-all`;
-                     btn.innerText = opt;
-                     btn.onclick = () => this.handleVocabAnswer(opt, q);
-                     container.appendChild(btn);
-                 });
-             };
-
-             // BLIND RADIOなら即表示、それ以外は隠す
-             if (this.isRadioMode) {
-                 renderBtns();
-             } else {
-                 const revealBtn = document.createElement('button');
-                 revealBtn.className = 'col-span-2 w-full h-32 bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-xl text-gray-400 f1-font text-2xl uppercase tracking-widest hover:border-yellow-500 hover:text-yellow-500 transition-all flex flex-col items-center justify-center gap-2 animate-pulse';
-                 revealBtn.innerHTML = `<span>VISUALIZE MEANING</span><span class="text-xs text-gray-500 font-mono">TAP TO UNLOCK</span>`;
-                 revealBtn.onclick = () => { 
-                     renderBtns();
-                 };
-                 container.appendChild(revealBtn);
-             }
-         }
-
-         handleVocabAnswer(selected, q) {
-             const btns = document.querySelectorAll('.option-btn');
-             if (btns.length > 0 && btns[0].disabled) return;
-             btns.forEach(b => b.disabled = true);
-
-             // ラジオモードなら、回答後に正解を表示
-             if (this.isRadioMode) {
-                 const targetDisplay = document.getElementById('target-word');
-                 // グラフィックを消して、正解テキストを表示
-                 targetDisplay.innerHTML = "";
-                 targetDisplay.innerText = q.w; 
-                 targetDisplay.className = "f1-font text-6xl font-bold text-white tracking-wide drop-shadow-xl break-words px-2 text-center";
-             }
-
-             const feedback = document.getElementById('feedback');
-             const timeTaken = (Date.now() - this.lapStartTime) / 1000;
-             const isCorrect = (selected === q.aText);
-
-             if (window.handleSRSUpdate) {
-                 window.handleSRSUpdate({ ...q, timeTaken: timeTaken }, isCorrect);
-             }
-
-             if (isCorrect) {
-                 this.currentStreak++;
-                 if (this.currentStreak > this.maxStreak) {
-                     this.maxStreak = this.currentStreak;
-                 }
-
-                 if(this.isReverseMode) this.speak(q.w);
-                 
-                 if (timeTaken < 1.2) {
-                     feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold animate-pulse">🟣 PURPLE SECTOR (${timeTaken.toFixed(2)}s)</span>`;
-                 } else if (timeTaken > 5.0) {
-                     feedback.innerHTML = `<span class="text-yellow-500 text-xs font-bold">🟡 SLOW (${timeTaken.toFixed(2)}s)</span>`;
-                 }
-
-                 setTimeout(() => {
-                     this.currentIndex++;
-                     if (this.currentIndex < this.questions.length) this.showVocabQuestion();
-                     else this.finish();
-                 }, 400); 
-
-             } else {
-                 this.missCount++;
-                 this.currentStreak = 0; 
-                 
-                 feedback.innerText = `WRONG: ${q.w} = ${q.m}`;
-                 feedback.className = "mt-4 text-center h-6 font-bold text-red-500 animate-pulse";
-                 if (!this.missedWordsLog.find(item => item.w === q.w)) this.missedWordsLog.push({ w: q.w, m: q.m });
-                 
-                 this.questions.push(q);
-                 setTimeout(() => { 
-                     this.currentIndex++; 
-                     this.showVocabQuestion(); 
-                 }, 1500);
-             }
-         }
-
-         startTimer() {
-             if (this.timerInterval) clearInterval(this.timerInterval);
-             this.timerInterval = setInterval(() => { document.getElementById('timer').innerText = ((Date.now() - this.startTime) / 1000).toFixed(2) + 's'; }, 50);
-         }
-
-         shuffle(array) {
-             for (let i = array.length - 1; i > 0; i--) {
-                 const j = Math.floor(Math.random() * (i + 1));
-                 [array[i], array[j]] = [array[j], array[i]];
-             }
-         }
-        
-         copyToClipboard(text, btn) {
-             navigator.clipboard.writeText(text).then(() => {
-                 btn.innerText = "AUTO-COPIED!";
-                 btn.classList.remove("bg-black", "text-white");
-                 btn.classList.add("bg-green-500", "text-black", "border", "border-green-400");
-                 setTimeout(() => {
-                     btn.innerText = "COPY LICENSE ID";
-                     btn.classList.add("bg-black", "text-white");
-                     btn.classList.remove("bg-green-500", "text-black", "border", "border-green-400");
-                 }, 3000);
-             }).catch(err => {
-                 console.log("Copy failed", err);
-                 btn.innerText = "COPY LICENSE ID";
-             });
-         }
-
-         finish() {
-             clearInterval(this.timerInterval);
-             document.getElementById('quiz-screen').classList.add('hidden');
-             document.getElementById('result-screen').classList.remove('hidden');
-             
-             const totalTime = (Date.now() - this.startTime) / 1000;
-             let totalQs = this.questions.length;
-             if (totalQs === 0) totalQs = 1; 
-             
-             let correctCount = totalQs - this.missCount;
-             if (correctCount < 0) correctCount = 0;
-             let accuracy = (correctCount / totalQs) * 100;
-             
-             const accDisplay = document.getElementById('accuracy-display');
-             accDisplay.innerText = `${accuracy.toFixed(1)}%`;
-
-             if (window.saveRaceResult) {
-                 let roundName = "UNKNOWN ROUND";
-                 if (this.isPitStopMode) {
-                     roundName = "SRS PIT STOP";
-                 } else if (this.vocabRounds[this.currentRoundIndex]) {
-                     roundName = this.vocabRounds[this.currentRoundIndex].name;
-                 }
-
-                 const resultData = {
-                     accuracy: parseFloat(accuracy.toFixed(1)),
-                     round: roundName,
-                     score: `${correctCount}/${totalQs}`,
-                     streak: this.maxStreak,
-                     time: parseFloat(totalTime.toFixed(2))
-                 };
-                 window.saveRaceResult(resultData);
-             }
-             
-             const passArea = document.getElementById('pass-area');
-             const failMsg = document.getElementById('fail-msg');
-             const passBtn = document.getElementById('pass-btn');
-             const licenseId = `barcelona`;
-
-             if (accuracy >= 90) {
-                 accDisplay.style.color = "#4ade80"; 
-                 passArea.classList.remove('hidden');
-                 failMsg.classList.add('hidden');
-                 this.copyToClipboard(licenseId, passBtn);
-                 passBtn.onclick = () => this.copyToClipboard(licenseId, passBtn);
-
-             } else {
-                 accDisplay.style.color = "#ef4444"; 
-                 passArea.classList.add('hidden');
-                 failMsg.classList.remove('hidden');
-             }
-
-             document.getElementById('rank-text').innerText = `Time: ${totalTime.toFixed(2)}s | Misses: ${this.missCount}`;
-             document.getElementById('result-title').innerText = "CHECKERED FLAG";
-             
-             const review = document.getElementById('review-list');
-             let summaryHtml = `<div class="mb-4 font-bold text-white uppercase text-sm tracking-widest border-b border-gray-700 pb-2">Lap Analysis</div>`;
-             if (this.missedWordsLog.length > 0) { summaryHtml += this.missedWordsLog.map(item => `<div class="mb-2 text-sm p-2 bg-red-900/10 border border-red-900/30 rounded"><span class="font-bold text-white block">${item.w}</span><span class="text-gray-400">${item.m}</span></div>`).join(''); } else { summaryHtml += '<p class="text-green-500 font-bold">Perfect Lap. No Issues Detected.</p>'; }
-             review.innerHTML = summaryHtml;
-             
-            const nextBtn = document.getElementById('next-round-btn');
-            const currentRound = this.vocabRounds[this.currentRoundIndex];
-
-            if (!this.isPitStopMode) {
-                if (currentRound && currentRound.id === 'random') {
-                    nextBtn.classList.remove('hidden');
-                    nextBtn.innerText = "AGAIN (SAME SETUP)"; 
-                    nextBtn.onclick = () => { 
-                        this.createRandomRound(); 
-                    };
-                } else if (this.currentRoundIndex + 1 < this.vocabRounds.length) {
-                    nextBtn.classList.remove('hidden');
-                    nextBtn.innerText = "NEXT SECTOR";
-                    nextBtn.onclick = () => { 
-                        document.getElementById('round-selector').value = this.currentRoundIndex + 1; 
-                        this.start(); 
-                    };
-                } else {
-                    nextBtn.classList.add('hidden');
-                }
-            } else { 
-                nextBtn.classList.add('hidden'); 
+                load();
             }
-             
-             if (window.fetchSRSItems) window.fetchSRSItems();
-             if (window.incrementDailyLaps) window.incrementDailyLaps(); 
-         }
 
-         returnToGrid() {
-             document.getElementById('result-screen').classList.add('hidden');
-             document.getElementById('start-screen').classList.remove('hidden');
-             if (window.fetchSRSItems) window.fetchSRSItems();
-         }
-        
-         updatePitStopButton(count) {
-             const text = document.getElementById('mistake-count-display');
-             const overlay = document.getElementById('pit-alert-overlay');
-             if (count > 0) {
-                 text.innerText = "CRITICAL"; text.classList.remove('text-green-500'); text.classList.add('text-red-500');
-                 overlay.classList.remove('hidden'); overlay.onclick = () => this.startPitStop();
-             } else {
-                 text.innerText = "OPTIMAL"; text.classList.add('text-green-500'); text.classList.remove('text-red-500');
-                 overlay.classList.add('hidden');
+            speak(text) {
+                if (!this.synth || this.englishVoices.length === 0) {
+                    console.warn("[TTS] Engine warming up...");
+                    return; 
+                }
+                this.synth.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(text);
+                const preferredVoice = this.englishVoices.find(v => v.name.includes('Google US English')) 
+                                    || this.englishVoices.find(v => v.name.includes('Samantha'))
+                                    || this.englishVoices.find(v => v.name.includes('Zira'))
+                                    || this.englishVoices[0]; 
+                utterance.voice = preferredVoice;
+                utterance.rate = 1.1; 
+                utterance.pitch = 1.0;
+                this.synth.speak(utterance);
+            }
+
+            parseData() {
+                if(!rawData.trim()) { this.masterList = []; return; }
+                const lines = rawData.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !l.startsWith('[source'));
+                this.masterList = [];
+                lines.forEach(line => {
+                    let sep = -1;
+                    if (line.indexOf('\t') !== -1) sep = line.indexOf('\t');
+                    else if (line.indexOf(':') !== -1) sep = line.indexOf(':');
+                    else if (line.indexOf('：') !== -1) sep = line.indexOf('：');
+                    if (sep !== -1) {
+                        this.masterList.push({ w: line.substring(0, sep).trim(), m: line.substring(sep + 1).trim() });
+                    }
+                });
+            }
+
+            generateRounds() {
+                const wordCopy = [...this.masterList]; 
+                this.vocabRounds = [];
+                let roundNum = 1;
+                let currentWordIndex = 1; 
+                while (wordCopy.length > 0) {
+                    const chunk = wordCopy.splice(0, this.wordsPerRound);
+                    if (chunk.length > 0) {
+                        this.vocabRounds.push({ id: roundNum, name: `ROUND ${roundNum} (No.${currentWordIndex} - ${currentWordIndex + chunk.length - 1})`, words: chunk });
+                        roundNum++;
+                        currentWordIndex += chunk.length;
+                    }
+                }
+            }
+
+            initUI() {
+                const selector = document.getElementById('round-selector');
+                selector.innerHTML = '';
+                if(this.vocabRounds.length === 0) { selector.innerHTML = '<option>Load Data or Login</option>'; }
+                else {
+                    this.vocabRounds.forEach((round, index) => {
+                        const opt = document.createElement('option');
+                        opt.value = index;
+                        opt.text = round.name;
+                        selector.appendChild(opt);
+                    });
+                }
+
+                const lastPlayed = localStorage.getItem('rb26_last_round');
+                if (lastPlayed) {
+                    const roundIdx = parseInt(lastPlayed);
+                    if (!isNaN(roundIdx) && roundIdx < this.vocabRounds.length) {
+                        selector.value = roundIdx;
+                        const option = selector.options[roundIdx];
+                        if (option) option.text = "◀ LAST ▶ " + option.text;
+                    }
+                }
+                this.updateSummary();
+            }
+
+            updateSummary() {
+                const selector = document.getElementById('round-selector');
+                let roundName = "Custom / Random";
+                if (selector.selectedIndex >= 0) {
+                    roundName = selector.options[selector.selectedIndex].text;
+                }
+                
+                const tire = this.wordsPerRound;
+                const rev = document.getElementById('reverse-mode').checked ? "REV" : "STD";
+                const radio = document.getElementById('radio-mode').checked ? "+RADIO" : "";
+                const spell = document.getElementById('spelling-mode').checked && document.getElementById('reverse-mode').checked ? "+MANUAL" : "";
+                
+                document.getElementById('strategy-summary').innerText = `${roundName} | ${tire} Qs | ${rev}${radio}${spell}`;
+            }
+
+            toggleStrategyMenu() {
+                const panel = document.getElementById('strategy-panel');
+                const btn = document.getElementById('strategy-toggle-btn');
+                if (panel.classList.contains('open')) {
+                    panel.classList.remove('open');
+                    btn.classList.remove('bg-gray-700', 'text-white');
+                    btn.classList.add('bg-gray-800', 'text-gray-400');
+                    btn.innerText = "Show Settings ▼";
+                } else {
+                    panel.classList.add('open');
+                    btn.classList.remove('bg-gray-800', 'text-gray-400');
+                    btn.classList.add('bg-gray-700', 'text-white');
+                    btn.innerText = "Hide Settings ▲";
+                }
+            }
+
+            switchStrategyTab(tab) {
+                const tabs = ['normal', 'random', 'flagged'];
+                tabs.forEach(t => {
+                    const div = document.getElementById(`strategy-${t}`);
+                    const btn = document.getElementById(`tab-${t}`);
+                    if (t === tab) {
+                        if(div) div.classList.remove('hidden');
+                        if(btn) {
+                            btn.classList.add('text-white', 'border-red-500');
+                            btn.classList.remove('text-gray-500', 'border-transparent');
+                        }
+                    } else {
+                        if(div) div.classList.add('hidden');
+                        if(btn) {
+                            btn.classList.remove('text-white', 'border-red-500');
+                            btn.classList.add('text-gray-500', 'border-transparent');
+                        }
+                    }
+                });
+            }
+
+            initSearch() {
+                const input = document.getElementById('search-input');
+                const results = document.getElementById('search-results');
+                input.addEventListener('input', (e) => {
+                    const q = e.target.value.toLowerCase().trim();
+                    if (!q) { results.classList.add('hidden'); return; }
+                    const hits = this.masterList.map((item, index) => ({ ...item, i: index + 1 }))
+                        .filter(item => item.w.toLowerCase().includes(q) || item.m.toLowerCase().includes(q))
+                        .slice(0, 50);
+                    if (hits.length > 0) {
+                        results.classList.remove('hidden');
+                        results.innerHTML = hits.map(h => `
+                            <div onclick="quiz.speak('${h.w.replace(/'/g, "\\'")}')" class="p-3 border-b border-gray-800 active:bg-gray-800 cursor-pointer flex justify-between items-center group hover:bg-white/5 transition-colors">
+                                <div class="text-left"><div class="flex items-baseline gap-2"><span class="text-[10px] text-yellow-500 font-mono opacity-70">No.${h.i}</span><span class="text-red-400 font-bold text-xs f1-font">${h.w}</span></div><span class="text-gray-400 text-[10px] pl-1">${h.m}</span></div>
+                                <button class="text-[8px] bg-gray-700 text-white px-2 py-1 rounded-full uppercase">Listen</button>
+                            </div>`).join('');
+                    } else {
+                        results.classList.remove('hidden');
+                        results.innerHTML = `<div class="p-3 text-gray-500 text-[10px] text-center">NO DATA</div>`;
+                    }
+                });
+                document.addEventListener('click', (e) => { if (!input.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden'); });
+            }
+
+            createCustomRound() {
+                const s = parseInt(document.getElementById('custom-start').value) - 1;
+                const e = parseInt(document.getElementById('custom-end').value);
+                if(isNaN(s) || isNaN(e) || s < 0 || e > this.masterList.length || s >= e) { alert("Invalid Range"); return; }
+                const customWords = this.masterList.slice(s, e);
+                this.vocabRounds.unshift({ id: 'custom', name: `CUSTOM (No.${s+1}-${e})`, words: customWords });
+                this.initUI();
+                document.getElementById('round-selector').value = 0;
+                this.updateSummary();
+            }
+
+            createRandomRound() {
+                const sVal = document.getElementById('rand-start').value;
+                const eVal = document.getElementById('rand-end').value;
+                const qVal = document.getElementById('rand-qty').value;
+                
+                let s = parseInt(sVal) - 1;
+                let e = parseInt(eVal);
+                let qty = parseInt(qVal);
+
+                if (isNaN(s)) s = 0;
+                if (isNaN(e)) e = this.masterList.length;
+                if (isNaN(qty) || qty <= 0) qty = this.wordsPerRound; 
+
+                if (s < 0 || e > this.masterList.length || s >= e) { alert("Invalid Range for Random GP"); return; }
+
+                const rangePool = this.masterList.slice(s, e);
+                this.shuffle(rangePool);
+                const selectedWords = rangePool.slice(0, qty);
+                
+                this.vocabRounds.unshift({ id: 'random', name: `🎲 RANDOM (Range: ${s+1}-${e})`, words: selectedWords });
+                this.initUI();
+                document.getElementById('round-selector').value = 0;
+                this.updateSummary();
+                this.start();
+            }
+
+           createFlaggedRound() {
+                const flagType = document.getElementById('flagged-type').value;
+                const flaggedItems = (this.allMistakes || []).filter(m => {
+                    const isRed = m.flag === 'red' || m.bookmarked === true;
+                    const isYellow = m.flag === 'yellow';
+                    if (flagType === 'red') return isRed;
+                    if (flagType === 'yellow') return isYellow;
+                    return isRed || isYellow; 
+                });
+                
+                if (flaggedItems.length === 0) {
+                    alert("まだ何もない");
+                    return;
+                }
+
+                const qVal = document.getElementById('flagged-qty').value;
+                let qty = parseInt(qVal);
+                if (isNaN(qty) || qty <= 0) qty = flaggedItems.length;
+
+                this.shuffle(flaggedItems);
+                const targetItems = flaggedItems.slice(0, qty);
+                const selectedWords = targetItems.map(item => ({ w: item.word || item.w, m: item.meaning || item.m }));
+                
+                let roundTitle = flagType === 'red' ? '🚩 RED GP' : flagType === 'yellow' ? '🟨 YELLOW GP' : '🚩🟨 FLAGGED GP';
+
+                this.vocabRounds.unshift({ 
+                    id: 'flagged', 
+                    name: `${roundTitle} (${selectedWords.length} Qs)`, 
+                    words: selectedWords 
+                });
+                
+                this.initUI();
+                document.getElementById('round-selector').value = 0;
+                this.updateSummary();
+                this.start();
+            }   
+
+            setTireStrategy(count, type) {
+                this.wordsPerRound = count;
+                this.generateRounds();
+                this.initUI();
+                document.querySelectorAll('.tire-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById(`tire-${type}`).classList.add('active');
+                this.updateSummary();
+            }
+
+            toggleSpellingOption() {
+                const isRev = document.getElementById('reverse-mode').checked;
+                const spellOpt = document.getElementById('spelling-option-container');
+                if (isRev) {
+                    spellOpt.classList.remove('hidden');
+                } else {
+                    spellOpt.classList.add('hidden');
+                    document.getElementById('spelling-mode').checked = false;
+                }
+            }
+
+            // --- FREE PRACTICE (FLASHCARD) MODE ---
+            startFlashcardMode() {
+                if(this.vocabRounds.length === 0) { alert("Data not loaded. Check your telemetry."); return; }
+                
+                this.startStint(); // ★タイマー開始
+
+                const selector = document.getElementById('round-selector');
+                this.currentRoundIndex = parseInt(selector.value);
+                const selectedRound = this.vocabRounds[this.currentRoundIndex];
+                
+                this.questions = selectedRound.words.map(target => ({ w: target.w, m: target.m }));
+                this.currentIndex = 0;
+                this.isReverseMode = document.getElementById('reverse-mode').checked;
+                
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('flashcard-screen').classList.remove('hidden');
+                document.getElementById('fc-round-name').innerText = "FP: " + selectedRound.name;
+                
+                this.showFlashcard();
+            }
+
+           showFlashcard() {
+                if (this.questions.length === 0) return;
+                const q = this.questions[this.currentIndex];
+                document.getElementById('fc-progress').innerText = `LAP ${this.currentIndex + 1} / ${this.questions.length}`;
+                
+                const displayWord = this.isReverseMode ? q.m : q.w;
+                const displayMeaning = this.isReverseMode ? q.w : q.m;
+
+                const wordEl = document.getElementById('fc-word');
+                wordEl.innerText = displayWord;
+                
+                if (this.isReverseMode && displayWord.length > 8) {
+                    wordEl.classList.remove('text-5xl', 'md:text-7xl');
+                    wordEl.classList.add('text-3xl', 'md:text-5xl');
+                } else {
+                    wordEl.classList.add('text-5xl', 'md:text-7xl');
+                    wordEl.classList.remove('text-3xl', 'md:text-5xl');
+                }
+
+                document.getElementById('fc-meaning').innerText = displayMeaning;
+                document.getElementById('fc-meaning-container').classList.add('hidden'); 
+
+                const currentWord = q.w;
+                const srsData = this.allMistakes ? this.allMistakes.find(m => m.word === currentWord || m.w === currentWord) : null;
+                const isRed = srsData && (srsData.flag === 'red' || srsData.bookmarked === true);
+                const isYellow = srsData && srsData.flag === 'yellow';
+                
+                const bookmarkBtn = document.getElementById('fc-bookmark-btn');
+                if (bookmarkBtn) {
+                    if (isRed) bookmarkBtn.innerText = '🚩';
+                    else if (isYellow) bookmarkBtn.innerText = '🟨';
+                    else bookmarkBtn.innerText = '🏳️';
+                }
+                
+                if (this.isAutoAudio && !this.isReverseMode) {
+                    setTimeout(() => this.speak(q.w), 100);
+                }
+            }
+
+            flipFlashcard() {
+                const container = document.getElementById('fc-meaning-container');
+                container.classList.toggle('hidden');
+                
+                if (!container.classList.contains('hidden') && this.isReverseMode && this.isAutoAudio) {
+                    this.speak(this.questions[this.currentIndex].w);
+                }
+            }
+
+            nextFlashcard() {
+                if (this.currentIndex < this.questions.length - 1) {
+                    this.currentIndex++;
+                    this.showFlashcard();
+                } else {
+                    const currentRound = this.vocabRounds[this.currentRoundIndex];
+                    if (currentRound.id !== 'custom' && currentRound.id !== 'random' && this.currentRoundIndex + 1 < this.vocabRounds.length) {
+                        const selector = document.getElementById('round-selector');
+                        selector.value = this.currentRoundIndex + 1;
+                        this.startFlashcardMode();
+                    } else {
+                        this.exitFlashcardMode();
+                    }
+                }
+            }
+
+            async toggleFlashcardBookmark(event) {
+                event.stopPropagation();
+                
+                const q = this.questions[this.currentIndex];
+                const safeW = encodeURIComponent(q.w);
+                const safeM = encodeURIComponent(q.m);
+                
+                await window.toggleBookmark(safeW, safeM);
+                
+                const srsData = this.allMistakes ? this.allMistakes.find(m => m.word === q.w || m.w === q.w) : null;
+                const isRed = srsData && (srsData.flag === 'red' || srsData.bookmarked === true);
+                const isYellow = srsData && srsData.flag === 'yellow';
+                
+                const bookmarkBtn = document.getElementById('fc-bookmark-btn');
+                if (bookmarkBtn) {
+                    if (isRed) bookmarkBtn.innerText = '🚩';
+                    else if (isYellow) bookmarkBtn.innerText = '🟨';
+                    else bookmarkBtn.innerText = '🏳️';
+                }
+            }
+
+            speakFlashcardWord() {
+                if (this.questions.length === 0) return;
+                const q = this.questions[this.currentIndex];
+                this.speak(q.w);
+            }
+
+            prevFlashcard() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                    this.showFlashcard();
+                }
+            }
+
+            exitFlashcardMode() {
+                this.stopStint(); // ★タイマー停止
+                document.getElementById('flashcard-screen').classList.add('hidden');
+                document.getElementById('start-screen').classList.remove('hidden');
+            }
+
+            start() {
+                this.startStint(); // ★タイマー開始
+
+                this.currentIndex = 0;
+                this.missCount = 0;
+                this.currentStreak = 0; 
+                this.maxStreak = 0;     
+                this.missedWordsLog = [];
+                this.startTime = Date.now();
+                this.startTimer();
+                
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('result-screen').classList.add('hidden');
+                document.getElementById('quiz-screen').classList.remove('hidden');
+                
+                this.startVocabMode();
+            }
+
+            startVocabMode() {
+                if(this.vocabRounds.length === 0) { alert("Data not loaded"); this.returnToGrid(); return; }
+                this.isPitStopMode = false;
+                
+                const selector = document.getElementById('round-selector');
+                this.currentRoundIndex = parseInt(selector.value);
+                const selectedRound = this.vocabRounds[this.currentRoundIndex];
+                
+                if (selectedRound.id !== 'custom' && selectedRound.id !== 'random') {
+                    localStorage.setItem('rb26_last_round', this.currentRoundIndex);
+                }
+
+                this.isReverseMode = document.getElementById('reverse-mode').checked;
+                this.isSpellingMode = document.getElementById('spelling-mode').checked && this.isReverseMode;
+                this.isRadioMode = document.getElementById('radio-mode').checked;
+
+                let modeTitle = "";
+                if (this.isRadioMode) modeTitle = " [BLIND RADIO]";
+                else if (this.isSpellingMode) modeTitle = " [MANUAL SHIFT]";
+                else if (this.isReverseMode) modeTitle = " [REV]";
+
+                document.getElementById('circuit-name').innerText = selectedRound.name + modeTitle;
+                document.getElementById('question-label').innerText = this.isReverseMode ? "TRANSLATE" : "MEANING";
+
+                this.questions = selectedRound.words.map(target => {
+                    const qText = this.isReverseMode ? target.m : target.w;
+                    const aText = this.isReverseMode ? target.w : target.m;
+                    
+                    const options = this.isSpellingMode 
+                        ? [] 
+                        : [aText, ...this.getDistractors(target, this.isReverseMode)].sort(() => Math.random() - 0.5);
+                    
+                    const existingData = (this.allMistakes || []).find(item => item.word === target.w || item.w === target.w) || {};
+
+                   return { 
+                        w: target.w, 
+                        m: target.m, 
+                        qText: qText, 
+                        aText: aText, 
+                        o: options,
+                        docId: existingData.id || null, 
+                        interval: existingData.interval || 0,
+                        repetitions: existingData.repetitions || 0,
+                        easeFactor: existingData.easeFactor || 2.5,
+                        lastMissedSeconds: existingData.lastMissedSeconds || null 
+                    };
+                });
+                this.questions.sort(() => Math.random() - 0.5);
+                this.showVocabQuestion();
+            }
+            
+            getDistractors(targetWord, isReverse) {
+                 const distractors = [];
+                 if (this.masterList.length < 4) return ["Option A", "Option B", "Option C"]; 
+
+                 const targetString = isReverse ? targetWord.w : targetWord.m;
+                 const targetLen = targetString.length;
+
+                 let smartPool = this.masterList.filter(item => {
+                     const str = isReverse ? item.w : item.m;
+                     if (str === targetString) return false;
+                     return Math.abs(str.length - targetLen) <= 2;
+                 });
+
+                 if (smartPool.length < 10) {
+                     smartPool = this.masterList.filter(item => {
+                         const str = isReverse ? item.w : item.m;
+                         return str !== targetString;
+                     });
+                 }
+
+                 let attempts = 0;
+                 while (distractors.length < 3 && attempts < 100) {
+                     const r = smartPool[Math.floor(Math.random() * smartPool.length)];
+                     const candidate = isReverse ? r.w : r.m;
+                     if (!distractors.includes(candidate)) {
+                         distractors.push(candidate);
+                     }
+                     attempts++;
+                 }
+                 while (distractors.length < 3) distractors.push("---");
+                 return distractors;
              }
-         }
-        
-         startPitStop() {
-             if (!this.dueMistakes || this.dueMistakes.length === 0) return;
-             // 熟語は除外
-             const vocabDue = this.dueMistakes.filter(item => !item.id.toString().startsWith('idiom_'));
-             if (!vocabDue || vocabDue.length === 0) return;
 
-             this.isPitStopMode = true; 
-             
-             this.questions = vocabDue.map(item => {
-                 const word = item.word || item.w;
-                 const meaning = item.meaning || item.m;
-                 const targetWord = { w: word, m: meaning };
+             showVocabQuestion() {
+                 const q = this.questions[this.currentIndex];
+                 document.getElementById('question-number').innerText = `LAP ${this.currentIndex + 1} / ${this.questions.length}`;
                  
-                 const distractors = this.getDistractors(targetWord, false);
-                 const options = [targetWord.m, ...distractors].sort(() => Math.random() - 0.5);
-                 return { w: targetWord.w, m: targetWord.m, qText: targetWord.w, aText: targetWord.m, o: options, docId: item.id, interval: item.interval || 0, repetitions: item.repetitions || 0, easeFactor: item.easeFactor || 2.5 };
-             });
-             
-             this.questions.sort(() => Math.random() - 0.5);
-             this.currentIndex = 0; this.missCount = 0; this.missedWordsLog = [];
-             this.currentStreak = 0; this.maxStreak = 0;
-             document.getElementById('circuit-name').innerText = "SRS PIT STOP";
-             document.getElementById('start-screen').classList.add('hidden');
-             document.getElementById('quiz-screen').classList.remove('hidden');
-             
-             this.startTime = Date.now();
-             this.startTimer();
-             this.showVocabQuestion();
-         }
-        
-         openTelemetry() {
-             document.getElementById('start-screen').classList.add('hidden');
-             document.getElementById('telemetry-screen').classList.remove('hidden');
-             const mistakes = this.allMistakes || [];
-             const worstWords = [...mistakes].sort((a, b) => (a.easeFactor || 2.5) - (b.easeFactor || 2.5)).slice(0, 20);
-             const listContainer = document.getElementById('worst-words-list');
-             if (worstWords.length === 0) listContainer.innerHTML = `<div class="text-gray-500 text-xs italic">No degradation.</div>`;
-             else {
-                 listContainer.innerHTML = worstWords.map(item => `
-                     <div class="flex justify-between items-center bg-gray-900/40 p-3 rounded-lg border-l-2 border-red-500 mb-1">
-                         <span class="font-bold text-gray-200 text-xs f1-font">${item.word || item.w}</span>
-                         <span class="text-[10px] text-gray-500 font-mono">EF:${(item.easeFactor||2.5).toFixed(2)}</span>
-                     </div>`).join('');
+                 const targetDisplay = document.getElementById('target-word');
+
+                 if (this.isRadioMode) {
+                     targetDisplay.className = "w-full flex justify-center py-4"; 
+                     targetDisplay.innerHTML = `
+                        <div class="radio-box">
+                            <div class="radio-content">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-white text-black text-[10px] font-bold px-1.5 rounded-sm">LIVE</span>
+                                    <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest font-mono">TEAM RADIO</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-white f1-font text-2xl font-bold italic tracking-wider">GP <span class="text-gray-600 text-sm not-italic mx-1">➜</span> YOU</span>
+                                </div>
+                            </div>
+                            
+                            <div class="waveform">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+                        </div>
+                     `;
+                     setTimeout(() => this.speak(q.w), 300);
+                 } else {
+                     targetDisplay.innerHTML = "";
+                     targetDisplay.innerText = q.qText;
+                     targetDisplay.className = (this.isReverseMode && q.qText.length > 8) 
+                         ? "f1-font text-4xl font-bold text-white tracking-wide break-words px-2 text-center"
+                         : "f1-font text-6xl font-bold text-white tracking-wide drop-shadow-lg break-words px-2 text-center";
+                     
+                     if (this.isAutoAudio && !this.isReverseMode && !this.isSpellingMode) setTimeout(() => this.speak(q.w), 200);
+                 }
+
+                 this.lapStartTime = Date.now(); 
+
+                 document.getElementById('progress-fill').style.width = `${(this.currentIndex / this.questions.length) * 100}%`;
+                 document.getElementById('feedback').innerText = '';
+                 
+                 const speakBtn = document.getElementById('speak-btn');
+                 speakBtn.onclick = () => this.speak(q.w);
+
+                const flagBtn = document.getElementById('flag-btn');
+                 if (flagBtn) {
+                     const currentItem = (this.allMistakes || []).find(m => m.word === q.w || m.w === q.w);
+                     let flagState = 'none';
+                     if (currentItem) {
+                         if (currentItem.flag === 'red' || currentItem.bookmarked === true) flagState = 'red';
+                         else if (currentItem.flag === 'yellow') flagState = 'yellow';
+                     }
+
+                     const updateFlagUI = () => {
+                         flagBtn.classList.remove('text-red-500', 'border-red-500', 'bg-red-900/20', 'text-yellow-500', 'border-yellow-500', 'bg-yellow-900/20', 'text-gray-400', 'border-gray-700', 'bg-black/40');
+                         flagBtn.innerHTML = '';
+                         if (flagState === 'red') {
+                             flagBtn.classList.add('text-red-500', 'border-red-500', 'bg-red-900/20');
+                             flagBtn.innerHTML = '<span class="text-2xl">🚩</span>';
+                         } else if (flagState === 'yellow') {
+                             flagBtn.classList.add('text-yellow-500', 'border-yellow-500', 'bg-yellow-900/20');
+                             flagBtn.innerHTML = '<span class="text-2xl">🟨</span>';
+                         } else {
+                             flagBtn.classList.add('text-gray-400', 'border-gray-700', 'bg-black/40');
+                             flagBtn.innerHTML = '<span class="text-2xl">🏳️</span>';
+                         }
+                     };
+                     updateFlagUI();
+
+                     flagBtn.onclick = async () => {
+                         const safeW = encodeURIComponent(q.w);
+                         const safeM = encodeURIComponent(q.m);
+                         if (window.toggleBookmark) {
+                             await window.toggleBookmark(safeW, safeM);
+                             const updatedItem = (this.allMistakes || []).find(m => m.word === q.w || m.w === q.w);
+                             if (updatedItem) {
+                                 if (updatedItem.flag === 'red' || updatedItem.bookmarked === true) flagState = 'red';
+                                 else if (updatedItem.flag === 'yellow') flagState = 'yellow';
+                                 else flagState = 'none';
+                             } else flagState = 'none';
+                             updateFlagUI();
+                         }
+                     };
+                 }
+
+                 const stdContainer = document.getElementById('options-container');
+                 const spellContainer = document.getElementById('spelling-interface');
+
+                 if (this.isSpellingMode) {
+                     stdContainer.classList.add('hidden');
+                     spellContainer.classList.remove('hidden');
+                     this.renderSpellingInterface(q);
+                 } else {
+                     stdContainer.classList.remove('hidden');
+                     spellContainer.classList.add('hidden');
+                     this.renderStandardOptions(q, stdContainer);
+                 }
              }
-             const ctx = document.getElementById('weaknessRadarChart').getContext('2d');
-             if (this.telemetryChart) this.telemetryChart.destroy();
-             const buckets = [0, 0, 0, 0, 0];
-             mistakes.forEach(m => {
-                 const int = m.interval || 0;
-                 if (int <= 1) buckets[0]++; else if (int <= 6) buckets[1]++; else if (int <= 14) buckets[2]++; else if (int <= 30) buckets[3]++; else buckets[4]++;
-             });
-             this.telemetryChart = new Chart(ctx, {
-                 type: 'bar',
-                 data: { labels: ['1d', '2-6d', '2w', '1mo', 'Master'], datasets: [{ data: buckets, backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'], borderColor: '#333', borderWidth: 1 }] },
-                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } } }
-             });
-         }
-         closeOverlay(id) {
-             document.getElementById(id).classList.add('hidden');
-             document.getElementById('start-screen').classList.remove('hidden');
-         }
 
-        openWordBook() {
-             document.getElementById('start-screen').classList.add('hidden');
-             document.getElementById('wordbook-screen').classList.remove('hidden');
-             this.bookmarkedFilter = 'all';
-             document.getElementById('wb-filter-btn').innerText = "ALL";
-             document.getElementById('wb-filter-btn').className = "bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors";
-             this.renderWordBook();
-         }
+             renderSpellingInterface(q) {
+                 const slotsEl = document.getElementById('spelling-slots');
+                 const poolEl = document.getElementById('spelling-pool');
+                 
+                 if (this.spellingAns.length === 0) {
+                     slotsEl.innerHTML = '';
+                     poolEl.innerHTML = '';
+                     slotsEl.classList.remove('correct-lane', 'wrong-lane');
+                     this.isLocked = false;
+                     
+                     const targetWord = q.w.trim();
+                     const letters = targetWord.split('');
+                     this.spellingPoolState = letters.map((char, i) => ({ char, id: i, used: false })).sort(() => Math.random() - 0.5);
+                 } else {
+                     slotsEl.innerHTML = '';
+                     poolEl.innerHTML = '';
+                 }
 
-         toggleBookFilter() {
-             if (this.bookmarkedFilter === 'all') {
-                 this.bookmarkedFilter = 'red';
-                 document.getElementById('wb-filter-btn').innerText = "🚩 RED";
-                 document.getElementById('wb-filter-btn').className = "bg-red-900/80 text-white px-3 rounded border border-red-500 text-xs font-bold uppercase hover:bg-red-800 transition-colors";
-             } else if (this.bookmarkedFilter === 'red') {
-                 this.bookmarkedFilter = 'yellow';
-                 document.getElementById('wb-filter-btn').innerText = "🟨 YELLOW";
-                 document.getElementById('wb-filter-btn').className = "bg-yellow-900/80 text-white px-3 rounded border border-yellow-500 text-xs font-bold uppercase hover:bg-yellow-800 transition-colors";
-             } else if (this.bookmarkedFilter === 'yellow') {
-                 this.bookmarkedFilter = '24h';
-                 document.getElementById('wb-filter-btn').innerText = "⏱️ 24H";
-                 document.getElementById('wb-filter-btn').className = "bg-purple-900/80 text-white px-3 rounded border border-purple-500 text-xs font-bold uppercase hover:bg-purple-800 transition-colors";
-             } else {
+                 const targetLen = q.w.trim().length;
+                 for(let i=0; i<targetLen; i++) {
+                     const slot = document.createElement('div');
+                     const charObj = this.spellingAns[i]; 
+                     
+                     if (charObj) {
+                         slot.className = "w-10 h-12 border border-white bg-gray-800 rounded mx-1 flex items-center justify-center text-2xl font-bold text-white cursor-pointer active:scale-95 transition-transform";
+                         slot.innerText = charObj.char;
+                         slot.onclick = () => this.handleSpellingUndo(i, q);
+                     } else {
+                         slot.className = "w-10 h-12 border-b-2 border-gray-600 mx-1 flex items-center justify-center text-xl font-bold text-gray-600";
+                         slot.innerText = "_";
+                     }
+                     slotsEl.appendChild(slot);
+                 }
+
+                 this.spellingPoolState.forEach((item) => {
+                     const btn = document.createElement('button');
+                     btn.className = "letter-chip bg-gray-800 text-white rounded shadow-md border border-gray-600 active:bg-gray-600 transition-all w-12 h-12 text-xl";
+                     btn.innerText = item.char;
+                     
+                     if (item.used) {
+                         btn.classList.add('opacity-0', 'pointer-events-none');
+                     } else {
+                         btn.onclick = () => this.handleSpellingClick(item, q);
+                     }
+                     poolEl.appendChild(btn);
+                 });
+             }
+
+             handleSpellingClick(item, q) {
+                 if (this.isLocked) return;
+                 item.used = true;
+                 this.spellingAns.push(item);
+                 this.renderSpellingInterface(q);
+                 if (this.spellingAns.length === q.w.trim().length) {
+                     this.checkSpellingWin(q);
+                 }
+             }
+
+             handleSpellingUndo(index, q) {
+                 if (this.isLocked) return; 
+                 const removedItem = this.spellingAns.splice(index, 1)[0];
+                 const poolItem = this.spellingPoolState.find(p => p.id === removedItem.id);
+                 if (poolItem) poolItem.used = false;
+                 this.renderSpellingInterface(q);
+             }
+
+             checkSpellingWin(q) {
+                 const userWord = this.spellingAns.map(a => a.char).join('');
+                 const targetWord = q.w.trim();
+                 const slotsEl = document.getElementById('spelling-slots');
+
+                 if (userWord === targetWord) {
+                     this.isLocked = true;
+                     slotsEl.classList.add('correct-lane');
+                     const feedback = document.getElementById('feedback');
+                     feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold animate-pulse">🟣 PERFECT SHIFT</span>`;
+                     this.speak(q.w);
+                     
+                     this.currentStreak++;
+                     if (this.currentStreak > this.maxStreak) this.maxStreak = this.currentStreak;
+                     
+                     const timeTaken = (Date.now() - this.lapStartTime) / 1000;
+                     if (window.handleSRSUpdate) {
+                         window.handleSRSUpdate({ ...q, timeTaken: timeTaken }, true);
+                     }
+
+                     setTimeout(() => {
+                         this.currentIndex++;
+                         this.spellingAns = []; 
+                         if (this.currentIndex < this.questions.length) this.showVocabQuestion();
+                         else this.finish();
+                     }, 600);
+
+                 } else {
+                     this.isLocked = true; 
+                     this.missCount++;
+                     this.currentStreak = 0;
+                     
+                     slotsEl.classList.add('wrong-lane', 'animate-shake');
+                     document.getElementById('feedback').innerHTML = `<span class="text-red-500 text-xs font-bold">GEARBOX DAMAGE</span>`;
+
+                     if (!this.missedWordsLog.find(item => item.w === q.w)) this.missedWordsLog.push({ w: q.w, m: q.m });
+                     
+                     if (window.handleSRSUpdate) {
+                         window.handleSRSUpdate({ ...q, timeTaken: 5.0 }, false);
+                     }
+
+                     setTimeout(() => {
+                         this.isLocked = false;
+                         slotsEl.classList.remove('wrong-lane', 'animate-shake');
+                         document.getElementById('feedback').innerText = '';
+                         this.spellingAns = [];
+                         this.spellingPoolState.forEach(p => p.used = false);
+                         this.renderSpellingInterface(q); 
+                     }, 1000);
+                 }
+             }
+
+             renderStandardOptions(q, container) {
+                 container.innerHTML = '';
+                 
+                 const renderBtns = () => {
+                     container.innerHTML = '';
+                     q.o.forEach(opt => {
+                         const btn = document.createElement('button');
+                         const fontClass = this.isReverseMode ? "f1-font tracking-wider text-xl" : "text-lg";
+                         btn.className = `option-btn w-full h-full flex items-center text-left p-5 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 active:border-red-500 font-bold shadow-lg ${fontClass} transition-all`;
+                         btn.innerText = opt;
+                         btn.onclick = () => this.handleVocabAnswer(opt, q);
+                         container.appendChild(btn);
+                     });
+                 };
+
+                 if (this.isRadioMode) {
+                     renderBtns();
+                 } else {
+                     const revealBtn = document.createElement('button');
+                     revealBtn.className = 'col-span-2 w-full h-32 bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-xl text-gray-400 f1-font text-2xl uppercase tracking-widest hover:border-yellow-500 hover:text-yellow-500 transition-all flex flex-col items-center justify-center gap-2 animate-pulse';
+                     revealBtn.innerHTML = `<span>VISUALIZE MEANING</span><span class="text-xs text-gray-500 font-mono">TAP TO UNLOCK</span>`;
+                     revealBtn.onclick = () => { 
+                         renderBtns();
+                     };
+                     container.appendChild(revealBtn);
+                 }
+             }
+
+             handleVocabAnswer(selected, q) {
+                 const btns = document.querySelectorAll('.option-btn');
+                 if (btns.length > 0 && btns[0].disabled) return;
+                 btns.forEach(b => b.disabled = true);
+
+                 if (this.isRadioMode) {
+                     const targetDisplay = document.getElementById('target-word');
+                     targetDisplay.innerHTML = "";
+                     targetDisplay.innerText = q.w; 
+                     targetDisplay.className = "f1-font text-6xl font-bold text-white tracking-wide drop-shadow-xl break-words px-2 text-center";
+                 }
+
+                 const feedback = document.getElementById('feedback');
+                 const timeTaken = (Date.now() - this.lapStartTime) / 1000;
+                 const isCorrect = (selected === q.aText);
+
+                 if (window.handleSRSUpdate) {
+                     window.handleSRSUpdate({ ...q, timeTaken: timeTaken }, isCorrect);
+                 }
+
+                 if (isCorrect) {
+                     this.currentStreak++;
+                     if (this.currentStreak > this.maxStreak) {
+                         this.maxStreak = this.currentStreak;
+                     }
+
+                     if(this.isReverseMode) this.speak(q.w);
+                     
+                     if (timeTaken < 1.2) {
+                         feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold animate-pulse">🟣 PURPLE SECTOR (${timeTaken.toFixed(2)}s)</span>`;
+                     } else if (timeTaken > 5.0) {
+                         feedback.innerHTML = `<span class="text-yellow-500 text-xs font-bold">🟡 SLOW (${timeTaken.toFixed(2)}s)</span>`;
+                     }
+
+                     setTimeout(() => {
+                         this.currentIndex++;
+                         if (this.currentIndex < this.questions.length) this.showVocabQuestion();
+                         else this.finish();
+                     }, 400); 
+
+                 } else {
+                     this.missCount++;
+                     this.currentStreak = 0; 
+                     
+                     feedback.innerText = `WRONG: ${q.w} = ${q.m}`;
+                     feedback.className = "mt-4 text-center h-6 font-bold text-red-500 animate-pulse";
+                     if (!this.missedWordsLog.find(item => item.w === q.w)) this.missedWordsLog.push({ w: q.w, m: q.m });
+                     
+                     this.questions.push(q);
+                     setTimeout(() => { 
+                         this.currentIndex++; 
+                         this.showVocabQuestion(); 
+                     }, 1500);
+                 }
+             }
+
+             startTimer() {
+                 if (this.timerInterval) clearInterval(this.timerInterval);
+                 this.timerInterval = setInterval(() => { document.getElementById('timer').innerText = ((Date.now() - this.startTime) / 1000).toFixed(2) + 's'; }, 50);
+             }
+
+             shuffle(array) {
+                 for (let i = array.length - 1; i > 0; i--) {
+                     const j = Math.floor(Math.random() * (i + 1));
+                     [array[i], array[j]] = [array[j], array[i]];
+                 }
+             }
+            
+             copyToClipboard(text, btn) {
+                 navigator.clipboard.writeText(text).then(() => {
+                     btn.innerText = "AUTO-COPIED!";
+                     btn.classList.remove("bg-black", "text-white");
+                     btn.classList.add("bg-green-500", "text-black", "border", "border-green-400");
+                     setTimeout(() => {
+                         btn.innerText = "COPY LICENSE ID";
+                         btn.classList.add("bg-black", "text-white");
+                         btn.classList.remove("bg-green-500", "text-black", "border", "border-green-400");
+                     }, 3000);
+                 }).catch(err => {
+                     console.log("Copy failed", err);
+                     btn.innerText = "COPY LICENSE ID";
+                 });
+             }
+
+             finish() {
+                 const sessionTime = this.stopStint(); // ★タイマー停止と計測秒数の取得
+                 
+                 clearInterval(this.timerInterval);
+                 document.getElementById('quiz-screen').classList.add('hidden');
+                 document.getElementById('result-screen').classList.remove('hidden');
+                 
+                 const totalTime = (Date.now() - this.startTime) / 1000;
+                 let totalQs = this.questions.length;
+                 if (totalQs === 0) totalQs = 1; 
+                 
+                 let correctCount = totalQs - this.missCount;
+                 if (correctCount < 0) correctCount = 0;
+                 let accuracy = (correctCount / totalQs) * 100;
+                 
+                 const accDisplay = document.getElementById('accuracy-display');
+                 accDisplay.innerText = `${accuracy.toFixed(1)}%`;
+
+                 if (window.saveRaceResult) {
+                     let roundName = "UNKNOWN ROUND";
+                     if (this.isPitStopMode) {
+                         roundName = "SRS PIT STOP";
+                     } else if (this.vocabRounds[this.currentRoundIndex]) {
+                         roundName = this.vocabRounds[this.currentRoundIndex].name;
+                     }
+
+                     const resultData = {
+                         accuracy: parseFloat(accuracy.toFixed(1)),
+                         round: roundName,
+                         score: `${correctCount}/${totalQs}`,
+                         streak: this.maxStreak,
+                         time: parseFloat(totalTime.toFixed(2)),
+                         stintDuration: sessionTime // ★ここに追加してFirebaseへ流す
+                     };
+                     window.saveRaceResult(resultData);
+                 }
+                 
+                 const passArea = document.getElementById('pass-area');
+                 const failMsg = document.getElementById('fail-msg');
+                 const passBtn = document.getElementById('pass-btn');
+                 const licenseId = `barcelona`;
+
+                 if (accuracy >= 90) {
+                     accDisplay.style.color = "#4ade80"; 
+                     passArea.classList.remove('hidden');
+                     failMsg.classList.add('hidden');
+                     this.copyToClipboard(licenseId, passBtn);
+                     passBtn.onclick = () => this.copyToClipboard(licenseId, passBtn);
+
+                 } else {
+                     accDisplay.style.color = "#ef4444"; 
+                     passArea.classList.add('hidden');
+                     failMsg.classList.remove('hidden');
+                 }
+
+                 document.getElementById('rank-text').innerText = `Time: ${totalTime.toFixed(2)}s | Misses: ${this.missCount}`;
+                 document.getElementById('result-title').innerText = "CHECKERED FLAG";
+                 
+                 const review = document.getElementById('review-list');
+                 let summaryHtml = `<div class="mb-4 font-bold text-white uppercase text-sm tracking-widest border-b border-gray-700 pb-2">Lap Analysis</div>`;
+                 if (this.missedWordsLog.length > 0) { summaryHtml += this.missedWordsLog.map(item => `<div class="mb-2 text-sm p-2 bg-red-900/10 border border-red-900/30 rounded"><span class="font-bold text-white block">${item.w}</span><span class="text-gray-400">${item.m}</span></div>`).join(''); } else { summaryHtml += '<p class="text-green-500 font-bold">Perfect Lap. No Issues Detected.</p>'; }
+                 review.innerHTML = summaryHtml;
+                 
+                const nextBtn = document.getElementById('next-round-btn');
+                const currentRound = this.vocabRounds[this.currentRoundIndex];
+
+                if (!this.isPitStopMode) {
+                    if (currentRound && currentRound.id === 'random') {
+                        nextBtn.classList.remove('hidden');
+                        nextBtn.innerText = "AGAIN (SAME SETUP)"; 
+                        nextBtn.onclick = () => { 
+                            this.createRandomRound(); 
+                        };
+                    } else if (this.currentRoundIndex + 1 < this.vocabRounds.length) {
+                        nextBtn.classList.remove('hidden');
+                        nextBtn.innerText = "NEXT SECTOR";
+                        nextBtn.onclick = () => { 
+                            document.getElementById('round-selector').value = this.currentRoundIndex + 1; 
+                            this.start(); 
+                        };
+                    } else {
+                        nextBtn.classList.add('hidden');
+                    }
+                } else { 
+                    nextBtn.classList.add('hidden'); 
+                }
+                 
+                 if (window.fetchSRSItems) window.fetchSRSItems();
+                 if (window.incrementDailyLaps) window.incrementDailyLaps(); 
+             }
+
+             returnToGrid() {
+                 document.getElementById('result-screen').classList.add('hidden');
+                 document.getElementById('start-screen').classList.remove('hidden');
+                 if (window.fetchSRSItems) window.fetchSRSItems();
+             }
+            
+             updatePitStopButton(count) {
+                 const text = document.getElementById('mistake-count-display');
+                 const overlay = document.getElementById('pit-alert-overlay');
+                 if (count > 0) {
+                     text.innerText = "CRITICAL"; text.classList.remove('text-green-500'); text.classList.add('text-red-500');
+                     overlay.classList.remove('hidden'); overlay.onclick = () => this.startPitStop();
+                 } else {
+                     text.innerText = "OPTIMAL"; text.classList.add('text-green-500'); text.classList.remove('text-red-500');
+                     overlay.classList.add('hidden');
+                 }
+             }
+            
+             startPitStop() {
+                 if (!this.dueMistakes || this.dueMistakes.length === 0) return;
+                 const vocabDue = this.dueMistakes.filter(item => !item.id.toString().startsWith('idiom_'));
+                 if (!vocabDue || vocabDue.length === 0) return;
+
+                 this.isPitStopMode = true; 
+                 
+                 this.questions = vocabDue.map(item => {
+                     const word = item.word || item.w;
+                     const meaning = item.meaning || item.m;
+                     const targetWord = { w: word, m: meaning };
+                     
+                     const distractors = this.getDistractors(targetWord, false);
+                     const options = [targetWord.m, ...distractors].sort(() => Math.random() - 0.5);
+                     return { w: targetWord.w, m: targetWord.m, qText: targetWord.w, aText: targetWord.m, o: options, docId: item.id, interval: item.interval || 0, repetitions: item.repetitions || 0, easeFactor: item.easeFactor || 2.5 };
+                 });
+                 
+                 this.questions.sort(() => Math.random() - 0.5);
+                 this.currentIndex = 0; this.missCount = 0; this.missedWordsLog = [];
+                 this.currentStreak = 0; this.maxStreak = 0;
+                 document.getElementById('circuit-name').innerText = "SRS PIT STOP";
+                 document.getElementById('start-screen').classList.add('hidden');
+                 document.getElementById('quiz-screen').classList.remove('hidden');
+                 
+                 this.startStint(); // ★タイマー開始
+                 this.startTime = Date.now();
+                 this.startTimer();
+                 this.showVocabQuestion();
+             }
+            
+             openTelemetry() {
+                 document.getElementById('start-screen').classList.add('hidden');
+                 document.getElementById('telemetry-screen').classList.remove('hidden');
+                 const mistakes = this.allMistakes || [];
+                 const worstWords = [...mistakes].sort((a, b) => (a.easeFactor || 2.5) - (b.easeFactor || 2.5)).slice(0, 20);
+                 const listContainer = document.getElementById('worst-words-list');
+                 if (worstWords.length === 0) listContainer.innerHTML = `<div class="text-gray-500 text-xs italic">No degradation.</div>`;
+                 else {
+                     listContainer.innerHTML = worstWords.map(item => `
+                         <div class="flex justify-between items-center bg-gray-900/40 p-3 rounded-lg border-l-2 border-red-500 mb-1">
+                             <span class="font-bold text-gray-200 text-xs f1-font">${item.word || item.w}</span>
+                             <span class="text-[10px] text-gray-500 font-mono">EF:${(item.easeFactor||2.5).toFixed(2)}</span>
+                         </div>`).join('');
+                 }
+                 const ctx = document.getElementById('weaknessRadarChart').getContext('2d');
+                 if (this.telemetryChart) this.telemetryChart.destroy();
+                 const buckets = [0, 0, 0, 0, 0];
+                 mistakes.forEach(m => {
+                     const int = m.interval || 0;
+                     if (int <= 1) buckets[0]++; else if (int <= 6) buckets[1]++; else if (int <= 14) buckets[2]++; else if (int <= 30) buckets[3]++; else buckets[4]++;
+                 });
+                 this.telemetryChart = new Chart(ctx, {
+                     type: 'bar',
+                     data: { labels: ['1d', '2-6d', '2w', '1mo', 'Master'], datasets: [{ data: buckets, backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'], borderColor: '#333', borderWidth: 1 }] },
+                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8' } } } }
+                 });
+             }
+             closeOverlay(id) {
+                 document.getElementById(id).classList.add('hidden');
+                 document.getElementById('start-screen').classList.remove('hidden');
+             }
+
+            openWordBook() {
+                 document.getElementById('start-screen').classList.add('hidden');
+                 document.getElementById('wordbook-screen').classList.remove('hidden');
                  this.bookmarkedFilter = 'all';
                  document.getElementById('wb-filter-btn').innerText = "ALL";
                  document.getElementById('wb-filter-btn').className = "bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors";
-             }
-             this.renderWordBook();
-         }
-
-         renderWordBook() {
-             const listEl = document.getElementById('wb-list');
-             const query = document.getElementById('wb-search').value.toLowerCase().trim();
-             const startVal = parseInt(document.getElementById('wb-start').value);
-             const endVal = parseInt(document.getElementById('wb-end').value);
-
-             listEl.innerHTML = '';
-             let dataSrc = this.masterList.length > 0 ? this.masterList : (this.allMistakes || []);
-             
-             let merged = dataSrc.map((item, idx) => {
-                 const srs = this.allMistakes.find(m => m.word === item.w || m.w === item.w);
-                 return { w: item.w || item.word, m: item.m || item.meaning, id: idx, srs: srs || null };
-             });
-
-            const filtered = merged.filter(item => {
-                 const matchQ = item.w.toLowerCase().includes(query) || item.m.toLowerCase().includes(query);
-                 
-                 let matchBook = true;
-                 const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
-                 const isYellow = item.srs && item.srs.flag === 'yellow';
-                 
-                 // --- 24時間以内のミス判定を追加 ---
-                 const nowTs = Date.now() / 1000;
-                 const is24hMiss = item.srs && (
-                     // 正確なクラッシュ時刻が記録されていれば24時間(86400秒)以内で判定
-                     (item.srs.lastMissedSeconds && (nowTs - item.srs.lastMissedSeconds <= 86400)) ||
-                     // 過去のデータ用：間隔が1(ミス直後)で反復回数が0のものも拾う
-                     (!item.srs.lastMissedSeconds && item.srs.interval <= 1 && item.srs.repetitions === 0)
-                 );
-                 
-                 if (this.bookmarkedFilter === 'red') matchBook = isRed;
-                 if (this.bookmarkedFilter === 'yellow') matchBook = isYellow;
-                 if (this.bookmarkedFilter === '24h') matchBook = is24hMiss; // 紫フィルター適用
-
-                 const wordNum = item.id + 1;
-                 const matchRange = (!startVal || wordNum >= startVal) && (!endVal || wordNum <= endVal);
-
-                 return matchQ && matchBook && matchRange;
-             });
-
-             if (filtered.length === 0) {
-                 listEl.innerHTML = `<div class="text-gray-500 text-xs text-center py-4">No components found.</div>`;
-                 return;
+                 this.renderWordBook();
              }
 
-             const displayLimit = 100;
-             const viewData = filtered.slice(0, displayLimit);
+             toggleBookFilter() {
+                 if (this.bookmarkedFilter === 'all') {
+                     this.bookmarkedFilter = 'red';
+                     document.getElementById('wb-filter-btn').innerText = "🚩 RED";
+                     document.getElementById('wb-filter-btn').className = "bg-red-900/80 text-white px-3 rounded border border-red-500 text-xs font-bold uppercase hover:bg-red-800 transition-colors";
+                 } else if (this.bookmarkedFilter === 'red') {
+                     this.bookmarkedFilter = 'yellow';
+                     document.getElementById('wb-filter-btn').innerText = "🟨 YELLOW";
+                     document.getElementById('wb-filter-btn').className = "bg-yellow-900/80 text-white px-3 rounded border border-yellow-500 text-xs font-bold uppercase hover:bg-yellow-800 transition-colors";
+                 } else if (this.bookmarkedFilter === 'yellow') {
+                     this.bookmarkedFilter = '24h';
+                     document.getElementById('wb-filter-btn').innerText = "⏱️ 24H";
+                     document.getElementById('wb-filter-btn').className = "bg-purple-900/80 text-white px-3 rounded border border-purple-500 text-xs font-bold uppercase hover:bg-purple-800 transition-colors";
+                 } else {
+                     this.bookmarkedFilter = 'all';
+                     document.getElementById('wb-filter-btn').innerText = "ALL";
+                     document.getElementById('wb-filter-btn').className = "bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors";
+                 }
+                 this.renderWordBook();
+             }
 
-             viewData.forEach(item => {
-                 const div = document.createElement('div');
-                 div.className = "flex items-center justify-between bg-gray-900/60 p-4 rounded-xl border border-gray-700 hover:border-blue-500 transition-all group shadow-md";
+             renderWordBook() {
+                 const listEl = document.getElementById('wb-list');
+                 const query = document.getElementById('wb-search').value.toLowerCase().trim();
+                 const startVal = parseInt(document.getElementById('wb-start').value);
+                 const endVal = parseInt(document.getElementById('wb-end').value);
+
+                 listEl.innerHTML = '';
+                 let dataSrc = this.masterList.length > 0 ? this.masterList : (this.allMistakes || []);
                  
-                 let statusColor = "bg-gray-700"; let statusText = "NEW";
-                 if (item.srs) {
-                     if (item.srs.interval > 14) { statusColor = "bg-green-500"; statusText = "OK"; }
-                     else if (item.srs.interval > 3) { statusColor = "bg-yellow-500"; statusText = "WARN"; }
-                     else { statusColor = "bg-red-500"; statusText = "CRIT"; }
+                 let merged = dataSrc.map((item, idx) => {
+                     const srs = this.allMistakes.find(m => m.word === item.w || m.w === item.w);
+                     return { w: item.w || item.word, m: item.m || item.meaning, id: idx, srs: srs || null };
+                 });
+
+                const filtered = merged.filter(item => {
+                     const matchQ = item.w.toLowerCase().includes(query) || item.m.toLowerCase().includes(query);
+                     
+                     let matchBook = true;
+                     const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
+                     const isYellow = item.srs && item.srs.flag === 'yellow';
+                     
+                     const nowTs = Date.now() / 1000;
+                     const is24hMiss = item.srs && (
+                         (item.srs.lastMissedSeconds && (nowTs - item.srs.lastMissedSeconds <= 86400)) ||
+                         (!item.srs.lastMissedSeconds && item.srs.interval <= 1 && item.srs.repetitions === 0)
+                     );
+                     
+                     if (this.bookmarkedFilter === 'red') matchBook = isRed;
+                     if (this.bookmarkedFilter === 'yellow') matchBook = isYellow;
+                     if (this.bookmarkedFilter === '24h') matchBook = is24hMiss; 
+
+                     const wordNum = item.id + 1;
+                     const matchRange = (!startVal || wordNum >= startVal) && (!endVal || wordNum <= endVal);
+
+                     return matchQ && matchBook && matchRange;
+                 });
+
+                 if (filtered.length === 0) {
+                     listEl.innerHTML = `<div class="text-gray-500 text-xs text-center py-4">No components found.</div>`;
+                     return;
                  }
 
-                 const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
-                 const isYellow = item.srs && item.srs.flag === 'yellow';
-                 let flagIcon = '🏳️';
-                 let flagClass = 'text-gray-600 hover:text-gray-300';
-                 if (isRed) {
-                     flagIcon = '🚩'; flagClass = 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]';
-                 } else if (isYellow) {
-                     flagIcon = '🟨'; flagClass = 'text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]';
-                 }
+                 const displayLimit = 100;
+                 const viewData = filtered.slice(0, displayLimit);
 
-                 const safeW = encodeURIComponent(item.w);
-                 const safeM = encodeURIComponent(item.m);
-                 const displayW = item.w.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                 const displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                 viewData.forEach(item => {
+                     const div = document.createElement('div');
+                     div.className = "flex items-center justify-between bg-gray-900/60 p-4 rounded-xl border border-gray-700 hover:border-blue-500 transition-all group shadow-md";
+                     
+                     let statusColor = "bg-gray-700"; let statusText = "NEW";
+                     if (item.srs) {
+                         if (item.srs.interval > 14) { statusColor = "bg-green-500"; statusText = "OK"; }
+                         else if (item.srs.interval > 3) { statusColor = "bg-yellow-500"; statusText = "WARN"; }
+                         else { statusColor = "bg-red-500"; statusText = "CRIT"; }
+                     }
 
-                 div.innerHTML = `
-                     <div class="flex items-center gap-3 overflow-hidden w-full">
-                         <div class="w-2 h-16 ${statusColor} rounded-full shrink-0 shadow-[0_0_8px_currentColor]"></div>
-                         <div class="text-left overflow-hidden flex-grow py-1">
-                             <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                                 <span class="text-xs md:text-sm text-yellow-500 font-mono opacity-90">No.${item.id + 1}</span>
-                                 <span class="font-bold text-white text-2xl md:text-3xl f1-font tracking-wide leading-none">${displayW}</span>
-                                 <span class="text-[10px] md:text-xs text-gray-400 font-mono border border-gray-600 px-1.5 py-0.5 rounded">${statusText}</span>
+                     const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
+                     const isYellow = item.srs && item.srs.flag === 'yellow';
+                     let flagIcon = '🏳️';
+                     let flagClass = 'text-gray-600 hover:text-gray-300';
+                     if (isRed) {
+                         flagIcon = '🚩'; flagClass = 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]';
+                     } else if (isYellow) {
+                         flagIcon = '🟨'; flagClass = 'text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]';
+                     }
+
+                     const safeW = encodeURIComponent(item.w);
+                     const safeM = encodeURIComponent(item.m);
+                     const displayW = item.w.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                     const displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                     div.innerHTML = `
+                         <div class="flex items-center gap-3 overflow-hidden w-full">
+                             <div class="w-2 h-16 ${statusColor} rounded-full shrink-0 shadow-[0_0_8px_currentColor]"></div>
+                             <div class="text-left overflow-hidden flex-grow py-1">
+                                 <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                                     <span class="text-xs md:text-sm text-yellow-500 font-mono opacity-90">No.${item.id + 1}</span>
+                                     <span class="font-bold text-white text-2xl md:text-3xl f1-font tracking-wide leading-none">${displayW}</span>
+                                     <span class="text-[10px] md:text-xs text-gray-400 font-mono border border-gray-600 px-1.5 py-0.5 rounded">${statusText}</span>
+                                 </div>
+                                 <p class="text-base md:text-lg text-gray-200 leading-snug break-words pr-2">${displayM}</p>
                              </div>
-                             <p class="text-base md:text-lg text-gray-200 leading-snug break-words pr-2">${displayM}</p>
                          </div>
-                     </div>
-                     <div class="flex flex-col items-center justify-center gap-1 shrink-0 pl-2 border-l border-gray-700/50">
-                         <button class="text-gray-400 hover:text-cyan-400 p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="quiz.speak(decodeURIComponent('${safeW}').replace(/'/g, '\\''))">🔊</button>
-                         <button class="${flagClass} p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="window.toggleBookmark('${safeW}', '${safeM}')">
-                             ${flagIcon}
-                         </button>
-                     </div>
-                 `;
-                 listEl.appendChild(div);
-             });
-             if(filtered.length > displayLimit) {
-                  const more = document.createElement('div');
-                  more.className = "text-center text-xs text-gray-600 py-2";
-                  more.innerText = `...and ${filtered.length - displayLimit} more. Refine sector or search.`;
-                  listEl.appendChild(more);
+                         <div class="flex flex-col items-center justify-center gap-1 shrink-0 pl-2 border-l border-gray-700/50">
+                             <button class="text-gray-400 hover:text-cyan-400 p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="quiz.speak(decodeURIComponent('${safeW}').replace(/'/g, '\\''))">🔊</button>
+                             <button class="${flagClass} p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="window.toggleBookmark('${safeW}', '${safeM}')">
+                                 ${flagIcon}
+                             </button>
+                         </div>
+                     `;
+                     listEl.appendChild(div);
+                 });
+                 if(filtered.length > displayLimit) {
+                      const more = document.createElement('div');
+                      more.className = "text-center text-xs text-gray-600 py-2";
+                      more.innerText = `...and ${filtered.length - displayLimit} more. Refine sector or search.`;
+                      listEl.appendChild(more);
+                 }
              }
-         }
-    }
+        }
 
-    window.quiz = new HybridQuiz();
+        window.quiz = new HybridQuiz();
     </script>
     
     <script type="module">
@@ -3843,14 +3869,14 @@ lest: ～しないように
       } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
       const firebaseConfig = {
-  apiKey: "AIzaSyBbOFRbh5oLYYKix2Ms9LKLI5rqFVkPCZs",
-  authDomain: "tango-964ab.firebaseapp.com",
-  projectId: "tango-964ab",
-  storageBucket: "tango-964ab.firebasestorage.app",
-  messagingSenderId: "1086963474480",
-  appId: "1:1086963474480:web:d8e425d704c1084692cdf5",
-  measurementId: "G-Y84L6GWD5Y"
-};
+          apiKey: "AIzaSyBbOFRbh5oLYYKix2Ms9LKLI5rqFVkPCZs",
+          authDomain: "tango-964ab.firebaseapp.com",
+          projectId: "tango-964ab",
+          storageBucket: "tango-964ab.firebasestorage.app",
+          messagingSenderId: "1086963474480",
+          appId: "1:1086963474480:web:d8e425d704c1084692cdf5",
+          measurementId: "G-Y84L6GWD5Y"
+      };
 
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
@@ -4002,13 +4028,11 @@ lest: ～しないように
        const safeWordId = questionObj.docId || questionObj.w.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
         const targetRef = doc(mistakesRef, safeWordId);
 
-        // ★追加パーツ：マシンの最新メモリから履歴を引っ張り出す
         let existingItem = null;
         if (window.quiz && window.quiz.allMistakes) {
             existingItem = window.quiz.allMistakes.find(m => m.id === safeWordId || m.word === questionObj.w || m.w === questionObj.w);
         }
         
-        // メモリの履歴を最優先で引き継ぐ
         const currentParams = { 
             interval: existingItem ? (existingItem.interval || 0) : (questionObj.interval || 0), 
             repetitions: existingItem ? (existingItem.repetitions || 0) : (questionObj.repetitions || 0), 
@@ -4019,14 +4043,13 @@ lest: ～しないように
         let nextInterval, nextRepetitions, nextEaseFactor;
         const nowTs = Math.floor(Date.now() / 1000); 
 
-        // ★バグの根本原因を修正：履歴があれば、再正解時にもミスの記録を消去せずに引き継ぐ
         let lastMissedSeconds = existingItem ? (existingItem.lastMissedSeconds || null) : (questionObj.lastMissedSeconds || null);
 
         if (!isCorrect) {
             nextRepetitions = 0; 
             nextInterval = 1; 
             nextEaseFactor = Math.max(1.3, currentParams.easeFactor - 0.2); 
-            lastMissedSeconds = nowTs; // ★ミスした瞬間のタイムスタンプを刻む
+            lastMissedSeconds = nowTs;
         } else {
             nextRepetitions = currentParams.repetitions + 1;
             
@@ -4049,7 +4072,6 @@ lest: ～しないように
 
         console.log(`[SRS] Time: ${timeTaken.toFixed(2)}s | Next: ${nextInterval} days`);
 
-        // クラウド(Firebase)へのセーブに lastMissedSeconds を追加
         setDoc(targetRef, { 
             word: questionObj.w, 
             meaning: questionObj.meaning || questionObj.m, 
@@ -4058,7 +4080,7 @@ lest: ～しないように
             repetitions: nextRepetitions, 
             easeFactor: nextEaseFactor, 
             lastReviewed: Timestamp.fromDate(now),
-            lastMissedSeconds: lastMissedSeconds // ★追加
+            lastMissedSeconds: lastMissedSeconds 
         }, { merge: true })
         .catch((e) => console.error("Telemetry Failed:", e));
 
@@ -4070,7 +4092,6 @@ lest: ～しないように
 
             const index = localData.findIndex(item => item.word === questionObj.w || item.id === safeWordId);
             
-            // ローカルキャッシュにも lastMissedSeconds を追加
             const newItemState = {
                 id: safeWordId,
                 word: questionObj.w,
@@ -4079,7 +4100,7 @@ lest: ～しないように
                 interval: nextInterval,
                 repetitions: nextRepetitions,
                 easeFactor: nextEaseFactor,
-                lastMissedSeconds: lastMissedSeconds // ★追加
+                lastMissedSeconds: lastMissedSeconds
             };
 
             if (index !== -1) {
@@ -4099,13 +4120,11 @@ lest: ～しないように
                 };
 
                 if(memIndex !== -1) {
-                     // 既にデータが存在する場合は上書き
                      window.quiz.allMistakes[memIndex] = { 
                          ...window.quiz.allMistakes[memIndex], 
                          ...memoryItem
                      };
                 } else {
-                     // ★バグ修正：初めてミスした単語をメモリに即座に追加
                      window.quiz.allMistakes.push(memoryItem);
                 }
                 
@@ -4190,7 +4209,7 @@ lest: ～しないように
                   word: word,
                   meaning: meaning,
                   flag: nextFlag,
-                  bookmarked: (nextFlag === 'red'), // 旧データとの互換性用
+                  bookmarked: (nextFlag === 'red'),
                   interval: currentItem ? (currentItem.interval || 0) : 0,
                   repetitions: currentItem ? (currentItem.repetitions || 0) : 0,
                   easeFactor: currentItem ? (currentItem.easeFactor || 2.5) : 2.5,
@@ -4223,7 +4242,6 @@ lest: ～しないように
               }
           } catch(e) {
               console.error("Bookmark Error:", e);
-              // ロールバック
               if(currentItem) {
                   currentItem.flag = currentFlag;
                   currentItem.bookmarked = (currentFlag === 'red');
