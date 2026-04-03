@@ -3292,7 +3292,8 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  } else {
                      targetDisplay.innerText = q.qText;
                      
-                     if (q.ex) {
+                     // ★ q.ex の条件に && !this.isReverseMode を追加
+                     if (q.ex && !this.isReverseMode) {
                         exText.className = "text-2xl md:text-4xl lg:text-5xl text-gray-100 f1-font italic text-center leading-tight tracking-tight drop-shadow-lg";
                         exText.innerHTML = `
                             <div class="flex flex-col items-center gap-4">
