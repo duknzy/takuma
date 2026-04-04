@@ -439,9 +439,15 @@
                         <div class="pt-4 border-t border-gray-700 relative">
                             <input type="text" id="search-input" placeholder="Quick Scan (Search)..." class="w-full bg-black text-white p-3 rounded-lg border border-gray-700 focus:border-red-500 outline-none font-mono text-sm mb-3 placeholder-gray-600">
                              <div id="search-results" class="hidden absolute top-16 left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-50"></div>
-                            <button onclick="quiz.openWordBook()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-3 rounded-lg font-bold transition-all uppercase text-xs flex items-center justify-center gap-2">
-                                <span>📁</span> OPEN DATA CENTER
-                            </button>
+                            
+                            <div class="flex gap-2">
+                                <button onclick="quiz.openWordBook()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-3 rounded-lg font-bold transition-all uppercase text-xs flex items-center justify-center gap-2 shadow-lg">
+                                    <span>📁</span> DATA CENTER
+                                </button>
+                                <button onclick="document.getElementById('custom-word-modal').classList.remove('hidden')" class="flex-1 bg-red-900/40 hover:bg-red-800/80 text-white border border-red-800 py-3 rounded-lg font-bold transition-all uppercase text-xs flex items-center justify-center gap-2 shadow-lg">
+                                    <span>🛠️</span> R&D (ADD WORD)
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -465,7 +471,12 @@
         <div id="wordbook-screen" class="hidden race-card p-6 rounded-2xl text-center border-t-4 border-yellow-500 h-[90%] my-auto z-50 flex flex-col absolute inset-4">
             <div class="flex justify-between items-center mb-4 flex-shrink-0">
                 <h2 class="f1-font text-2xl font-bold text-yellow-500 tracking-widest">DATA CENTER</h2>
-                <button onclick="quiz.closeOverlay('wordbook-screen')" class="text-gray-400 active:text-white text-3xl p-2 hover:text-white transition-colors">&times;</button>
+                <div class="flex items-center gap-2">
+                    <button onclick="document.getElementById('custom-word-modal').classList.remove('hidden')" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-xs font-bold f1-font transition-all active:scale-95 border border-red-700 shadow-lg shadow-red-900/50">
+                        + NEW
+                    </button>
+                    <button onclick="quiz.closeOverlay('wordbook-screen')" class="text-gray-400 active:text-white text-3xl p-2 hover:text-white transition-colors leading-none">&times;</button>
+                </div>
             </div>
             <div class="flex flex-wrap gap-2 mb-2 flex-shrink-0 justify-center items-center">
                 <div class="bg-gray-900 p-2 rounded border border-gray-700 flex items-center gap-2">
@@ -480,14 +491,6 @@
                 <button id="wb-filter-btn" class="bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors" onclick="quiz.toggleBookFilter()">ALL</button>
             </div>
             
-            <div class="flex gap-2 mb-4 flex-shrink-0 bg-gray-900/80 p-3 rounded-lg border border-gray-700 shadow-inner">
-                <input type="text" id="custom-word-input" placeholder="Word (ex: downforce)" class="w-1/3 bg-black text-white p-2 text-sm rounded border border-gray-700 focus:border-red-500 outline-none font-mono">
-                <input type="text" id="custom-meaning-input" placeholder="Meaning (ex: ダウンフォース)" class="flex-1 bg-black text-white p-2 text-sm rounded border border-gray-700 focus:border-red-500 outline-none">
-                <button onclick="quiz.addCustomWord(event)" class="bg-red-600 hover:bg-red-500 text-white px-4 rounded border border-red-700 font-bold text-xs uppercase transition-all whitespace-nowrap active:scale-95 shadow-lg shadow-red-900/50">
-                    ADD
-                </button>
-            </div>
-
             <div id="wb-list" class="flex-1 overflow-y-auto wb-scroll text-left space-y-2 pr-1">
             </div>
         </div>
@@ -595,6 +598,31 @@
                 <button id="next-round-btn" onclick="quiz.returnToGrid()" class="f1-font bg-red-600 hover:bg-red-500 text-white py-4 rounded-xl font-bold transition-all shadow-lg shadow-red-900/50 uppercase text-sm tracking-wider">Next Sector</button>
             </div>
         </div>
+
+        <div id="custom-word-modal" class="hidden fixed inset-0 z-[200] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="race-card p-6 rounded-2xl w-full max-w-md border border-red-600/50 shadow-[0_0_30px_rgba(225,6,0,0.2)] animate-slide-in relative">
+                <button onclick="document.getElementById('custom-word-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl leading-none transition-colors">&times;</button>
+                
+                <h3 class="f1-font text-2xl font-bold text-red-500 mb-2 tracking-widest">R&D FACILITY</h3>
+                <p class="text-[10px] text-gray-400 uppercase mb-6 tracking-widest border-b border-gray-700 pb-2">Craft Custom Components</p>
+
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Target Word (Component)</label>
+                        <input type="text" id="modal-word-input" placeholder="ex: downforce" class="w-full bg-gray-900 text-white p-3 rounded-lg border border-gray-700 focus:border-red-500 outline-none font-mono text-sm">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Meaning (Spec)</label>
+                        <input type="text" id="modal-meaning-input" placeholder="ex: ダウンフォース" class="w-full bg-gray-900 text-white p-3 rounded-lg border border-gray-700 focus:border-red-500 outline-none text-sm">
+                    </div>
+                    
+                    <button onclick="quiz.addCustomWord(event)" id="modal-save-btn" class="w-full bg-red-600 hover:bg-red-500 text-white py-4 rounded-xl font-bold transition-all uppercase text-sm tracking-widest shadow-lg shadow-red-900/50 mt-4 active:scale-95 border border-red-700">
+                        INSTALL PART
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -606,7 +634,7 @@
             });
         }
    
-        // データは空にしておくぜ
+        // データは空のままにしておくぜ
         const rawData = `
         follow: ～の後に続く、～に従う、～を追いかける、～を理解する｜follow the rules｜規則に従う
 consider: ～を考慮する、～を（…だと）見なす、～をよく考える｜consider the problem｜問題を考慮する
@@ -2810,6 +2838,7 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 this.masterList = [];
                 
                 const citeRegex = /\[(?:cite:\s*)?\d+\]/g;
+                let idCounter = 1; // 純正データのID用カウンター
                 
                 lines.forEach(line => {
                     const parts = line.split(/[|｜]/).map(s => s.trim());
@@ -2829,7 +2858,8 @@ lest: ～しないように、～するといけないから｜lest he should fa
                             w: mainPart.substring(0, sep).trim(), 
                             m: mainPart.substring(sep + 1).trim(),
                             ex: example, 
-                            exTr: parts[2] || "" 
+                            exTr: parts[2] || "",
+                            originalId: idCounter++ // ここで純正のIDを付与する
                         });
                     }
                 });
@@ -2949,11 +2979,14 @@ lest: ～しないように、～するといけないから｜lest he should fa
                         .slice(0, 50);
                     if (hits.length > 0) {
                         results.classList.remove('hidden');
-                        results.innerHTML = hits.map(h => `
+                        results.innerHTML = hits.map(h => {
+                            let displayId = h.isCustom ? `C-${h.customId}` : `No.${h.originalId || h.i}`;
+                            return `
                             <div onclick="quiz.speak('${h.w.replace(/'/g, "\\'")}')" class="p-3 border-b border-gray-800 active:bg-gray-800 cursor-pointer flex justify-between items-center group hover:bg-white/5 transition-colors">
-                                <div class="text-left"><div class="flex items-baseline gap-2"><span class="text-[10px] text-yellow-500 font-mono opacity-70">No.${h.i}</span><span class="text-red-400 font-bold text-xs f1-font">${h.w}</span></div><span class="text-gray-400 text-[10px] pl-1">${h.m}</span></div>
+                                <div class="text-left"><div class="flex items-baseline gap-2"><span class="text-[10px] text-yellow-500 font-mono opacity-70">${displayId}</span><span class="text-red-400 font-bold text-xs f1-font">${h.w}</span></div><span class="text-gray-400 text-[10px] pl-1">${h.m}</span></div>
                                 <button class="text-[8px] bg-gray-700 text-white px-2 py-1 rounded-full uppercase">Listen</button>
-                            </div>`).join('');
+                            </div>`
+                        }).join('');
                     } else {
                         results.classList.remove('hidden');
                         results.innerHTML = `<div class="p-3 text-gray-500 text-[10px] text-center">NO DATA</div>`;
@@ -2967,14 +3000,17 @@ lest: ～しないように、～するといけないから｜lest he should fa
                     alert("Pit lane closed. ログインしていないと追加できないぞ。");
                     return;
                 }
-                const wordInput = document.getElementById('custom-word-input');
-                const meaningInput = document.getElementById('custom-meaning-input');
+                const wordInput = document.getElementById('modal-word-input');
+                const meaningInput = document.getElementById('modal-meaning-input');
                 const w = wordInput.value.trim();
                 const m = meaningInput.value.trim();
 
-                if (!w || !m) return;
+                if (!w || !m) {
+                    alert("Telemetry error: データが足りないぞ。");
+                    return;
+                }
 
-                const customWord = {
+                const dbWordData = {
                     w: w,
                     m: m,
                     ex: "[Custom Data] 君のオリジナルパーツだ",
@@ -2982,24 +3018,40 @@ lest: ～しないように、～するといけないから｜lest he should fa
                     timestamp: Date.now()
                 };
 
-                const btn = event.target;
+                const btn = document.getElementById('modal-save-btn');
                 const oldText = btn.innerText;
-                btn.innerText = "SAVING...";
+                btn.innerText = "INSTALLING...";
                 btn.disabled = true;
 
                 try {
                     if (window.saveCustomWordToFirestore) {
-                        await window.saveCustomWordToFirestore(customWord);
+                        await window.saveCustomWordToFirestore(dbWordData);
                     }
 
+                    // 現在のカスタムパーツ数をカウントして、新しいIDを付与する
+                    const currentCustomCount = this.masterList.filter(item => item.isCustom).length;
+                    const customWord = {
+                        ...dbWordData,
+                        isCustom: true,
+                        customId: currentCustomCount + 1
+                    };
+
+                    // マスターリストの先頭に追加
                     this.masterList.unshift(customWord);
+                    
+                    // グリッドを再構築
                     this.generateRounds();
                     this.initUI();
-                    this.renderWordBook();
+                    
+                    // 単語帳が開いていれば更新
+                    const wbScreen = document.getElementById('wordbook-screen');
+                    if (wbScreen && !wbScreen.classList.contains('hidden')) {
+                        this.renderWordBook();
+                    }
 
                     wordInput.value = '';
                     meaningInput.value = '';
-                    btn.innerText = "ADDED!";
+                    btn.innerText = "INSTALLED!";
                     btn.classList.replace('bg-red-600', 'bg-green-600');
                     btn.classList.replace('border-red-700', 'border-green-700');
                     
@@ -3008,6 +3060,8 @@ lest: ～しないように、～するといけないから｜lest he should fa
                         btn.classList.replace('bg-green-600', 'bg-red-600');
                         btn.classList.replace('border-green-700', 'border-red-700');
                         btn.disabled = false;
+                        // モーダルを閉じる
+                        document.getElementById('custom-word-modal').classList.add('hidden');
                     }, 1000);
 
                 } catch (e) {
@@ -3947,7 +4001,15 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  
                  let merged = dataSrc.map((item, idx) => {
                      const srs = this.allMistakes.find(m => m.word === item.w || m.w === item.w);
-                     return { w: item.w || item.word, m: item.m || item.meaning, id: idx, srs: srs || null };
+                     return { 
+                         w: item.w || item.word, 
+                         m: item.m || item.meaning, 
+                         isCustom: item.isCustom || false,
+                         originalId: item.originalId || null,
+                         customId: item.customId || null,
+                         id: idx, 
+                         srs: srs || null 
+                     };
                  });
 
                 const filtered = merged.filter(item => {
@@ -4007,12 +4069,15 @@ lest: ～しないように、～するといけないから｜lest he should fa
                      const displayW = item.w.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                      const displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+                     // ★ここでナンバリングの表示を分岐させている
+                     let displayId = item.isCustom ? `C-${item.customId}` : `No.${item.originalId || item.id + 1}`;
+
                      div.innerHTML = `
                          <div class="flex items-center gap-3 overflow-hidden w-full">
                              <div class="w-2 h-16 ${statusColor} rounded-full shrink-0 shadow-[0_0_8px_currentColor]"></div>
                              <div class="text-left overflow-hidden flex-grow py-1">
                                  <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                                     <span class="text-xs md:text-sm text-yellow-500 font-mono opacity-90">No.${item.id + 1}</span>
+                                     <span class="text-xs md:text-sm text-yellow-500 font-mono opacity-90">${displayId}</span>
                                      <span class="font-bold text-white text-2xl md:text-3xl f1-font tracking-wide leading-none">${displayW}</span>
                                      <span class="text-[10px] md:text-xs text-gray-400 font-mono border border-gray-600 px-1.5 py-0.5 rounded">${statusText}</span>
                                  </div>
@@ -4132,7 +4197,13 @@ lest: ～しないように、～するといけないから｜lest he should fa
               // オリジナル単語をロードして合流させる
               const customWords = await window.fetchCustomWords();
               if (customWords && customWords.length > 0 && window.quiz) {
-                  window.quiz.masterList = [...customWords, ...window.quiz.masterList];
+                  // ★ここでカスタム単語に独自のID (C-1, C-2...) を振る
+                  const formattedCustomWords = customWords.map((cw, idx) => ({
+                      ...cw, 
+                      customId: customWords.length - idx, 
+                      isCustom: true
+                  }));
+                  window.quiz.masterList = [...formattedCustomWords, ...window.quiz.masterList];
                   window.quiz.generateRounds();
                   window.quiz.initUI();
               }
