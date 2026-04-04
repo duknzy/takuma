@@ -2813,8 +2813,14 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 };
                 load();
             }
-
             speak(text) {
+                // ↓ここを追加：カスタムパーツ（数式など）なら無線をミュートする
+                const targetData = this.masterList.find(item => item.w === text || item.m === text);
+                if (targetData && targetData.isCustom) {
+                    console.log("[RADIO] Custom part detected. Audio muted.");
+                    return;
+                }
+
                 if (!this.synth || this.englishVoices.length === 0) {
                     console.warn("[TTS] Engine warming up...");
                     return; 
