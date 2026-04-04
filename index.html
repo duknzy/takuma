@@ -3838,11 +3838,13 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 const currentRound = this.vocabRounds[this.currentRoundIndex];
 
                 if (!this.isPitStopMode) {
-                    if (currentRound && currentRound.id === 'random') {
+                    // ↓ここを修正：flaggedモードの場合もAGAINボタンにする
+                    if (currentRound && (currentRound.id === 'random' || currentRound.id === 'flagged')) {
                         nextBtn.classList.remove('hidden');
                         nextBtn.innerText = "AGAIN (SAME SETUP)"; 
                         nextBtn.onclick = () => { 
-                            this.createRandomRound(); 
+                            if (currentRound.id === 'random') this.createRandomRound(); 
+                            else this.createFlaggedRound();
                         };
                     } else if (this.currentRoundIndex + 1 < this.vocabRounds.length) {
                         nextBtn.classList.remove('hidden');
@@ -4134,12 +4136,14 @@ lest: ～しないように、～するといけないから｜lest he should fa
       });
 
       // カスタム単語をFirestoreに保存する
+      // カスタム単語をFirestoreに保存する
       window.saveCustomWordToFirestore = async (wordData) => {
           if (!window.currentUser) return;
           const userRef = doc(db, "users", window.currentUser.uid);
           const customWordsRef = collection(userRef, "custom_words");
-          const docId = wordData.w.toLowerCase().replace(/[^a-z0-9]/g, '_');
-          await setDoc(doc(customWordsRef, docId), wordData, { merge: true });
+          
+          // ↓ここを修正：単語名ではなく、自動でユニークなIDを生成して保存する
+          await addDoc(customWordsRef, wordData);
       };
 
       // カスタム単語をFirestoreから読み込む
