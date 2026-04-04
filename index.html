@@ -38,6 +38,8 @@
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
 
         body {
@@ -210,12 +212,16 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        @media only screen and (max-width: 768px) {
-            .carbon-bg {
-                background-attachment: scroll; 
-                min-height: 100vh;
-            }
-        }
+       @media only screen and (max-width: 768px) {
+    html {
+        /* ↓ここを追加：画面幅に合わせて基準サイズをシームレスに可変させる魔法のセッティングだ */
+        font-size: clamp(12px, 3.5vw, 16px);
+    }
+    .carbon-bg {
+        background-attachment: scroll; 
+        min-height: 100vh;
+    }
+}
         @media (min-width: 768px) {
             .strategy-panel-mobile {
                 max-height: none !important;
