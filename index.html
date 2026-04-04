@@ -3040,25 +3040,26 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 btn.innerText = "INSTALLING...";
                 btn.disabled = true;
 
-                try {
+               try {
+                    let newDocId = null;
                     if (window.saveCustomWordToFirestore) {
-                        await window.saveCustomWordToFirestore(dbWordData);
+                        // ↓修正：保存した時に発行されるIDを受け取る
+                        newDocId = await window.saveCustomWordToFirestore(dbWordData);
                     }
 
-                    // 現在のカスタムパーツ数をカウントして、新しいIDを付与する
                     const currentCustomCount = this.masterList.filter(item => item.isCustom).length;
                     const customWord = {
                         ...dbWordData,
                         isCustom: true,
-                        customId: currentCustomCount + 1
+                        customId: currentCustomCount + 1,
+                        firestoreId: newDocId // ←追加：リストにもIDを記憶させる
                     };
 
-                    // マスターリストの先頭に追加
                     this.masterList.unshift(customWord);
                     
-                    // グリッドを再構築
                     this.generateRounds();
                     this.initUI();
+// ...（この下は元のコードのままでOKだ）...
                     
                     // 単語帳が開いていれば更新
                     const wbScreen = document.getElementById('wordbook-screen');
@@ -4023,7 +4024,7 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  listEl.innerHTML = '';
                  let dataSrc = this.masterList.length > 0 ? this.masterList : (this.allMistakes || []);
                  
-                 let merged = dataSrc.map((item, idx) => {
+                let merged = dataSrc.map((item, idx) => {
                      const srs = this.allMistakes.find(m => m.word === item.w || m.w === item.w);
                      return { 
                          w: item.w || item.word, 
@@ -4031,6 +4032,7 @@ lest: ～しないように、～するといけないから｜lest he should fa
                          isCustom: item.isCustom || false,
                          originalId: item.originalId || null,
                          customId: item.customId || null,
+                         firestoreId: item.firestoreId || null, // ←★俺がこれを1行入れ忘れていた！！
                          id: idx, 
                          srs: srs || null 
                      };
@@ -4097,6 +4099,12 @@ lest: ～しないように、～するといけないから｜lest he should fa
                      // ★ここでナンバリングの表示を分岐させている
                      let displayId = item.isCustom ? `C-${item.customId}` : `No.${item.originalId || item.id + 1}`;
 
+                     // ↓ここを追加：カスタム単語かつIDが存在する場合のみ、削除ボタンを用意する
+                     let deleteBtn = '';
+                     if (item.isCustom && item.firestoreId) {
+                         deleteBtn = `<button class="text-gray-600 hover:text-red-500 p-2 text-xl md:text-2xl active:scale-95 transition-transform" onclick="window.deleteCustomWord('${item.firestoreId}', '${safeW}')">🗑️</button>`;
+                     }
+
                      div.innerHTML = `
                          <div class="flex items-center gap-3 overflow-hidden w-full">
                              <div class="w-2 h-16 ${statusColor} rounded-full shrink-0 shadow-[0_0_8px_currentColor]"></div>
@@ -4114,7 +4122,7 @@ lest: ～しないように、～するといけないから｜lest he should fa
                              <button class="${flagClass} p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="window.toggleBookmark('${safeW}', '${safeM}')">
                                  ${flagIcon}
                              </button>
-                         </div>
+                             ${deleteBtn} </div>
                      `;
                      listEl.appendChild(div);
                  });
@@ -4134,7 +4142,7 @@ lest: ～しないように、～するといけないから｜lest he should fa
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
       import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
       import { 
-          getFirestore, collection, addDoc, query, where, getDocs, doc, setDoc, updateDoc, 
+          getFirestore, collection, addDoc, query, where, getDocs, doc, setDoc, updateDoc, deleteDoc, 
           Timestamp, orderBy, limit, runTransaction, onSnapshot, getDoc, increment,
           initializeFirestore, persistentLocalCache, 
       } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
@@ -4158,18 +4166,14 @@ lest: ～しないように、～するといけないから｜lest he should fa
           })
       });
 
-      // カスタム単語をFirestoreに保存する
-      // カスタム単語をFirestoreに保存する
       window.saveCustomWordToFirestore = async (wordData) => {
-          if (!window.currentUser) return;
+          if (!window.currentUser) return null;
           const userRef = doc(db, "users", window.currentUser.uid);
           const customWordsRef = collection(userRef, "custom_words");
-          
-          // ↓ここを修正：単語名ではなく、自動でユニークなIDを生成して保存する
-          await addDoc(customWordsRef, wordData);
+          const docRef = await addDoc(customWordsRef, wordData);
+          return docRef.id; // ←追加：生成された固有IDをマシンに返す
       };
 
-      // カスタム単語をFirestoreから読み込む
       window.fetchCustomWords = async () => {
           if (!window.currentUser) return [];
           try {
@@ -4177,11 +4181,35 @@ lest: ～しないように、～するといけないから｜lest he should fa
               const q = query(customWordsRef, orderBy("timestamp", "desc"));
               const snapshot = await getDocs(q);
               const customWords = [];
-              snapshot.forEach(docSnap => customWords.push(docSnap.data()));
+              snapshot.forEach(docSnap => {
+                  // ←追加：FirestoreのIDも一緒に取得してパーツに刻み込む
+                  customWords.push({ ...docSnap.data(), firestoreId: docSnap.id });
+              });
               return customWords;
           } catch (e) {
               console.warn("Failed to load custom parts:", e);
               return [];
+          }
+      };
+
+      // 3. そのすぐ下に、削除（スクラップ）機能を追加しろ
+      window.deleteCustomWord = async (firestoreId, word) => {
+          if (!confirm(`[ ${decodeURIComponent(word)} ] を完全にスクラップ（削除）する。よろしいか？`)) return;
+          if (!window.currentUser) return;
+          try {
+              const docRef = doc(db, "users", window.currentUser.uid, "custom_words", firestoreId);
+              await deleteDoc(docRef); // データベースから消去
+              
+              // マシンのメモリ（masterList）からもパーツを取り除く
+              if (window.quiz) {
+                  window.quiz.masterList = window.quiz.masterList.filter(item => item.firestoreId !== firestoreId);
+                  window.quiz.generateRounds();
+                  window.quiz.initUI();
+                  window.quiz.renderWordBook();
+              }
+          } catch(e) {
+              console.error("Delete failed", e);
+              alert("Telemetry error: 削除に失敗した。");
           }
       };
 
