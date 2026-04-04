@@ -4001,6 +4001,11 @@ lest: ～しないように、～するといけないから｜lest he should fa
                      this.bookmarkedFilter = '24h';
                      document.getElementById('wb-filter-btn').innerText = "⏱️ 24H";
                      document.getElementById('wb-filter-btn').className = "bg-purple-900/80 text-white px-3 rounded border border-purple-500 text-xs font-bold uppercase hover:bg-purple-800 transition-colors";
+                 } else if (this.bookmarkedFilter === '24h') {
+                     // ↓ここを追加：24Hの次にR&D（カスタム単語）フィルターを持ってくる
+                     this.bookmarkedFilter = 'custom';
+                     document.getElementById('wb-filter-btn').innerText = "🛠️ R&D";
+                     document.getElementById('wb-filter-btn').className = "bg-blue-900/80 text-white px-3 rounded border border-blue-500 text-xs font-bold uppercase hover:bg-blue-800 transition-colors";
                  } else {
                      this.bookmarkedFilter = 'all';
                      document.getElementById('wb-filter-btn').innerText = "ALL";
@@ -4047,6 +4052,7 @@ lest: ～しないように、～するといけないから｜lest he should fa
                      if (this.bookmarkedFilter === 'red') matchBook = isRed;
                      if (this.bookmarkedFilter === 'yellow') matchBook = isYellow;
                      if (this.bookmarkedFilter === '24h') matchBook = is24hMiss; 
+                     if (this.bookmarkedFilter === 'custom') matchBook = item.isCustom;
 
                      const wordNum = item.id + 1;
                      const matchRange = (!startVal || wordNum >= startVal) && (!endVal || wordNum <= endVal);
