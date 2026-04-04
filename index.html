@@ -57,7 +57,7 @@
             height: auto;
             z-index: -1;
             object-fit: cover;
-            filter: brightness(0.6); /* target.htmlは0.6だったが元の0.8を維持 */
+            filter: brightness(0.6);
         }
 
         .carbon-bg {
@@ -148,7 +148,6 @@
             opacity: 1;
         }
 
-        /* --- BLIND RADIO BROADCAST STYLE --- */
         .radio-box {
             background: linear-gradient(90deg, rgba(20,20,20,0.95) 0%, rgba(10,10,10,0.95) 100%);
             border-left: 4px solid #e10600;
@@ -212,16 +211,15 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-       @media only screen and (max-width: 768px) {
-    html {
-        /* ↓ここを追加：画面幅に合わせて基準サイズをシームレスに可変させる魔法のセッティングだ */
-        font-size: clamp(12px, 3.5vw, 16px);
-    }
-    .carbon-bg {
-        background-attachment: scroll; 
-        min-height: 100vh;
-    }
-}
+        @media only screen and (max-width: 768px) {
+            html {
+                font-size: clamp(12px, 3.5vw, 16px);
+            }
+            .carbon-bg {
+                background-attachment: scroll; 
+                min-height: 100vh;
+            }
+        }
         @media (min-width: 768px) {
             .strategy-panel-mobile {
                 max-height: none !important;
@@ -481,6 +479,15 @@
                 <input type="text" id="wb-search" placeholder="Search components..." class="flex-1 bg-black text-white p-2 text-sm rounded border border-gray-700 font-mono focus:border-yellow-500 outline-none">
                 <button id="wb-filter-btn" class="bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors" onclick="quiz.toggleBookFilter()">ALL</button>
             </div>
+            
+            <div class="flex gap-2 mb-4 flex-shrink-0 bg-gray-900/80 p-3 rounded-lg border border-gray-700 shadow-inner">
+                <input type="text" id="custom-word-input" placeholder="Word (ex: downforce)" class="w-1/3 bg-black text-white p-2 text-sm rounded border border-gray-700 focus:border-red-500 outline-none font-mono">
+                <input type="text" id="custom-meaning-input" placeholder="Meaning (ex: ダウンフォース)" class="flex-1 bg-black text-white p-2 text-sm rounded border border-gray-700 focus:border-red-500 outline-none">
+                <button onclick="quiz.addCustomWord(event)" class="bg-red-600 hover:bg-red-500 text-white px-4 rounded border border-red-700 font-bold text-xs uppercase transition-all whitespace-nowrap active:scale-95 shadow-lg shadow-red-900/50">
+                    ADD
+                </button>
+            </div>
+
             <div id="wb-list" class="flex-1 overflow-y-auto wb-scroll text-left space-y-2 pr-1">
             </div>
         </div>
@@ -599,7 +606,7 @@
             });
         }
    
-        // データは空
+        // データは空にしておくぜ
         const rawData = `
         follow: ～の後に続く、～に従う、～を追いかける、～を理解する｜follow the rules｜規則に従う
 consider: ～を考慮する、～を（…だと）見なす、～をよく考える｜consider the problem｜問題を考慮する
@@ -2955,6 +2962,62 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 document.addEventListener('click', (e) => { if (!input.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden'); });
             }
 
+            async addCustomWord(event) {
+                if (!window.currentUser) {
+                    alert("Pit lane closed. ログインしていないと追加できないぞ。");
+                    return;
+                }
+                const wordInput = document.getElementById('custom-word-input');
+                const meaningInput = document.getElementById('custom-meaning-input');
+                const w = wordInput.value.trim();
+                const m = meaningInput.value.trim();
+
+                if (!w || !m) return;
+
+                const customWord = {
+                    w: w,
+                    m: m,
+                    ex: "[Custom Data] 君のオリジナルパーツだ",
+                    exTr: "",
+                    timestamp: Date.now()
+                };
+
+                const btn = event.target;
+                const oldText = btn.innerText;
+                btn.innerText = "SAVING...";
+                btn.disabled = true;
+
+                try {
+                    if (window.saveCustomWordToFirestore) {
+                        await window.saveCustomWordToFirestore(customWord);
+                    }
+
+                    this.masterList.unshift(customWord);
+                    this.generateRounds();
+                    this.initUI();
+                    this.renderWordBook();
+
+                    wordInput.value = '';
+                    meaningInput.value = '';
+                    btn.innerText = "ADDED!";
+                    btn.classList.replace('bg-red-600', 'bg-green-600');
+                    btn.classList.replace('border-red-700', 'border-green-700');
+                    
+                    setTimeout(() => {
+                        btn.innerText = oldText;
+                        btn.classList.replace('bg-green-600', 'bg-red-600');
+                        btn.classList.replace('border-green-700', 'border-red-700');
+                        btn.disabled = false;
+                    }, 1000);
+
+                } catch (e) {
+                    console.error("Failed to add custom word", e);
+                    alert("Engine failure: 保存に失敗した。");
+                    btn.innerText = oldText;
+                    btn.disabled = false;
+                }
+            }
+
             createCustomRound() {
                 const s = parseInt(document.getElementById('custom-start').value) - 1;
                 const e = parseInt(document.getElementById('custom-end').value);
@@ -3049,7 +3112,6 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 }
             }
 
-            // --- FREE PRACTICE (FLASHCARD) MODE ---
             startFlashcardMode() {
                 if(this.vocabRounds.length === 0) { alert("Data not loaded. Check your telemetry."); return; }
                 
@@ -3298,7 +3360,6 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  } else {
                      targetDisplay.innerText = q.qText;
                      
-                     // ★ q.ex の条件に && !this.isReverseMode を追加
                      if (q.ex && !this.isReverseMode) {
                         exText.className = "text-2xl md:text-4xl lg:text-5xl text-gray-100 f1-font italic text-center leading-tight tracking-tight drop-shadow-lg";
                         exText.innerHTML = `
@@ -3337,7 +3398,7 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  const speakBtn = document.getElementById('speak-btn');
                  speakBtn.onclick = () => this.speak(q.w);
 
-                const flagBtn = document.getElementById('flag-btn');
+                 const flagBtn = document.getElementById('flag-btn');
                  if (flagBtn) {
                      const currentItem = (this.allMistakes || []).find(m => m.word === q.w || m.w === q.w);
                      let flagState = 'none';
@@ -3988,7 +4049,6 @@ lest: ～しないように、～するといけないから｜lest he should fa
           initializeFirestore, persistentLocalCache, 
       } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-      // DB設定はindex.htmlのものを維持
       const firebaseConfig = {
           apiKey: "AIzaSyBbOFRbh5oLYYKix2Ms9LKLI5rqFVkPCZs",
           authDomain: "tango-964ab.firebaseapp.com",
@@ -4007,6 +4067,31 @@ lest: ～しないように、～するといけないから｜lest he should fa
               tabManager: undefined 
           })
       });
+
+      // カスタム単語をFirestoreに保存する
+      window.saveCustomWordToFirestore = async (wordData) => {
+          if (!window.currentUser) return;
+          const userRef = doc(db, "users", window.currentUser.uid);
+          const customWordsRef = collection(userRef, "custom_words");
+          const docId = wordData.w.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          await setDoc(doc(customWordsRef, docId), wordData, { merge: true });
+      };
+
+      // カスタム単語をFirestoreから読み込む
+      window.fetchCustomWords = async () => {
+          if (!window.currentUser) return [];
+          try {
+              const customWordsRef = collection(db, "users", window.currentUser.uid, "custom_words");
+              const q = query(customWordsRef, orderBy("timestamp", "desc"));
+              const snapshot = await getDocs(q);
+              const customWords = [];
+              snapshot.forEach(docSnap => customWords.push(docSnap.data()));
+              return customWords;
+          } catch (e) {
+              console.warn("Failed to load custom parts:", e);
+              return [];
+          }
+      };
 
       const gateScreen = document.getElementById('gate-screen');
       const startScreen = document.getElementById('start-screen');
@@ -4043,6 +4128,14 @@ lest: ～しないように、～するといけないから｜lest he should fa
 
           try {
               await window.fetchSRSItems();
+              
+              // オリジナル単語をロードして合流させる
+              const customWords = await window.fetchCustomWords();
+              if (customWords && customWords.length > 0 && window.quiz) {
+                  window.quiz.masterList = [...customWords, ...window.quiz.masterList];
+                  window.quiz.generateRounds();
+                  window.quiz.initUI();
+              }
               
               const userNameDisplay = document.getElementById('user-name');
               if(userNameDisplay) userNameDisplay.innerText = user.displayName || "RACING DRIVER";
