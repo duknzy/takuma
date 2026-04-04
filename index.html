@@ -2876,9 +2876,20 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  return example.replace(regex, '____');
              }
 
-            generateRounds() {
+          generateRounds() {
                 const wordCopy = [...this.masterList]; 
                 this.vocabRounds = [];
+
+                // ★追加：カスタム単語だけを集めた専用のテストコース（ラウンド）を生成
+                const customWords = this.masterList.filter(item => item.isCustom);
+                if (customWords.length > 0) {
+                    this.vocabRounds.push({ 
+                        id: 'custom_only', 
+                        name: `🛠️ R&D PARTS (${customWords.length} Qs)`, 
+                        words: customWords 
+                    });
+                }
+
                 let roundNum = 1;
                 let currentWordIndex = 1; 
                 while (wordCopy.length > 0) {
