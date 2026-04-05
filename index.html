@@ -3253,10 +3253,10 @@ lest: ～しないように、～するといけないから｜lest he should fa
                     const displayId = item.isCustom ? `C-${item.customId}` : `No.${item.originalId}`;
 
                   grid.innerHTML += `
-                        <div class="w-full bg-gray-900/80 border border-gray-700 rounded-xl p-3 md:p-4 flex flex-col gap-2 md:gap-3 shadow-lg relative h-full min-h-[220px]">
+                        <div class="w-full bg-gray-900/80 border border-gray-700 rounded-xl p-3 md:p-4 flex flex-col shadow-lg relative min-h-[220px]">
                             <button onclick="quiz.removeFromCompare(${index})" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl leading-none active:scale-95 transition-transform">&times;</button>
                             
-                            <div class="border-b border-gray-800 pb-1 pr-6">
+                            <div class="border-b border-gray-800 pb-2 mb-2 pr-6 shrink-0">
                                 <div class="text-[10px] text-indigo-400 font-mono tracking-widest uppercase mb-0.5 flex items-center gap-2">
                                     <span>${displayId}</span>
                                     ${item.isCustom ? '<span class="bg-blue-900 text-blue-200 px-1 rounded text-[8px]">R&D</span>' : ''}
@@ -3264,33 +3264,26 @@ lest: ～しないように、～するといけないから｜lest he should fa
                                 <div class="f1-font text-lg md:text-xl font-bold text-white break-words leading-tight">${displayW}</div>
                             </div>
                             
-                            <div class="flex-1 flex flex-col pr-1 gap-2 overflow-y-auto scrollbar-thin">
-                                <div class="shrink-0">
-                                    <div class="text-[9px] text-gray-500 uppercase mb-0.5 font-bold">Meaning</div>
-                                    <div class="text-xs md:text-sm text-gray-200 leading-snug">${displayM}</div>
-                                </div>
+                            <div class="mb-2 shrink-0">
+                                <div class="text-[9px] text-gray-500 uppercase mb-0.5 font-bold">Meaning</div>
+                                <div class="text-xs md:text-sm text-gray-200 leading-snug line-clamp-3">${displayM}</div>
+                            </div>
                                 
-                                <div class="flex-1 flex flex-col min-h-[60px]">
-                                    <div class="text-[9px] text-indigo-400 uppercase mb-0.5 font-bold flex justify-between items-center shrink-0">
-                                        <span>Memo</span>
-                                        <span id="save-status-${index}" class="text-[8px] opacity-0 transition-opacity text-green-500 font-bold">● SYNCED</span>
-                                    </div>
-                                    <textarea 
-                                        class="flex-1 w-full bg-black/40 text-xs text-gray-300 p-2 rounded border border-gray-800 focus:border-indigo-500 outline-none resize-none font-sans leading-relaxed transition-colors"
-                                        placeholder="メモ..."
-                                        onblur="quiz.saveMemo('${safeW}', this.value, ${index})"
-                                    >${srs && srs.memo ? srs.memo : ""}</textarea>
+                            <div class="flex-1 flex flex-col min-h-[60px] mb-2">
+                                <div class="text-[9px] text-indigo-400 uppercase mb-0.5 font-bold flex justify-between items-center shrink-0">
+                                    <span>Driver's Memo</span>
+                                    <span id="save-status-${index}" class="text-[8px] opacity-0 transition-opacity text-green-500 font-bold">● SYNCED</span>
                                 </div>
+                                <textarea 
+                                    class="flex-1 w-full bg-black/40 text-xs text-gray-300 p-2 rounded border border-gray-800 focus:border-indigo-500 outline-none resize-none font-sans leading-relaxed transition-colors"
+                                    placeholder="似た単語との違いをメモしろ..."
+                                    onblur="quiz.saveMemo('${safeW}', this.value, ${index})"
+                                >${srs && srs.memo ? srs.memo : ""}</textarea>
                             </div>
 
-                            <div class="bg-black/50 p-1.5 md:p-2 rounded border border-gray-800 mt-1 shrink-0">
-                                <div class="text-[9px] text-gray-500 uppercase mb-0.5 font-bold">SRS Condition</div>
-                                <div class="text-[9px] md:text-[10px] font-mono">${srsHtml}</div>
-                            </div>
-                            
-                            <div class="flex justify-between items-center pt-1.5 md:pt-2 border-t border-gray-800 shrink-0">
-                                <button onclick="quiz.speak('${safeW}')" class="text-gray-400 hover:text-cyan-400 p-1 md:p-2 text-xl md:text-2xl active:scale-95 transition-transform">🔊</button>
-                                <button onclick="window.toggleBookmark('${safeW}', '${safeM}'); setTimeout(() => quiz.renderCompareGrid(), 300)" class="${flagClass} p-1 md:p-2 text-xl md:text-2xl active:scale-95 transition-transform">${flagState}</button>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-800 shrink-0">
+                                <button onclick="quiz.speak('${safeW}')" class="text-gray-400 hover:text-cyan-400 text-xl md:text-2xl active:scale-95 transition-transform">🔊</button>
+                                <button onclick="window.toggleBookmark('${safeW}', '${safeM}'); setTimeout(() => quiz.renderCompareGrid(), 300)" class="${flagClass} text-xl md:text-2xl active:scale-95 transition-transform">${flagState}</button>
                             </div>
                         </div>
                     `;
