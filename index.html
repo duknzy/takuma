@@ -436,16 +436,22 @@
                             </div>
                         </div>
 
-                        <div class="pt-4 border-t border-gray-700 relative">
+                       <div class="pt-4 border-t border-gray-700 relative">
                             <input type="text" id="search-input" placeholder="Quick Scan (Search)..." class="w-full bg-black text-white p-3 rounded-lg border border-gray-700 focus:border-red-500 outline-none font-mono text-sm mb-3 placeholder-gray-600">
                              <div id="search-results" class="hidden absolute top-16 left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-50"></div>
                             
-                            <div class="flex gap-2">
-                                <button onclick="quiz.openWordBook()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-3 rounded-lg font-bold transition-all uppercase text-xs flex items-center justify-center gap-2 shadow-lg">
-                                    <span>📁</span> DATA CENTER
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="quiz.openWordBook()" class="bg-gray-700 hover:bg-gray-600 text-gray-200 border border-gray-600 py-3 rounded-lg font-bold transition-all uppercase text-xs flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95">
+                                    <span class="text-base leading-none">📁</span>
+                                    <span class="text-[9px]">DATA</span>
                                 </button>
-                                <button onclick="document.getElementById('custom-word-modal').classList.remove('hidden')" class="flex-1 bg-red-900/40 hover:bg-red-800/80 text-white border border-red-800 py-3 rounded-lg font-bold transition-all uppercase text-xs flex items-center justify-center gap-2 shadow-lg">
-                                    <span>🛠️</span> R&D (ADD WORD)
+                                <button onclick="document.getElementById('custom-word-modal').classList.remove('hidden')" class="bg-red-900/40 hover:bg-red-800/80 text-white border border-red-800 py-3 rounded-lg font-bold transition-all uppercase text-xs flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95">
+                                    <span class="text-base leading-none">🛠️</span>
+                                    <span class="text-[9px]">ADD</span>
+                                </button>
+                                <button onclick="quiz.openComparisonMode()" class="bg-indigo-900/40 hover:bg-indigo-800/80 text-white border border-indigo-800 py-3 rounded-lg font-bold transition-all uppercase text-xs flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95">
+                                    <span class="text-base leading-none">⚖️</span>
+                                    <span class="text-[9px]">COMPARE</span>
                                 </button>
                             </div>
                         </div>
@@ -466,6 +472,21 @@
                 <h3 class="text-xs text-red-500 font-bold uppercase tracking-widest mb-2 flex-shrink-0">Degradation Report (Worst Laps)</h3>
                 <div id="worst-words-list" class="space-y-1 overflow-y-auto pr-2 flex-grow scrollbar-thin"></div>
             </div>
+        </div>
+
+        <div id="comparison-screen" class="hidden race-card p-4 md:p-6 rounded-2xl border-t-4 border-indigo-500 h-[90%] my-auto z-[60] flex flex-col absolute inset-4">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <h2 class="f1-font text-xl md:text-2xl font-bold text-indigo-400 tracking-widest flex items-center gap-2"><span>⚖️</span> HEAD-TO-HEAD</h2>
+                <button onclick="quiz.closeOverlay('comparison-screen')" class="text-gray-400 active:text-white text-3xl p-2 hover:text-white transition-colors leading-none">&times;</button>
+            </div>
+            
+            <div class="relative mb-4 flex-shrink-0">
+                <input type="text" id="compare-search" placeholder="Type to add component (e.g. adapt)..." class="w-full bg-black text-white p-3 rounded-lg border border-gray-700 focus:border-indigo-500 outline-none font-mono text-sm placeholder-gray-600 shadow-inner">
+                <div id="compare-search-results" class="hidden absolute top-14 left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-[70]"></div>
+            </div>
+
+            <div id="compare-grid" class="flex-1 overflow-x-auto overflow-y-hidden flex gap-4 pb-2 snap-x wb-scroll">
+                </div>
         </div>
         
         <div id="wordbook-screen" class="hidden race-card p-6 rounded-2xl text-center border-t-4 border-yellow-500 h-[90%] my-auto z-50 flex flex-col absolute inset-4">
@@ -2687,6 +2708,8 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 this.dueMistakes = [];
                 this.allMistakes = []; 
                 this.bookmarkedFilter = 'all';
+                this.compareList = [];
+                this.initCompareSearch();
 
                 this.isPitStopMode = false;
                 this.isReverseMode = false;
@@ -3089,6 +3112,134 @@ lest: ～しないように、～するといけないから｜lest he should fa
                     btn.disabled = false;
                 }
             }
+
+            // --- ここから比較モードのエンジン ---
+            openComparisonMode() {
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('comparison-screen').classList.remove('hidden');
+                this.renderCompareGrid();
+            }
+
+            initCompareSearch() {
+                const input = document.getElementById('compare-search');
+                const results = document.getElementById('compare-search-results');
+                input.addEventListener('input', (e) => {
+                    const q = e.target.value.toLowerCase().trim();
+                    if (!q) { results.classList.add('hidden'); return; }
+                    
+                    // 純正リストとカスタムリストから検索
+                    const hits = this.masterList.filter(item => 
+                        item.w.toLowerCase().includes(q) || item.m.toLowerCase().includes(q)
+                    ).slice(0, 10);
+                    
+                    if (hits.length > 0) {
+                        results.classList.remove('hidden');
+                        results.innerHTML = hits.map(h => {
+                            const safeW = encodeURIComponent(h.w).replace(/'/g, "\\'");
+                            return `
+                            <div onclick="quiz.addToCompare('${safeW}'); document.getElementById('compare-search-results').classList.add('hidden'); document.getElementById('compare-search').value='';" class="p-3 border-b border-gray-800 active:bg-gray-800 cursor-pointer flex justify-between items-center hover:bg-indigo-900/30 transition-colors">
+                                <div class="text-left">
+                                    <span class="text-indigo-400 font-bold text-sm f1-font">${h.w}</span>
+                                    <span class="text-gray-400 text-[10px] pl-2">${h.m}</span>
+                                </div>
+                                <span class="text-[10px] bg-indigo-600 text-white px-2 py-1 rounded font-bold">+ ADD</span>
+                            </div>`;
+                        }).join('');
+                    } else {
+                        results.classList.remove('hidden');
+                        results.innerHTML = `<div class="p-3 text-gray-500 text-[10px] text-center">NO DATA</div>`;
+                    }
+                });
+                document.addEventListener('click', (e) => { if (!input.contains(e.target) && !results.contains(e.target)) results.classList.add('hidden'); });
+            }
+
+            addToCompare(safeWord) {
+                if (this.compareList.length >= 6) {
+                    alert("Pit limit: 1画面で比較できるのは6パーツまでだ。");
+                    return;
+                }
+                const w = decodeURIComponent(safeWord);
+                const item = this.masterList.find(i => i.w === w);
+                if (item && !this.compareList.find(i => i.w === w)) {
+                    this.compareList.push(item);
+                    this.renderCompareGrid();
+                }
+            }
+
+            removeFromCompare(index) {
+                this.compareList.splice(index, 1);
+                this.renderCompareGrid();
+            }
+
+            renderCompareGrid() {
+                const grid = document.getElementById('compare-grid');
+                grid.innerHTML = '';
+                if (this.compareList.length === 0) {
+                    grid.innerHTML = `<div class="w-full flex items-center justify-center text-gray-500 font-mono text-xs flex-col gap-2 opacity-50"><span class="text-3xl">⚖️</span><span>上の検索バーから比較したいパーツ（単語）を追加しろ。</span></div>`;
+                    return;
+                }
+
+                this.compareList.forEach((item, index) => {
+                    const srs = (this.allMistakes || []).find(m => m.word === item.w || m.w === item.w);
+                    let srsHtml = `<span class="text-gray-500">No telemetry (New)</span>`;
+                    let flagState = '🏳️';
+                    let flagClass = 'text-gray-600 hover:text-gray-300';
+
+                    if (srs) {
+                        let color = srs.interval > 14 ? "text-green-500" : srs.interval > 3 ? "text-yellow-500" : "text-red-500";
+                        srsHtml = `<span class="${color}">Interval: ${srs.interval}d | EF: ${(srs.easeFactor||2.5).toFixed(2)}</span>`;
+                        
+                        if (srs.flag === 'red' || srs.bookmarked === true) {
+                            flagState = '🚩'; flagClass = 'text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]';
+                        } else if (srs.flag === 'yellow') {
+                            flagState = '🟨'; flagClass = 'text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]';
+                        }
+                    }
+                    
+                    const safeW = encodeURIComponent(item.w).replace(/'/g, "\\'");
+                    const safeM = encodeURIComponent(item.m).replace(/'/g, "\\'");
+                    const displayW = item.w.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    const displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    const displayId = item.isCustom ? `C-${item.customId}` : `No.${item.originalId}`;
+
+                    grid.innerHTML += `
+                        <div class="min-w-[260px] w-[260px] md:min-w-[300px] md:w-[300px] bg-gray-900/80 border border-gray-700 rounded-xl p-4 flex flex-col gap-3 shadow-lg snap-center relative shrink-0">
+                            <button onclick="quiz.removeFromCompare(${index})" class="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-2xl leading-none active:scale-95 transition-transform">&times;</button>
+                            
+                            <div class="border-b border-gray-800 pb-2 pr-6">
+                                <div class="text-[10px] text-indigo-400 font-mono tracking-widest uppercase mb-1 flex items-center gap-2">
+                                    <span>${displayId}</span>
+                                    ${item.isCustom ? '<span class="bg-blue-900 text-blue-200 px-1 rounded text-[8px]">R&D</span>' : ''}
+                                </div>
+                                <div class="f1-font text-2xl font-bold text-white break-words leading-tight">${displayW}</div>
+                            </div>
+                            
+                            <div class="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin">
+                                <div>
+                                    <div class="text-[9px] text-gray-500 uppercase mb-1 font-bold">Meaning</div>
+                                    <div class="text-sm text-gray-200 leading-snug">${displayM}</div>
+                                </div>
+                                
+                                <div>
+                                    <div class="text-[9px] text-gray-500 uppercase mb-1 font-bold">Example</div>
+                                    <div class="text-xs text-gray-400 italic">${item.ex || "No example data."}</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-black/50 p-2 rounded border border-gray-800 mt-2">
+                                <div class="text-[9px] text-gray-500 uppercase mb-1 font-bold">SRS Condition</div>
+                                <div class="text-[10px] font-mono">${srsHtml}</div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-800">
+                                <button onclick="quiz.speak('${safeW}')" class="text-gray-400 hover:text-cyan-400 p-2 text-2xl active:scale-95 transition-transform">🔊</button>
+                                <button onclick="window.toggleBookmark('${safeW}', '${safeM}'); setTimeout(() => quiz.renderCompareGrid(), 300)" class="${flagClass} p-2 text-2xl active:scale-95 transition-transform">${flagState}</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            // --- 比較モードエンジンここまで ---
 
             createCustomRound() {
                 const s = parseInt(document.getElementById('custom-start').value) - 1;
