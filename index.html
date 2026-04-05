@@ -3120,6 +3120,45 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 this.renderCompareGrid();
             }
 
+            // メモをクラウドに保存する最速のバイパス
+            async saveMemo(safeWord, memoText, index) {
+                const word = decodeURIComponent(safeWord);
+                if (!window.currentUser) return;
+
+                const statusEl = document.getElementById(`save-status-${index}`);
+                if(statusEl) { statusEl.innerText = "● SYNCING..."; statusEl.style.opacity = "1"; }
+
+                try {
+                    // ID生成ロジックを統一
+                    const docId = btoa(encodeURIComponent(word)).replace(/\//g, '_').replace(/\+/g, '-');
+                    const mistakesRef = collection(db, "users", window.currentUser.uid, "mistakes");
+                    const targetRef = doc(mistakesRef, docId);
+
+                    // 既存のSRSデータにメモをマージする
+                    await setDoc(targetRef, { 
+                        word: word,
+                        memo: memoText,
+                        lastReviewed: Timestamp.now()
+                    }, { merge: true });
+
+                    // ローカルのテレメトリー（メモリ）も即座に更新
+                    const existingIdx = this.allMistakes.findIndex(m => m.word === word || m.id === docId);
+                    if (existingIdx !== -1) {
+                        this.allMistakes[existingIdx].memo = memoText;
+                    } else {
+                        this.allMistakes.push({ word: word, id: docId, memo: memoText });
+                    }
+
+                    if(statusEl) { 
+                        statusEl.innerText = "● SYNCED"; 
+                        setTimeout(() => { if(statusEl) statusEl.style.opacity = "0"; }, 2000);
+                    }
+                } catch (e) {
+                    console.error("Memo sync failed", e);
+                    if(statusEl) { statusEl.innerText = "● ERROR"; statusEl.classList.replace('text-green-500', 'text-red-500'); }
+                }
+            }
+
             initCompareSearch() {
                 const input = document.getElementById('compare-search');
                 const results = document.getElementById('compare-search-results');
@@ -3220,9 +3259,17 @@ lest: ～しないように、～するといけないから｜lest he should fa
                                     <div class="text-sm text-gray-200 leading-snug">${displayM}</div>
                                 </div>
                                 
-                                <div>
-                                    <div class="text-[9px] text-gray-500 uppercase mb-1 font-bold">Example</div>
-                                    <div class="text-xs text-gray-400 italic">${item.ex || "No example data."}</div>
+                                <div class="mt-2">
+                                    <div class="text-[9px] text-indigo-400 uppercase mb-1 font-bold flex justify-between items-center">
+                                        <span>Driver's Memo (Engineer's Log)</span>
+                                        <span id="save-status-${index}" class="text-[8px] opacity-0 transition-opacity text-green-500 font-bold">● SYNCED</span>
+                                    </div>
+                                    <textarea 
+                                        class="w-full bg-black/40 text-xs text-gray-300 p-2 rounded border border-gray-800 focus:border-indigo-500 outline-none resize-none font-sans leading-relaxed transition-colors"
+                                        rows="5"
+                                        placeholder="似た単語との違いや、自分なりの攻略法をメモしろ..."
+                                        onblur="quiz.saveMemo('${safeW}', this.value, ${index})"
+                                    >${srs && srs.memo ? srs.memo : ""}</textarea>
                                 </div>
                             </div>
 
