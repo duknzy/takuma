@@ -474,19 +474,29 @@
             </div>
         </div>
 
-        <div id="comparison-screen" class="hidden race-card p-4 md:p-6 rounded-2xl border-t-4 border-indigo-500 h-[90%] my-auto z-[60] flex flex-col absolute inset-4">
-            <div class="flex justify-between items-center mb-4 flex-shrink-0">
-                <h2 class="f1-font text-xl md:text-2xl font-bold text-indigo-400 tracking-widest flex items-center gap-2"><span>⚖️</span> HEAD-TO-HEAD</h2>
-                <button onclick="quiz.closeOverlay('comparison-screen')" class="text-gray-400 active:text-white text-3xl p-2 hover:text-white transition-colors leading-none">&times;</button>
-            </div>
+        <div id="comparison-screen" class="hidden race-card p-4 md:p-6 rounded-2xl border-t-4 border-indigo-500 h-[90%] my-auto z-[60] flex flex-col md:flex-row absolute inset-4 gap-4 md:gap-6">
             
-            <div class="relative mb-4 flex-shrink-0">
-                <input type="text" id="compare-search" placeholder="Type to add component (e.g. adapt)..." class="w-full bg-black text-white p-3 rounded-lg border border-gray-700 focus:border-indigo-500 outline-none font-mono text-sm placeholder-gray-600 shadow-inner">
-                <div id="compare-search-results" class="hidden absolute top-14 left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-[70]"></div>
+            <div class="flex flex-col w-full md:w-1/3 lg:w-1/4 flex-shrink-0 border-b md:border-b-0 md:border-r border-gray-700 pb-4 md:pb-0 md:pr-6 relative h-full">
+                <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                    <h2 class="f1-font text-xl md:text-2xl font-bold text-indigo-400 tracking-widest flex items-center gap-2"><span>⚖️</span> COMPARE</h2>
+                    <button onclick="quiz.closeOverlay('comparison-screen')" class="md:hidden text-gray-400 active:text-white text-3xl p-2 hover:text-white transition-colors leading-none">&times;</button>
+                </div>
+                
+                <div class="flex flex-col flex-1 min-h-0">
+                    <input type="text" id="compare-search" placeholder="Type to add..." class="w-full bg-black text-white p-3 rounded-lg border border-gray-700 focus:border-indigo-500 outline-none font-mono text-sm placeholder-gray-600 shadow-inner flex-shrink-0 mb-3">
+                    
+                    <div id="compare-search-results" class="hidden flex-1 bg-gray-900/80 border border-gray-700 rounded-lg overflow-y-auto scrollbar-thin"></div>
+                </div>
             </div>
 
-            <div id="compare-grid" class="flex-1 overflow-x-auto overflow-y-hidden flex gap-4 pb-2 snap-x wb-scroll">
+            <div class="flex-1 flex flex-col min-w-0 h-full relative">
+                <div class="hidden md:flex justify-end absolute -top-4 -right-2 z-10">
+                    <button onclick="quiz.closeOverlay('comparison-screen')" class="text-gray-400 active:text-white text-4xl hover:text-white transition-colors leading-none">&times;</button>
                 </div>
+                
+                <div id="compare-grid" class="flex-1 overflow-x-auto overflow-y-hidden flex gap-4 pb-2 snap-x wb-scroll items-stretch mt-4 md:mt-0 pt-2 md:pt-6">
+                    </div>
+            </div>
         </div>
         
         <div id="wordbook-screen" class="hidden race-card p-6 rounded-2xl text-center border-t-4 border-yellow-500 h-[90%] my-auto z-50 flex flex-col absolute inset-4">
@@ -621,23 +631,23 @@
         </div>
 
         <div id="custom-word-modal" class="hidden fixed inset-0 z-[200] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
-            <div class="race-card p-6 rounded-2xl w-full max-w-md border border-red-600/50 shadow-[0_0_30px_rgba(225,6,0,0.2)] animate-slide-in relative">
-                <button onclick="document.getElementById('custom-word-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl leading-none transition-colors">&times;</button>
+            <div class="race-card p-8 md:p-10 rounded-2xl w-full max-w-2xl border border-red-600/50 shadow-[0_0_30px_rgba(225,6,0,0.2)] animate-slide-in relative">
+                <button onclick="document.getElementById('custom-word-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-4xl leading-none transition-colors">&times;</button>
                 
-                <h3 class="f1-font text-2xl font-bold text-red-500 mb-2 tracking-widest">R&D FACILITY</h3>
-                <p class="text-[10px] text-gray-400 uppercase mb-6 tracking-widest border-b border-gray-700 pb-2">Craft Custom Components</p>
+                <h3 class="f1-font text-3xl font-bold text-red-500 mb-2 tracking-widest">R&D FACILITY</h3>
+                <p class="text-xs text-gray-400 uppercase mb-8 tracking-widest border-b border-gray-700 pb-3">Craft Custom Components</p>
 
-                <div class="space-y-4 text-left">
+                <div class="space-y-6 text-left">
                     <div>
-                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Target Word (Component)</label>
-                        <input type="text" id="modal-word-input" placeholder="ex: downforce" class="w-full bg-gray-900 text-white p-3 rounded-lg border border-gray-700 focus:border-red-500 outline-none font-mono text-sm">
+                        <label class="text-xs text-gray-500 uppercase font-bold block mb-2">Target Word (Component)</label>
+                        <input type="text" id="modal-word-input" placeholder="ex: downforce" class="w-full bg-gray-900 text-white p-4 rounded-xl border border-gray-700 focus:border-red-500 outline-none font-mono text-lg">
                     </div>
                     <div>
-                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Meaning (Spec)</label>
-                        <input type="text" id="modal-meaning-input" placeholder="ex: ダウンフォース" class="w-full bg-gray-900 text-white p-3 rounded-lg border border-gray-700 focus:border-red-500 outline-none text-sm">
+                        <label class="text-xs text-gray-500 uppercase font-bold block mb-2">Meaning (Spec)</label>
+                        <input type="text" id="modal-meaning-input" placeholder="ex: ダウンフォース" class="w-full bg-gray-900 text-white p-4 rounded-xl border border-gray-700 focus:border-red-500 outline-none text-lg">
                     </div>
                     
-                    <button onclick="quiz.addCustomWord(event)" id="modal-save-btn" class="w-full bg-red-600 hover:bg-red-500 text-white py-4 rounded-xl font-bold transition-all uppercase text-sm tracking-widest shadow-lg shadow-red-900/50 mt-4 active:scale-95 border border-red-700">
+                    <button onclick="quiz.addCustomWord(event)" id="modal-save-btn" class="w-full bg-red-600 hover:bg-red-500 text-white py-5 rounded-xl font-bold transition-all uppercase text-lg tracking-widest shadow-lg shadow-red-900/50 mt-6 active:scale-95 border border-red-700">
                         INSTALL PART
                     </button>
                 </div>
