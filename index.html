@@ -3169,31 +3169,32 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 }
             }
 
-           initCompareSearch() {
+          initCompareSearch() {
                 const input = document.getElementById('compare-search');
                 const results = document.getElementById('compare-search-results');
                 input.addEventListener('input', (e) => {
                     const q = e.target.value.toLowerCase().trim();
                     if (!q) { results.classList.add('hidden'); return; }
                     
-                    // 純正リストとカスタムリストから検索
+                    // 2列になるので、取得件数を少し増やして12個（6行分）にする
                     const hits = this.masterList.filter(item => 
                         item.w.toLowerCase().includes(q) || item.m.toLowerCase().includes(q)
-                    ).slice(0, 10);
+                    ).slice(0, 12);
                     
                     if (hits.length > 0) {
                         results.classList.remove('hidden');
-                        results.innerHTML = hits.map(h => {
+                        // ↓ここを変更：全体を grid-cols-2（2列）で囲み、各アイテムを縦並びのカード風に独立させる
+                        results.innerHTML = `<div class="grid grid-cols-2 gap-2 p-2">` + hits.map(h => {
                             const safeW = encodeURIComponent(h.w).replace(/'/g, "\\'");
                             return `
-                            <div onclick="quiz.addToCompare('${safeW}'); document.getElementById('compare-search-results').classList.add('hidden'); document.getElementById('compare-search').value='';" class="p-4 border-b border-gray-800 active:bg-gray-800 cursor-pointer flex justify-between items-center hover:bg-indigo-900/30 transition-colors">
-                                <div class="text-left">
-                                    <span class="text-indigo-400 font-bold text-base f1-font">${h.w}</span>
-                                    <span class="text-gray-400 text-xs pl-2">${h.m}</span>
+                            <div onclick="quiz.addToCompare('${safeW}'); document.getElementById('compare-search-results').classList.add('hidden'); document.getElementById('compare-search').value='';" class="bg-gray-900/50 p-3 border border-gray-800 rounded-lg active:bg-gray-800 cursor-pointer flex flex-col justify-between hover:border-indigo-500 transition-all h-full group shadow-md">
+                                <div class="text-left mb-3 overflow-hidden">
+                                    <div class="text-indigo-400 font-bold text-sm f1-font truncate">${h.w}</div>
+                                    <div class="text-gray-400 text-[10px] line-clamp-2 leading-tight mt-1">${h.m}</div>
                                 </div>
-                                <span class="text-[10px] bg-indigo-600 text-white px-3 py-1.5 rounded font-bold">+ ADD</span>
+                                <button class="w-full text-[10px] bg-indigo-900/40 group-hover:bg-indigo-600 text-white px-2 py-1.5 rounded font-bold uppercase transition-colors shrink-0 whitespace-nowrap border border-indigo-800">+ ADD</button>
                             </div>`;
-                        }).join('');
+                        }).join('') + `</div>`;
                     } else {
                         results.classList.remove('hidden');
                         results.innerHTML = `<div class="p-4 text-gray-500 text-xs text-center">NO DATA</div>`;
@@ -3263,20 +3264,19 @@ lest: ～しないように、～するといけないから｜lest he should fa
                                 <div class="f1-font text-2xl font-bold text-white break-words leading-tight">${displayW}</div>
                             </div>
                             
-                            <div class="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin">
-                                <div>
+                            <div class="flex-1 flex flex-col pr-1 gap-3 overflow-y-auto scrollbar-thin">
+                                <div class="shrink-0">
                                     <div class="text-[9px] text-gray-500 uppercase mb-1 font-bold">Meaning</div>
                                     <div class="text-sm text-gray-200 leading-snug">${displayM}</div>
                                 </div>
                                 
-                                <div class="mt-2">
-                                    <div class="text-[9px] text-indigo-400 uppercase mb-1 font-bold flex justify-between items-center">
+                                <div class="flex-1 flex flex-col min-h-[100px]">
+                                    <div class="text-[9px] text-indigo-400 uppercase mb-1 font-bold flex justify-between items-center shrink-0">
                                         <span>Driver's Memo (Engineer's Log)</span>
                                         <span id="save-status-${index}" class="text-[8px] opacity-0 transition-opacity text-green-500 font-bold">● SYNCED</span>
                                     </div>
                                     <textarea 
-                                        class="w-full bg-black/40 text-xs text-gray-300 p-2 rounded border border-gray-800 focus:border-indigo-500 outline-none resize-none font-sans leading-relaxed transition-colors"
-                                        rows="5"
+                                        class="flex-1 w-full bg-black/40 text-xs text-gray-300 p-2 rounded border border-gray-800 focus:border-indigo-500 outline-none resize-none font-sans leading-relaxed transition-colors"
                                         placeholder="似た単語との違いや、自分なりの攻略法をメモしろ..."
                                         onblur="quiz.saveMemo('${safeW}', this.value, ${index})"
                                     >${srs && srs.memo ? srs.memo : ""}</textarea>
