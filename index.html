@@ -3577,11 +3577,15 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 this.showVocabQuestion();
             }
             
-            getDistractors(targetWord, isReverse) {
+           getDistractors(targetWord, isReverse) {
                  const distractors = [];
                  if (this.masterList.length < 4) return ["Option A", "Option B", "Option C"]; 
 
                  const targetString = isReverse ? targetWord.w : targetWord.m;
+                 
+                 // ★ 万が一データが空っぽでもクラッシュさせず、エラー用のダミーを返す
+                 if (!targetString) return ["---", "---", "---"];
+
                  const targetLen = targetString.length;
 
                  let smartPool = this.masterList.filter(item => {
@@ -4098,10 +4102,14 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  }
              }
             
-             startPitStop() {
+            startPitStop() {
                  if (!this.dueMistakes || this.dueMistakes.length === 0) return;
-                 // ★ item.id の存在チェックを追加
-                 const vocabDue = this.dueMistakes.filter(item => item.id && !item.id.toString().startsWith('idiom_'));
+                 // ★ 単語(w)と意味(m)が存在するデータだけを厳格にフィルタリングする
+                 const vocabDue = this.dueMistakes.filter(item => {
+                     const w = item.word || item.w;
+                     const m = item.meaning || item.m;
+                     return item.id && !item.id.toString().startsWith('idiom_') && w && m;
+                 });
                  if (!vocabDue || vocabDue.length === 0) return;
 
                  this.isPitStopMode = true; 
