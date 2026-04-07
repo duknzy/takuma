@@ -4100,7 +4100,8 @@ lest: ～しないように、～するといけないから｜lest he should fa
             
              startPitStop() {
                  if (!this.dueMistakes || this.dueMistakes.length === 0) return;
-                 const vocabDue = this.dueMistakes.filter(item => !item.id.toString().startsWith('idiom_'));
+                 // ★ item.id の存在チェックを追加
+                 const vocabDue = this.dueMistakes.filter(item => item.id && !item.id.toString().startsWith('idiom_'));
                  if (!vocabDue || vocabDue.length === 0) return;
 
                  this.isPitStopMode = true; 
@@ -4561,8 +4562,9 @@ lest: ～しないように、～するといけないから｜lest he should fa
         const dueItems = [];
         const nowTs = Date.now() / 1000;
         
-        allItems.forEach(item => { 
-            if (item.nextReviewSeconds <= nowTs && !item.id.toString().startsWith('idiom_')) {
+       allItems.forEach(item => { 
+            // ★ item.id が存在するかどうかのチェックを追加
+            if (item.nextReviewSeconds <= nowTs && item.id && !item.id.toString().startsWith('idiom_')) {
                 dueItems.push(item); 
             }
         });
@@ -4746,7 +4748,10 @@ lest: ～しないように、～するといけないから｜lest he should fa
               currentItem.bookmarked = (nextFlag === 'red'); 
               currentItem.ex = example;
           } else {
+              // ★ 以下の2行を追加して固有IDをマシンに認識させる
+              const docId = word.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
               window.quiz.allMistakes.push({ 
+                   id: docId, // ← ここにIDをセット
                    word: word, meaning: meaning, ex: example, flag: nextFlag, bookmarked: (nextFlag === 'red'), 
                    interval: 0, repetitions: 0, easeFactor: 2.5,
                    nextReviewSeconds: Date.now() / 1000 
