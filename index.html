@@ -3577,26 +3577,31 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 this.showVocabQuestion();
             }
             
-           getDistractors(targetWord, isReverse) {
+          getDistractors(targetWord, isReverse) {
                  const distractors = [];
                  if (this.masterList.length < 4) return ["Option A", "Option B", "Option C"]; 
 
                  const targetString = isReverse ? targetWord.w : targetWord.m;
                  
-                 // ★ 万が一データが空っぽでもクラッシュさせず、エラー用のダミーを返す
+                 // ① ターゲットが空っぽならダミーを返して即リタイアを回避
                  if (!targetString) return ["---", "---", "---"];
 
                  const targetLen = targetString.length;
 
                  let smartPool = this.masterList.filter(item => {
-                     const str = isReverse ? item.w : item.m;
+                     // ② クラウドの古い仕様(word/meaning)や空データに対応する強固なガード
+                     const str = isReverse ? (item.w || item.word) : (item.m || item.meaning);
+                     if (!str) return false; // データが空ならこのパーツは除外
                      if (str === targetString) return false;
+                     // ここまで来れば str.length でクラッシュすることは絶対にない
                      return Math.abs(str.length - targetLen) <= 2;
                  });
 
                  if (smartPool.length < 10) {
                      smartPool = this.masterList.filter(item => {
-                         const str = isReverse ? item.w : item.m;
+                         // ③ こっちの予備プールも同様にガードする
+                         const str = isReverse ? (item.w || item.word) : (item.m || item.meaning);
+                         if (!str) return false;
                          return str !== targetString;
                      });
                  }
@@ -3604,8 +3609,9 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  let attempts = 0;
                  while (distractors.length < 3 && attempts < 100) {
                      const r = smartPool[Math.floor(Math.random() * smartPool.length)];
-                     const candidate = isReverse ? r.w : r.m;
-                     if (!distractors.includes(candidate)) {
+                     // ④ ダミー選択肢を抽出する際もエラーを完全に防ぐ
+                     const candidate = isReverse ? (r.w || r.word) : (r.m || r.meaning);
+                     if (candidate && !distractors.includes(candidate)) {
                          distractors.push(candidate);
                      }
                      attempts++;
