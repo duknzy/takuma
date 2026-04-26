@@ -3733,11 +3733,13 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  }
              }
 
-             renderSpellingInterface(q) {
+                          renderSpellingInterface(q) {
                  const slotsEl = document.getElementById('spelling-slots');
                  const poolEl = document.getElementById('spelling-pool');
                  
-                 const targetWordsArray = q.w.trim().split(/\s+/);
+                 const targetWordStr = q.w || "";
+                 // ★ \s+ ではなく '' で分割し、1文字ずつ（アルファベット単位）にバラす
+                 const targetWordsArray = targetWordStr.trim().split(''); 
 
                  if (this.spellingAns.length === 0) {
                      slotsEl.innerHTML = '';
@@ -3745,7 +3747,7 @@ lest: ～しないように、～するといけないから｜lest he should fa
                      slotsEl.classList.remove('correct-lane', 'wrong-lane');
                      this.isLocked = false;
                      
-                     this.spellingPoolState = targetWordsArray.map((word, i) => ({ char: word, id: i, used: false })).sort(() => Math.random() - 0.5);
+                     this.spellingPoolState = targetWordsArray.map((char, i) => ({ char: char, id: i, used: false })).sort(() => Math.random() - 0.5);
                  } else {
                      slotsEl.innerHTML = '';
                      poolEl.innerHTML = '';
@@ -3757,11 +3759,12 @@ lest: ～しないように、～するといけないから｜lest he should fa
                      const charObj = this.spellingAns[i]; 
                      
                      if (charObj) {
-                         slot.className = "min-w-[3rem] px-3 h-12 border border-white bg-gray-800 rounded mx-1 flex items-center justify-center text-lg font-bold text-white cursor-pointer active:scale-95 transition-transform shadow-[0_0_10px_rgba(255,255,255,0.2)]";
-                         slot.innerText = charObj.char;
+                         // ★ スマホでも横に並ぶように少しスリム化
+                         slot.className = "min-w-[2.5rem] px-2 h-12 border border-white bg-gray-800 rounded mx-0.5 flex items-center justify-center text-xl font-bold text-white cursor-pointer active:scale-95 transition-transform shadow-[0_0_10px_rgba(255,255,255,0.2)]";
+                         slot.innerText = charObj.char === ' ' ? '␣' : charObj.char;
                          slot.onclick = () => this.handleSpellingUndo(i, q);
                      } else {
-                         slot.className = "min-w-[3rem] px-3 h-12 border-b-2 border-gray-600 mx-1 flex items-center justify-center text-lg font-bold text-gray-600";
+                         slot.className = "min-w-[2.5rem] px-2 h-12 border-b-2 border-gray-600 mx-0.5 flex items-center justify-center text-xl font-bold text-gray-600";
                          slot.innerText = "_";
                      }
                      slotsEl.appendChild(slot);
@@ -3769,18 +3772,20 @@ lest: ～しないように、～するといけないから｜lest he should fa
 
                  this.spellingPoolState.forEach((item) => {
                      const btn = document.createElement('button');
+                     const displayChar = item.char === ' ' ? '␣' : item.char;
                      if (item.used) {
-                         btn.className = "px-4 h-12 bg-gray-900 text-gray-500 rounded shadow-inner border border-gray-700 active:scale-95 transition-all text-lg font-bold opacity-50"; 
-                         btn.innerText = item.char;
+                         btn.className = "min-w-[2.5rem] px-2 h-12 bg-gray-900 text-gray-500 rounded shadow-inner border border-gray-700 active:scale-95 transition-all text-xl font-bold opacity-50"; 
+                         btn.innerText = displayChar;
                          btn.onclick = () => this.handlePoolUndo(item, q);
                      } else {
-                         btn.className = "px-4 h-12 bg-gray-800 text-white rounded shadow-md border border-gray-500 active:bg-gray-600 active:scale-95 transition-all text-lg font-bold hover:border-white"; 
-                         btn.innerText = item.char;
+                         btn.className = "min-w-[2.5rem] px-2 h-12 bg-gray-800 text-white rounded shadow-md border border-gray-500 active:bg-gray-600 active:scale-95 transition-all text-xl font-bold hover:border-white uppercase"; 
+                         btn.innerText = displayChar;
                          btn.onclick = () => this.handleSpellingClick(item, q);
                      }
                      poolEl.appendChild(btn);
                  });
              }
+
 
              handlePoolUndo(item, q) {
                  if (this.isLocked) return;
@@ -3790,17 +3795,20 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  }
              }
 
-             handleSpellingClick(item, q) {
+                          handleSpellingClick(item, q) {
                  if (this.isLocked) return;
                  item.used = true;
                  this.spellingAns.push(item);
                  this.renderSpellingInterface(q);
                  
-                 const targetLen = q.w.trim().split(/\s+/).length;
+                 const targetWordStr = q.w || "";
+                 // ★ 単語数ではなく文字数（length）で判定する
+                 const targetLen = targetWordStr.trim().split('').length;
                  if (this.spellingAns.length === targetLen) {
                      this.checkSpellingWin(q);
                  }
              }
+
 
              handleSpellingUndo(index, q) {
                  if (this.isLocked) return; 
@@ -3810,9 +3818,12 @@ lest: ～しないように、～するといけないから｜lest he should fa
                  this.renderSpellingInterface(q);
              }
 
-             checkSpellingWin(q) {
-                 const userWord = this.spellingAns.map(a => a.char).join(' ');
-                 const targetWord = q.w.trim().replace(/\s+/g, ' ');
+                         checkSpellingWin(q) {
+                 const targetWordStr = q.w || "";
+                 // ★ スペース区切りではなく、文字を詰めて結合する
+                 const userWord = this.spellingAns.map(a => a.char).join('');
+                 const targetWord = targetWordStr.trim();
+                 
                  const slotsEl = document.getElementById('spelling-slots');
                  const feedback = document.getElementById('feedback');
 
@@ -3863,6 +3874,7 @@ lest: ～しないように、～するといけないから｜lest he should fa
                      }, 2500);
                  }
              }
+
 
              renderStandardOptions(q, container) {
                  container.innerHTML = '';
