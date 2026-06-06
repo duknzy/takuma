@@ -1,17 +1,21 @@
-const CACHE_NAME = 'rb-hybrid-v8'; // v7にアップデートしたのは良い判断だ
+const CACHE_NAME = 'rb-hybrid-v8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './icon.png',       // manifest.json で指定されているアイコン
-  './F1.jpg',         // ★ HTMLの poster と apple-touch-icon で使用 (追加)
-  './f1.mp4',         // ←★ ここにカンマが必要！
+  './icon.png',
+  './F1.jpg',
+  './f1.mp4',
   './晋平太.m4a',
   './sum.m4a',
-  './focus.m4a',      // ←★ ここにカンマが必要！
-  './hoodstar.m4a',   // ←★ ここにカンマが必要！
-  './stay.m4a',       // ←★ ここにカンマが必要！
-  './R指定.m4a' 
+  './focus.m4a',
+  './hoodstar.m4a',
+  './stay.m4a',
+  './R指定.m4a',
+  // ★ 外部CDNの依存関係もすべてキャッシュにブち込め！
+  'https://cdn.tailwindcss.com',
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap'
 ];
 
 self.addEventListener('install', (event) => {

@@ -4367,10 +4367,13 @@ lest: ～しないように、～するといけないから｜lest he should fa
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
       import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
       import { 
-          getFirestore, collection, addDoc, query, where, getDocs, doc, setDoc, updateDoc, deleteDoc, 
-          Timestamp, orderBy, limit, runTransaction, onSnapshot, getDoc, increment,
-          initializeFirestore, persistentLocalCache, 
-      } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    initializeFirestore,         // ★ getFirestoreの代わりにコイツをインジェクションする
+    persistentLocalCache,        // ★ オフラインキャッシュ用
+    persistentMultipleTabManager,// ★ マルチタブ同期用
+    doc, 
+    runTransaction, 
+    increment 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
       const firebaseConfig = {
           apiKey: "AIzaSyBbOFRbh5oLYYKix2Ms9LKLI5rqFVkPCZs",
@@ -4385,11 +4388,11 @@ lest: ～しないように、～するといけないから｜lest he should fa
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       
-      const db = initializeFirestore(app, {
-          localCache: persistentLocalCache({
-              tabManager: undefined 
-          })
-      });
+      window.db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+    })
+});
 
       window.saveCustomWordToFirestore = async (wordData) => {
           if (!window.currentUser) return null;
@@ -4844,26 +4847,33 @@ lest: ～しないように、～するといけないから｜lest he should fa
           }
       };
 
-      window.incrementDailyLaps = async () => {
-          if (!window.currentUser) return; 
-          const statsRef = doc(db, "stats", "daily_global");
-          const todayStr = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }).split(' ')[0];
-          try {
-              await runTransaction(db, async (transaction) => {
-                  const sfDoc = await transaction.get(statsRef);
-                  if (!sfDoc.exists()) {
-                      transaction.set(statsRef, { count: 1, date: todayStr });
-                  } else {
-                      const data = sfDoc.data();
-                      if (data.date === todayStr) {
-                          transaction.update(statsRef, { count: increment(1) });
-                      } else {
-                          transaction.set(statsRef, { count: 1, date: todayStr });
-                      }
-                  }
-              });
-          } catch (e) { console.error(e); }
-      };
+     window.incrementDailyLaps = async () => {
+    if (!window.currentUser) return; 
+    
+    // ★ テレメトリーチェック：オフラインならFirestoreのトランザクションを即バイパス
+    if (!navigator.onLine) {
+        console.log("[Telemetry] Offline detected. Skipping global lap sync.");
+        return;
+    }
+
+    const statsRef = doc(db, "stats", "daily_global");
+    const todayStr = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }).split(' ')[0];
+    try {
+        await runTransaction(db, async (transaction) => {
+            const sfDoc = await transaction.get(statsRef);
+            if (!sfDoc.exists()) {
+                transaction.set(statsRef, { count: 1, date: todayStr });
+            } else {
+                const data = sfDoc.data();
+                if (data.date === todayStr) {
+                    transaction.update(statsRef, { count: increment(1) });
+                } else {
+                    transaction.set(statsRef, { count: 1, date: todayStr });
+                }
+            }
+        });
+    } catch (e) { console.error(e); }
+};
     </script>
 </body>
 </html>
