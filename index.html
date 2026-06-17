@@ -2722,14 +2722,64 @@ lest: ～しないように、～するといけないから｜lest he should fa
                 this.initCompareSearch();
 
                 this.isPitStopMode = false;
-                this.isReverseMode = false;
-                this.isSpellingMode = false; 
-                this.spellingAns = []; 
-                this.spellingPoolState = []; 
-                
-                // BLIND RADIO
-                this.isRadioMode = false;
-                const radioCheck = document.getElementById('radio-mode');
+this.isReverseMode = false;
+this.isSpellingMode = false;
+this.spellingAns = [];
+this.spellingPoolState = []; // 👈 ここを見つける
+
+// ─── ここから「実際のキーボード入力サポート」を追加 ───
+window.addEventListener('keydown', (e) => {
+    // 1. スペリングモードではない、またはシステムがロックされている場合は処理しない
+    if (!this.isSpellingMode || this.isLocked) return;
+
+    // 2. 他の入力欄（検索バーやカスタムパーツ登録モーダルなど）にフォーカスがある時はタイピングを邪魔しない
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    // 3. 現在実行中の問題オブジェクトを取得
+    const q = this.questions[this.currentIndex];
+    if (!q) return;
+
+    // 【Backspaceキー】が押された場合：最後の1文字を取り消す (Undo)
+    if (e.key === 'Backspace') {
+        if (this.spellingAns.length > 0) {
+            this.handleSpellingUndo(this.spellingAns.length - 1, q);
+        }
+        return;
+    }
+
+    // 押されたキーを小文字に統一して判定（大文字・小文字両対応）
+    const pressedKey = e.key.toLowerCase();
+
+    // アルファベットなど、1文字の入力のみを対象にする (ShiftやEnterなどを弾く)
+    if (pressedKey.length !== 1) return;
+
+    // 【アルファベット等のキー】が押された場合
+    // プール内から「まだ使用されておらず」「文字が一致する」最初のチップを探索
+    const poolItem = this.spellingPoolState.find(p => !p.used && p.char.toLowerCase() === pressedKey);
+
+    if (poolItem) {
+        // プールの文字を使用済みに変更
+        poolItem.used = true;
+        // 解答スロットにチップの情報を追加
+        this.spellingAns.push({ id: poolItem.id, char: poolItem.char });
+        
+        // インターフェースを再描画して反映
+        this.renderSpellingInterface(q);
+
+        // 入力した文字数がターゲットの単語長に達したかチェック
+        const targetWordStr = q.w || "";
+        const targetLen = targetWordStr.trim().length;
+        if (this.spellingAns.length === targetLen) {
+            // 自動で勝利判定（チェッカーフラグ）へ
+            this.checkSpellingWin(q);
+        }
+    }
+});
+// ─── ここまでを追加 ───
+
+// BLIND RADIO
+this.isRadioMode = false;
+const radioCheck = document.getElementById('radio-mode');
                 if(radioCheck) {
                     radioCheck.addEventListener('change', (e) => {
                         this.isRadioMode = e.target.checked;
