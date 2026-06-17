@@ -227,6 +227,16 @@
                 overflow: visible !important;
             }
         }
+
+        /* PC（画面の横幅が768px以上）のとき、スペリングの選択肢プールを非表示にする */
+@media (min-width: 768px) {
+    /* アプリ内のスペリング用プール（選択肢）のエリアを非表示にする */
+    #spelling-pool, 
+    .spelling-pool, 
+    [id*="pool"] {
+        display: none !important;
+    }
+}
     </style>
 </head>
 <body class="carbon-bg text-sm md:text-base">
@@ -2727,55 +2737,62 @@ this.isSpellingMode = false;
 this.spellingAns = [];
 this.spellingPoolState = []; // 👈 ここを見つける
 
-// ─── ここから「実際のキーボード入力サポート」を追加 ───
+// --- キーボードタイピングによる自由入力 ＆ Enter進行サポート ---
 window.addEventListener('keydown', (e) => {
     // 1. スペリングモードではない、またはシステムがロックされている場合は処理しない
     if (!this.isSpellingMode || this.isLocked) return;
 
-    // 2. 他の入力欄（検索バーやカスタムパーツ登録モーダルなど）にフォーカスがある時はタイピングを邪魔しない
+    // 2. 他の入力欄（検索バーなど）にフォーカスがある時はタイピングを邪魔しない
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
     // 3. 現在実行中の問題オブジェクトを取得
     const q = this.questions[this.currentIndex];
     if (!q) return;
 
-    // 【Backspaceキー】が押された場合：最後の1文字を取り消す (Undo)
-    if (e.key === 'Backspace') {
-        if (this.spellingAns.length > 0) {
-            this.handleSpellingUndo(this.spellingAns.length - 1, q);
+    const targetWordStr = q.w || "";
+    const targetLen = targetWordStr.trim().length;
+
+    // ─── 【Enterキー】が押された場合：正誤判定を行う ───
+    if (e.key === 'Enter') {
+        // 文字数がターゲットと同じまで入力されている場合のみ、判定を実行して次へ進む
+        if (this.spellingAns.length === targetLen) {
+            this.checkSpellingWin(q);
         }
         return;
     }
 
-    // 押されたキーを小文字に統一して判定（大文字・小文字両対応）
+    // ─── 【Backspaceキー】が押された場合：最後の1文字を消す ───
+    if (e.key === 'Backspace') {
+        if (this.spellingAns.length > 0) {
+            // 自由入力なので、単純に末尾の文字を削除
+            this.spellingAns.pop();
+            // 画面を再描画
+            this.renderSpellingInterface(q);
+        }
+        return;
+    }
+
+    // ─── 【アルファベットキー】が押された場合（自由タイピング） ───
     const pressedKey = e.key.toLowerCase();
 
-    // アルファベットなど、1文字の入力のみを対象にする (ShiftやEnterなどを弾く)
-    if (pressedKey.length !== 1) return;
+    // a〜z の1文字のアルファベットのみ入力を許可（必要に応じてハイフン等も含める場合は調整してください）
+    if (pressedKey.length !== 1 || !/[a-z]/.test(pressedKey)) return;
 
-    // 【アルファベット等のキー】が押された場合
-    // プール内から「まだ使用されておらず」「文字が一致する」最初のチップを探索
-    const poolItem = this.spellingPoolState.find(p => !p.used && p.char.toLowerCase() === pressedKey);
+    // すでに制限文字数に達している場合は、Enterを押すまでこれ以上入力させない
+    if (this.spellingAns.length >= targetLen) return;
 
-    if (poolItem) {
-        // プールの文字を使用済みに変更
-        poolItem.used = true;
-        // 解答スロットにチップの情報を追加
-        this.spellingAns.push({ id: poolItem.id, char: poolItem.char });
-        
-        // インターフェースを再描画して反映
-        this.renderSpellingInterface(q);
-
-        // 入力した文字数がターゲットの単語長に達したかチェック
-        const targetWordStr = q.w || "";
-        const targetLen = targetWordStr.trim().length;
-        if (this.spellingAns.length === targetLen) {
-            // 自動で勝利判定（チェッカーフラグ）へ
-            this.checkSpellingWin(q);
-        }
-    }
+    // 選択肢（プール）の文字に関係なく、タイピングした文字をそのまま解答スロットに追加
+    this.spellingAns.push({ 
+        id: 'kb-' + Date.now() + '-' + this.spellingAns.length, 
+        char: e.key // 大文字小文字を保持
+    });
+    
+    // 画面を再描画して文字を表示
+    this.renderSpellingInterface(q);
+    
+    // 💡【ポイント】ここではあえて `this.checkSpellingWin(q)` を自動で呼び出しません。
+    // これにより、文字数が埋まってもEnterを押すまで画面が止まり、自分のミスを確認できるようになります。
 });
-// ─── ここまでを追加 ───
 
 // BLIND RADIO
 this.isRadioMode = false;
