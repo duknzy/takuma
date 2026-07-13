@@ -1009,7 +1009,7 @@ if (currentItem.isFillIn) {
                  return example.replace(regex, '____');
              }
 
-          generateRounds() {
+         generateRounds() {
                 let sourceList = [];
                 if (this.currentMode === 'grammar') sourceList = this.grammarList;
                 else if (this.currentMode === 'synonym') sourceList = this.synonymList;
@@ -1018,6 +1018,7 @@ if (currentItem.isFillIn) {
                 const wordCopy = [...sourceList]; 
                 this.vocabRounds = [];
 
+                // カスタム追加分の単語（R&D PARTS）
                 const customWords = sourceList.filter(item => item.isCustom);
                 if (customWords.length > 0) {
                     this.vocabRounds.push({ 
@@ -1028,26 +1029,46 @@ if (currentItem.isFillIn) {
                 }
 
                 if (this.currentMode === 'grammar') {
-                    // 前置詞ごとにグループ化（[]の後ろの文字を抽出）
-                    const prepMap = {};
+                    // テキストファイルの構成に合わせて前置詞ごとにグループ化
+                    const prepGroups = {
+                        'about': [], 'against beyond over through': [], 'for': [], 'from': [],
+                        'in': [], 'on': [], 'out': [], 'to': [], 'up': [], 'with': [], 'others': []
+                    };
+                    
                     sourceList.forEach(item => {
                         if (item.isCustom) return;
-                        const match = item.w.match(/\]\s*(.+)$/);
-                        let prep = match ? match[1].trim() : "Others";
-                        if (!prepMap[prep]) prepMap[prep] = [];
-                        prepMap[prep].push(item);
+                        const wLower = item.w.toLowerCase();
+                        
+                        // 単語境界（\b）を使って正確に前置詞をマッチング
+                        if (/\babout\b/.test(wLower)) prepGroups['about'].push(item);
+                        else if (/\bfrom\b/.test(wLower)) prepGroups['from'].push(item);
+                        else if (/\bout\b/.test(wLower)) prepGroups['out'].push(item);
+                        else if (/\bup\b/.test(wLower)) prepGroups['up'].push(item);
+                        else if (/\bon\b/.test(wLower)) prepGroups['on'].push(item);
+                        else if (/\bin\b/.test(wLower)) prepGroups['in'].push(item);
+                        else if (/\bwith\b/.test(wLower)) prepGroups['with'].push(item);
+                        else if (/\bto\b/.test(wLower)) prepGroups['to'].push(item);
+                        else if (/\bfor\b/.test(wLower)) prepGroups['for'].push(item);
+                        else if (/\b(against|beyond|over|through)\b/.test(wLower)) prepGroups['against beyond over through'].push(item);
+                        else prepGroups['others'].push(item);
                     });
-                    Object.keys(prepMap).sort().forEach(prep => {
-                        this.vocabRounds.push({
-                            id: `prep_${prep}`,
-                            name: `【前置詞】 ${prep.toUpperCase()} (${prepMap[prep].length} Qs)`,
-                            words: prepMap[prep]
-                        });
+
+                    // セレクトボックス用にラウンドを追加
+                    Object.keys(prepGroups).forEach(prep => {
+                        if (prepGroups[prep].length > 0) {
+                            const displayName = prep === 'others' ? 'OTHERS' : prep.toUpperCase();
+                            this.vocabRounds.push({
+                                id: `prep_${prep.replace(/ /g, '_')}`,
+                                name: `【前置詞】 ${displayName} (${prepGroups[prep].length} Qs)`,
+                                words: prepGroups[prep]
+                            });
+                        }
                     });
+
                 } else if (this.currentMode === 'synonym') {
-                    // アルファベット順でグループ化
+                    // データファイル（txt）の区切りに合わせてアルファベット順でグループ化
                     const groupMap = {
-                        'A-C': [], 'D-F': [], 'G-I': [], 'J-L': [], 'M-O': [], 'P-R': [], 'S-U': [], 'V-Z': [], 'Others': []
+                        'A-C': [], 'D-F': [], 'G-I': [], 'J-M': [], 'N-P': [], 'Q-T': [], 'U-Z': [], 'Others': []
                     };
                     sourceList.forEach(item => {
                         if (item.isCustom) return;
@@ -1055,13 +1076,13 @@ if (currentItem.isFillIn) {
                         if (['a','b','c'].includes(firstChar)) groupMap['A-C'].push(item);
                         else if (['d','e','f'].includes(firstChar)) groupMap['D-F'].push(item);
                         else if (['g','h','i'].includes(firstChar)) groupMap['G-I'].push(item);
-                        else if (['j','k','l'].includes(firstChar)) groupMap['J-L'].push(item);
-                        else if (['m','n','o'].includes(firstChar)) groupMap['M-O'].push(item);
-                        else if (['p','q','r'].includes(firstChar)) groupMap['P-R'].push(item);
-                        else if (['s','t','u'].includes(firstChar)) groupMap['S-U'].push(item);
-                        else if (firstChar >= 'v' && firstChar <= 'z') groupMap['V-Z'].push(item);
+                        else if (['j','k','l','m'].includes(firstChar)) groupMap['J-M'].push(item);
+                        else if (['n','o','p'].includes(firstChar)) groupMap['N-P'].push(item);
+                        else if (['q','r','s','t'].includes(firstChar)) groupMap['Q-T'].push(item);
+                        else if (firstChar >= 'u' && firstChar <= 'z') groupMap['U-Z'].push(item);
                         else groupMap['Others'].push(item);
                     });
+                    
                     for (const group in groupMap) {
                         if (groupMap[group].length > 0) {
                             this.vocabRounds.push({
