@@ -2577,6 +2577,7 @@ this.isSynonymMode = (this.currentMode === 'synonym') || (document.getElementByI
                      return { 
                          w: item.w || item.word, 
                          m: item.m || item.meaning, 
+                         synonym: item.synonym || null, // ← ★これを追加
                          isCustom: item.isCustom || false,
                          originalId: item.originalId || null,
                          customId: item.customId || null,
@@ -2639,11 +2640,19 @@ this.isSynonymMode = (this.currentMode === 'synonym') || (document.getElementByI
                          flagIcon = '🟨'; flagClass = 'text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]';
                      }
 
-                     const safeW = encodeURIComponent(item.w);
+                    const safeW = encodeURIComponent(item.w);
                      const safeM = encodeURIComponent(item.m);
                      const displayW = item.w.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                     const displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                     let displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;"); // ← ★ const を let に変更
 
+                     // ▼ ★ここから類義語の追加ロジック ▼
+                     if (this.currentMode === 'synonym' && item.synonym) {
+                         const dispSyn = item.synonym.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                         displayM = `${displayM} (= ${dispSyn})`;
+                     }
+                     // ▲ ここまで ▲
+
+                     // ★ここでナンバリングの表示を分岐させている
                      // ★ここでナンバリングの表示を分岐させている
                      let displayId = item.isCustom ? `C-${item.customId}` : `No.${item.originalId || item.id + 1}`;
 
