@@ -14,6 +14,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./data.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
@@ -680,59 +681,6 @@
             });
         }
    
-        // データは空のままにしておくぜ
-        const rawData = `
-       [account] for: ～を説明する ｜ How do you account for the sudden drop in sales? ｜ 売上の急激な減少をどう説明しますか。
-[allow] for: ～を考慮に入れる ｜ You should allow for delays when planning your journey. ｜ 旅行の計画を立てる時は、遅れを考慮に入れるべきだ。
-[answer] for: ～の責任を負う ｜ You will have to answer for your misbehavior one day. ｜ 君はいつか自分の不正行為の責任を負わなければならなくなるだろう。
-[apologize] for: ～を謝罪する ｜ He apologized for keeping us waiting so long. ｜ 彼は私たちをそんなに長く待たせたことを謝罪した。
-[apply] for: ～に申し込む ｜ She decided to apply for the scholarship to study abroad. ｜ 彼女は留学するためにその奨学金に申し込むことを決めた。
-[ask] for: ～を求める ｜ It is important to ask for help when you are in trouble. ｜ 困ったときに助けを求めることは重要です。
-[atone] for: ～を償う ｜ He tried to atone for his past mistakes by working hard. ｜ 彼は懸命に働くことで過去の過ちを償おうとした。
-[bargain] for: ～を予期する ｜ The test was much harder than I had bargained for. ｜ そのテストは私が予期していたよりもずっと難しかった。
-[blame] A for B: Bの責任をAに帰する ｜ You cannot blame him for the failure of the project. ｜ プロジェクトの失敗を彼のせいにすることはできない。
-[call] for: ～を必要とする ｜ This difficult situation calls for immediate action. ｜ この困難な状況は即座の行動を必要としている。
-[care] for: ～を好む ｜ I don't really care for spicy food very much. ｜ 私は辛い食べ物があまり好きではない。
-[cater] for: ～の要望に応じる ｜ The hotel caters for the needs of business travelers. ｜ そのホテルはビジネス旅行者のニーズに応えている。
-[charge] A for B: Bの代金としてAを請求する ｜ They charge fifty dollars for the repair service. ｜ 彼らは修理サービスに50ドルを請求する。
-[compensate] for: ～を埋め合わせる ｜ Nothing can compensate for the loss of human life. ｜ 人命の損失を埋め合わせることができるものは何もない。
-[criticize] A for B: BのことでAを非難する ｜ The government was criticized for its slow response. ｜ 政府はその対応の遅さで非難された。
-[exchange] A for B: AをBと交換する ｜ I would like to exchange this shirt for a larger one. ｜ このシャツをもっと大きいものと交換したいのですが。
-[excuse] A for B: BのことでAを許す ｜ Please excuse me for arriving so late. ｜ 到着がこんなに遅れたことをお許しください。
-[feel] for: ～に同情する ｜ I really feel for her after everything she has been through. ｜ 彼女があれほど大変な経験をした後だけに、本当に同情する。
-[head] for: ～に向かって進む ｜ The ship is heading for the tropical island. ｜ その船は熱帯の島に向かって進んでいる。
-[hope] for: ～を望む ｜ Everyone is hoping for a peaceful solution to the conflict. ｜ 誰もがその紛争の平和的な解決を望んでいる。
-[long] for: ～を切望する ｜ The children were longing for the summer vacation to start. ｜ 子供たちは夏休みが始まるのを切望していた。
-[make] for: ～の方向へ進む ｜ As soon as the rain started, they made for the shelter. ｜ 雨が降り出すとすぐに、彼らは避難所の方へ向かった。
-[mistake] A for B: AをBと間違える ｜ I mistook him for his twin brother in the dark. ｜ 私は暗闇の中で彼を彼の双子の兄と間違えた。
-[opt] for: ～を選ぶ ｜ Most students opted for the online class instead of the in-person one. ｜ ほとんどの学生は対面授業ではなくオンライン授業を選んだ。
-[pay] for: ～の報いを受ける ｜ He will pay for his arrogance in the near future. ｜ 彼は近い将来、自分の傲慢さの報いを受けることになるだろう。
-[praise] A for B: BのことでAを褒める ｜ The teacher praised the student for her creative essay. ｜ 先生はその生徒の独創的な作文を褒めた。
-[provide] for: ～に備える ｜ It is wise to provide for your retirement while you are young. ｜ 若いうちに老後に備えておくのは賢明なことだ。
-[punish] A for B: BのことでAを罰する ｜ The boy was punished for breaking the window. ｜ その少年は窓を割ったことで罰せられた。
-[qualify] for: ～の資格を得る ｜ You must pass the exam to qualify for the position. ｜ その職の資格を得るには試験に合格しなければならない。
-[run] for: ～に立候補する ｜ She is planning to run for mayor next year. ｜ 彼女は来年、市長に立候補することを計画している。
-[scold] A for B: BのことでAを叱る ｜ The mother scolded her son for not doing his homework. ｜ 母親は宿題をしなかったことで息子を叱った。
-[send] for: ～を呼びにやる ｜ If the fever doesn't go down, you should send for a doctor. ｜ 熱が下がらないなら、医者を呼びにやるべきだ。
-[stand] for: ～を表す ｜ What does the acronym "AI" stand for? ｜ 頭字語の「AI」は何を表していますか。
-[strive] for: ～を目指して努力する ｜ We must always strive for excellence in our work. ｜ 私たちは常に仕事において卓越することを目指して努力しなければならない。
-[substitute] A for B: Bの代わりにAを用いる ｜ You can substitute honey for sugar in this recipe. ｜ このレシピでは砂糖の代わりにハチミツを用いることができる。
-[take] A for B: AをBだと思っている ｜ Do you take me for a fool? ｜ 私を馬鹿だと思っているのですか。
-[thank] A for B: BのことでAに感謝する ｜ Thank you for inviting me to your beautiful home. ｜ あなたの美しい家に私を招待してくれてありがとう。
-[vouch] for: ～を保証する ｜ I can vouch for his honesty and integrity. ｜ 私は彼の正直さと誠実さを保証することができます。
-[vote] for: ～に賛成投票する ｜ Millions of people voted for the new candidate. ｜ 何百万もの人々がその新人候補者に賛成投票した。
-[wait] for: ～を待つ ｜ We have been waiting for the bus for over an hour. ｜ 私たちは1時間以上もバスを待っている。
-[yearn] for: ～を切望する ｜ The citizens yearned for freedom under the strict regime. ｜ 市民たちは厳しい政権下で自由を切望していた。
-[capacity] for: ～の能力 ｜ Humans have an amazing capacity for learning new languages. ｜ 人間は新しい言語を学ぶ驚くべき能力を持っている。
-[demand] for: ～への需要 ｜ There is a growing demand for electric vehicles worldwide. ｜ 世界中で電気自動車への需要が高まっている。
-[remedy] for: ～への解決策 ｜ Education is often seen as a remedy for poverty. ｜ 教育はしばしば貧困への解決策と見なされる。
-[reputation] for: ～という評判 ｜ That restaurant has a reputation for excellent service. ｜ あのレストランは素晴らしいサービスという評判がある。
-[respect] for: ～に対する尊敬 ｜ Children should show respect for their elders. ｜ 子供たちは年長者に対する尊敬を示すべきだ。
-[room] for: ～の余地 ｜ There is still plenty of room for improvement in this report. ｜ この報告書にはまだ改善の余地がたくさんある。
-[sympathy] for: ～への同情 ｜ I have deep sympathy for the victims of the earthquake. ｜ 私はその地震の被災者へ深い同情を寄せる。
-[talent] for: ～の才能 ｜ She has a natural talent for playing the piano. ｜ 彼女はピアノを弾く天性の才能がある。
-[taste] for: ～の好み ｜ He developed a taste for classical music in college. ｜ 彼は大学でクラシック音楽への好みを募らせた。
-        `; 
 
         document.addEventListener('dblclick', function(event) { event.preventDefault(); }, { passive: false });
         document.addEventListener('touchmove', function(event) { if (event.scale !== 1) { event.preventDefault(); } }, { passive: false });
@@ -1800,11 +1748,22 @@ const radioCheck = document.getElementById('radio-mode');
                      }
                      
                      if (q.ex && !this.isReverseMode) {
-                        exText.className = "text-2xl md:text-4xl lg:text-5xl text-gray-100 f1-font italic text-center leading-tight tracking-tight drop-shadow-lg";
-                        exText.innerHTML = `
-                            <div class="flex flex-col items-center gap-4">
-                                <div>${this.highlightIdiom(q.ex, q.w)}</div>
-                                <div id="ex-translation-container">
+    exText.className = "text-2xl md:text-4xl lg:text-5xl text-gray-100 f1-font italic text-center leading-tight tracking-tight drop-shadow-lg";
+
+    // ▼ ここから追加・修正 ▼
+    let displayExample = this.highlightIdiom(q.ex, q.w);
+    // 穴埋め問題の場合、例文内の「答えの単語」を伏字に自動置換する
+    if (q.isFillIn && q.ansW) {
+        // 単語境界(\b)を指定して、関係ない単語の綴りまで置換されるのを防ぐ
+        const regex = new RegExp('\\b' + q.ansW + '\\b', 'gi');
+        // 伏字部分は少し赤色にしてサイバー感を出す
+        displayExample = displayExample.replace(regex, '<span class="text-red-500 font-bold opacity-80">___</span>');
+    }
+
+    exText.innerHTML = `
+        <div class="flex flex-col items-center gap-4">
+            <div>${displayExample}</div>
+            <div id="ex-translation-container">
                                     <button id="reveal-tr-btn" class="f1-font border border-gray-700 bg-black/20 text-gray-500 px-4 py-2 rounded text-[10px] tracking-widest hover:text-cyan-400 hover:border-cyan-400 transition-all uppercase active:scale-95">
                                         Decrypt Translation
                                     </button>
