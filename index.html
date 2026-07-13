@@ -2078,10 +2078,17 @@ if (this.isSpellingMode) {
     exText.className = "text-2xl md:text-4xl lg:text-5xl text-gray-100 f1-font italic text-center leading-tight tracking-tight drop-shadow-lg";
 
     let displayExample = this.highlightIdiom(q.ex, q.w);
-                     // 穴埋め問題の場合、例文内の「答えの単語（活用形含む）」を伏字に自動置換する
-                     if (q.isFillIn && q.ansW) {
+                     
+                     // ▼ ここをごっそり書き換える ▼
+                     if (this.isPrepGuessMode) {
+                         // PREP GUESSモード: 前置詞（答え）だけをくり抜く
+                         const prepRegex = new RegExp(`\\b${q.aText}\\b`, 'gi');
+                         displayExample = displayExample.replace(prepRegex, '<span class="text-red-500 font-bold opacity-80">___</span>');
+                     } else if (q.isFillIn && q.ansW) {
+                         // 通常の穴埋めモード: 答えの単語（動詞の活用形含む）を伏せ字にする
                          displayExample = this.maskConjugatedWord(displayExample, q.ansW);
                      }
+                     // ▲ ここまで ▲
 
     exText.innerHTML = `
         <div class="flex flex-col items-center gap-4">
