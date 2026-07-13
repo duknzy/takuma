@@ -1117,10 +1117,10 @@ if (currentItem.isFillIn) {
                 }
 
                 if (this.currentMode === 'grammar') {
-                    // テキストファイルの構成に合わせて前置詞ごとにグループ化
+                    // 各前置詞を独立したグループに分割してシャープに保つ
                     const prepGroups = {
-                        'about': [], 'against beyond over through': [], 'for': [], 'from': [],
-                        'in': [], 'on': [], 'out': [], 'to': [], 'up': [], 'with': [], 'others': []
+                        'about': [], 'against': [], 'beyond': [], 'for': [], 'from': [],
+                        'in': [], 'on': [], 'out': [], 'over': [], 'through': [], 'to': [], 'up': [], 'with': [], 'others': []
                     };
                     
                     sourceList.forEach(item => {
@@ -1136,7 +1136,10 @@ if (currentItem.isFillIn) {
                         else if (/\bwith\b/.test(wLower)) prepGroups['with'].push(item);
                         else if (/\bto\b/.test(wLower)) prepGroups['to'].push(item);
                         else if (/\bfor\b/.test(wLower)) prepGroups['for'].push(item);
-                        else if (/\b(against|beyond|over|through)\b/.test(wLower)) prepGroups['against beyond over through'].push(item);
+                        else if (/\bagainst\b/.test(wLower)) prepGroups['against'].push(item);
+                        else if (/\bbeyond\b/.test(wLower)) prepGroups['beyond'].push(item);
+                        else if (/\bover\b/.test(wLower)) prepGroups['over'].push(item);
+                        else if (/\bthrough\b/.test(wLower)) prepGroups['through'].push(item);
                         else prepGroups['others'].push(item);
                     });
 
