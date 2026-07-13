@@ -1009,7 +1009,95 @@ if (currentItem.isFillIn) {
                  return example.replace(regex, '____');
              }
 
-         generateRounds() {
+             // ▼ ここから追加：動詞の活用形を検知して伏せ字にするスマート機能 ▼
+            maskConjugatedWord(example, baseWord) {
+                if (!example || !baseWord) return example;
+
+                const b = baseWord.toLowerCase();
+                
+                // 頻出する不規則動詞の活用形データベース
+                const irregulars = {
+                    'bear': ['bears', 'bore', 'bearing'],
+'blow': ['blows', 'blew', 'blowing'],
+'break': ['breaks', 'broke', 'breaking'],
+'bring': ['brings', 'brought', 'bringing'],
+'catch': ['catches', 'caught', 'catching'],
+'cling': ['clings', 'clung', 'clinging'],
+'come': ['comes', 'came', 'coming'],
+'deal': ['deals', 'dealt', 'dealing'],
+'do': ['does', 'did', 'doing'],
+'draw': ['draws', 'drew', 'drawing'],
+'dwell': ['dwells', 'dwelt', 'dwelling'],
+'fall': ['falls', 'fell', 'falling'],
+'feed': ['feeds', 'fed', 'feeding'],
+'feel': ['feels', 'felt', 'feeling'],
+'give': ['gives', 'gave', 'giving'],
+'go': ['goes', 'went', 'going'],
+'hold': ['holds', 'held', 'holding'],
+'keep': ['keeps', 'kept', 'keeping'],
+'know': ['knows', 'knew', 'knowing'],
+'lead': ['leads', 'led', 'leading'],
+'leave': ['leaves', 'left', 'leaving'],
+'make': ['makes', 'made', 'making'],
+'mistake': ['mistakes', 'mistook', 'mistaking'],
+'pay': ['pays', 'paid', 'paying'],
+'put': ['puts', 'put', 'putting'],
+'run': ['runs', 'ran', 'running'],
+'see': ['sees', 'saw', 'seeing'],
+'send': ['sends', 'sent', 'sending'],
+'set': ['sets', 'set', 'setting'],
+'show': ['shows', 'showed', 'showing'],
+'shrink': ['shrinks', 'shrank', 'shrinking'],
+'speak': ['speaks', 'spoke', 'speaking'],
+'spell': ['spells', 'spelt', 'spelling'],
+'spring': ['springs', 'sprang', 'springing'],
+'stand': ['stands', 'stood', 'standing'],
+'strike': ['strikes', 'struck', 'striking'],
+'strive': ['strives', 'strove', 'striving'],
+'take': ['takes', 'took', 'taking'],
+'tell': ['tells', 'told', 'telling'],
+'wear': ['wears', 'wore', 'wearing'],
+'wind': ['winds', 'wound', 'winding'],
+'clothe': ['clothes', 'clad', 'clothing'],
+'lean': ['leans', 'leant', 'leaning'],
+'lie': ['lies', 'lay', 'lying'],
+'rise': ['rises', 'rose', 'rising'],
+                };
+
+                let variations = [b];
+
+                if (irregulars[b]) {
+                    variations = variations.concat(irregulars[b]);
+                } else {
+                    // 規則動詞の語尾変化を自動生成
+                    variations.push(b + 's', b + 'es', b + 'ed', b + 'd', b + 'ing');
+                    if (b.endsWith('y')) {
+                        const stem = b.slice(0, -1);
+                        variations.push(stem + 'ies', stem + 'ied');
+                    }
+                    if (b.endsWith('e')) {
+                        const stem = b.slice(0, -1);
+                        variations.push(stem + 'ing');
+                    }
+                    if (b.length > 2) {
+                        const lastChar = b.slice(-1);
+                        variations.push(b + lastChar + 'ed', b + lastChar + 'ing');
+                    }
+                }
+
+                // 長い単語から順にマッチさせる（例: boast より boasting を先に判定）
+                variations.sort((a, b) => b.length - a.length);
+                variations = [...new Set(variations)];
+
+                // パターンを組み立てて一括置換
+                const pattern = '\\b(' + variations.join('|') + ')\\b';
+                const regex = new RegExp(pattern, 'gi');
+
+                return example.replace(regex, '<span class="text-red-500 font-bold opacity-80">___</span>');
+            }
+            // ▲ 追加ここまで ▲
+
+        generateRounds() {
                 let sourceList = [];
                 if (this.currentMode === 'grammar') sourceList = this.grammarList;
                 else if (this.currentMode === 'synonym') sourceList = this.synonymList;
@@ -1039,7 +1127,6 @@ if (currentItem.isFillIn) {
                         if (item.isCustom) return;
                         const wLower = item.w.toLowerCase();
                         
-                        // 単語境界（\b）を使って正確に前置詞をマッチング
                         if (/\babout\b/.test(wLower)) prepGroups['about'].push(item);
                         else if (/\bfrom\b/.test(wLower)) prepGroups['from'].push(item);
                         else if (/\bout\b/.test(wLower)) prepGroups['out'].push(item);
@@ -1053,20 +1140,29 @@ if (currentItem.isFillIn) {
                         else prepGroups['others'].push(item);
                     });
 
-                    // セレクトボックス用にラウンドを追加
+                    // ▼ 修正：タイヤ選択（問題数）に合わせて分割処理 ▼
                     Object.keys(prepGroups).forEach(prep => {
-                        if (prepGroups[prep].length > 0) {
+                        let groupWords = prepGroups[prep];
+                        if (groupWords.length > 0) {
                             const displayName = prep === 'others' ? 'OTHERS' : prep.toUpperCase();
-                            this.vocabRounds.push({
-                                id: `prep_${prep.replace(/ /g, '_')}`,
-                                name: `【前置詞】 ${displayName} (${prepGroups[prep].length} Qs)`,
-                                words: prepGroups[prep]
-                            });
+                            let part = 1;
+                            let totalParts = Math.ceil(groupWords.length / this.wordsPerRound);
+                            
+                            while (groupWords.length > 0) {
+                                const chunk = groupWords.splice(0, this.wordsPerRound);
+                                const ptStr = totalParts > 1 ? ` Pt.${part}` : '';
+                                this.vocabRounds.push({
+                                    id: `prep_${prep.replace(/ /g, '_')}_${part}`,
+                                    name: `【前置詞】 ${displayName}${ptStr} (${chunk.length} Qs)`,
+                                    words: chunk
+                                });
+                                part++;
+                            }
                         }
                     });
 
                 } else if (this.currentMode === 'synonym') {
-                    // データファイル（txt）の区切りに合わせてアルファベット順でグループ化
+                    // アルファベット順でグループ化
                     const groupMap = {
                         'A-C': [], 'D-F': [], 'G-I': [], 'J-M': [], 'N-P': [], 'Q-T': [], 'U-Z': [], 'Others': []
                     };
@@ -1083,13 +1179,23 @@ if (currentItem.isFillIn) {
                         else groupMap['Others'].push(item);
                     });
                     
+                    // ▼ 修正：タイヤ選択（問題数）に合わせて分割処理 ▼
                     for (const group in groupMap) {
-                        if (groupMap[group].length > 0) {
-                            this.vocabRounds.push({
-                                id: `syn_${group}`,
-                                name: `【類義語】 ${group} (${groupMap[group].length} Qs)`,
-                                words: groupMap[group]
-                            });
+                        let groupWords = groupMap[group];
+                        if (groupWords.length > 0) {
+                            let part = 1;
+                            let totalParts = Math.ceil(groupWords.length / this.wordsPerRound);
+                            
+                            while (groupWords.length > 0) {
+                                const chunk = groupWords.splice(0, this.wordsPerRound);
+                                const ptStr = totalParts > 1 ? ` Pt.${part}` : '';
+                                this.vocabRounds.push({
+                                    id: `syn_${group}_${part}`,
+                                    name: `【類義語】 ${group}${ptStr} (${chunk.length} Qs)`,
+                                    words: chunk
+                                });
+                                part++;
+                            }
                         }
                     }
                 } else {
@@ -1292,48 +1398,55 @@ if (currentItem.isFillIn) {
 
 
             switchModeTab(mode) {
-    this.currentMode = mode;
-    const tabs = ['vocab', 'synonym', 'grammar'];
-    
-    // タブのアクティブ状態を切り替え
-    tabs.forEach(t => {
-        const btn = document.getElementById(`mode-${t}`);
-        if (t === mode) {
-            btn.classList.add('text-white', 'border-red-500');
-            btn.classList.remove('text-gray-500', 'border-transparent');
-        } else {
-            btn.classList.remove('text-white', 'border-red-500');
-            btn.classList.add('text-gray-500', 'border-transparent');
-        }
-    });
+                this.currentMode = mode;
+                const tabs = ['vocab', 'synonym', 'grammar'];
+                
+                // タブのアクティブ状態を切り替え
+                tabs.forEach(t => {
+                    const btn = document.getElementById(`mode-${t}`);
+                    if (t === mode) {
+                        btn.classList.add('text-white', 'border-red-500');
+                        btn.classList.remove('text-gray-500', 'border-transparent');
+                    } else {
+                        btn.classList.remove('text-white', 'border-red-500');
+                        btn.classList.add('text-gray-500', 'border-transparent');
+                    }
+                });
 
-    // モードに応じたオプションスイッチのコントロール
-    const reverseOption = document.getElementById('reverse-mode').closest('label');
-    const spellOptionContainer = document.getElementById('spelling-option-container');
-    const synonymOption = document.getElementById('synonym-mode').closest('label');
+                // モードに応じたオプションスイッチのコントロール
+                const reverseOption = document.getElementById('reverse-mode').closest('label');
+                const spellOptionContainer = document.getElementById('spelling-option-container');
+                const synonymOption = document.getElementById('synonym-mode') ? document.getElementById('synonym-mode').closest('label') : null;
+                
+                // ▼ CUSTOM RANGEの表示/非表示をコントロールするための要素を取得 ▼
+                const customStartInput = document.getElementById('custom-start');
+                const customRangeArea = customStartInput ? customStartInput.closest('div').parentElement : null;
 
-    if (mode === 'vocab') {
-        // Vocabモード: 全解放
-        reverseOption.style.display = 'flex';
-        synonymOption.style.display = 'flex';
-        this.toggleSpellingOption(); // Reverseの状態に合わせて再評価
-    } else {
-        // Synonym / Grammarモード: 不要なシステムをロック
-        reverseOption.style.display = 'none';
-        spellOptionContainer.classList.add('hidden');
-        synonymOption.style.display = 'none';
-        
-        // 強制的にチェックをオフにする
-        document.getElementById('reverse-mode').checked = false;
-        document.getElementById('spelling-mode').checked = false;
-        if(document.getElementById('synonym-mode')) document.getElementById('synonym-mode').checked = false;
-    }
+                if (mode === 'vocab') {
+                    // Vocabモード: 全解放
+                    if(reverseOption) reverseOption.style.display = 'flex';
+                    if(synonymOption) synonymOption.style.display = 'flex';
+                    if(customRangeArea) customRangeArea.style.display = 'block'; // ★ CUSTOM RANGE 表示
+                    this.toggleSpellingOption(); 
+                } else {
+                    // Synonym / Grammarモード: 不要なシステムをロック
+                    if(reverseOption) reverseOption.style.display = 'none';
+                    if(spellOptionContainer) spellOptionContainer.classList.add('hidden');
+                    if(synonymOption) synonymOption.style.display = 'none';
+                    if(customRangeArea) customRangeArea.style.display = 'none'; // ★ CUSTOM RANGE 非表示
+                    
+                    // 強制的にチェックをオフにする
+                    document.getElementById('reverse-mode').checked = false;
+                    document.getElementById('spelling-mode').checked = false;
+                    if(document.getElementById('synonym-mode')) document.getElementById('synonym-mode').checked = false;
+                }
 
-    // セッティング変更に合わせてラウンドを再生成し、UIを更新
-    this.generateRounds();
-    this.initUI();
-    this.updateSummary();
-}
+                // セッティング変更に合わせてラウンドを再生成し、UIを更新
+                this.generateRounds();
+                this.initUI();
+                this.updateSummary();
+            }
+
 
             // --- ここから比較モードのエンジン ---
             openComparisonMode() {
@@ -1921,15 +2034,11 @@ this.isSynonymMode = (this.currentMode === 'synonym') || (document.getElementByI
                      if (q.ex && !this.isReverseMode) {
     exText.className = "text-2xl md:text-4xl lg:text-5xl text-gray-100 f1-font italic text-center leading-tight tracking-tight drop-shadow-lg";
 
-    // ▼ ここから追加・修正 ▼
     let displayExample = this.highlightIdiom(q.ex, q.w);
-    // 穴埋め問題の場合、例文内の「答えの単語」を伏字に自動置換する
-    if (q.isFillIn && q.ansW) {
-        // 単語境界(\b)を指定して、関係ない単語の綴りまで置換されるのを防ぐ
-        const regex = new RegExp('\\b' + q.ansW + '\\b', 'gi');
-        // 伏字部分は少し赤色にしてサイバー感を出す
-        displayExample = displayExample.replace(regex, '<span class="text-red-500 font-bold opacity-80">___</span>');
-    }
+                     // 穴埋め問題の場合、例文内の「答えの単語（活用形含む）」を伏字に自動置換する
+                     if (q.isFillIn && q.ansW) {
+                         displayExample = this.maskConjugatedWord(displayExample, q.ansW);
+                     }
 
     exText.innerHTML = `
         <div class="flex flex-col items-center gap-4">
