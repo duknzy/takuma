@@ -1639,11 +1639,12 @@ switchModeTab(mode) {
                 this.updateSummary();
             }
 
-           createRandomRound() {
+          createRandomRound() {
                 // ▼ 現在のタブのリストをターゲットにする ▼
                 let sourceList = this.vocabList;
                 if (this.currentMode === 'synonym') sourceList = this.synonymList;
-                if (this.currentMode === 'grammar') sourceList = this.grammarList;
+                // ▼ ここに || this.currentMode === 'prep_guess' を追加 ▼
+                if (this.currentMode === 'grammar' || this.currentMode === 'prep_guess') sourceList = this.grammarList;
 
                 const sVal = document.getElementById('rand-start').value;
                 const eVal = document.getElementById('rand-end').value;
@@ -2392,15 +2393,22 @@ if (this.isSpellingMode) {
                          else this.finish();
                      }, 400); 
 
-                 } else {
+                } else {
                      this.missCount++;
                      this.currentStreak = 0; 
                      
-                     feedback.innerText = `WRONG: ${q.w} = ${q.m}`;
+                     // ▼ 類義語モードなら英語と日本語を両方表示する ▼
+                     if (this.isSynonymMode && q.synonym) {
+                         feedback.innerText = `WRONG: ${q.w} = ${q.synonym} (${q.m})`;
+                     } else {
+                         feedback.innerText = `WRONG: ${q.w} = ${q.m}`;
+                     }
                      feedback.className = "mt-4 text-center h-6 font-bold text-red-500 animate-pulse";
                      
                      if (!this.missedWordsLog.find(item => item.w === q.w)) {
-                         this.missedWordsLog.push({ w: q.w, m: q.m, ex: q.ex });
+                         // リザルト画面のログにも類義語と日本語を両方残す
+                         const logMeaning = (this.isSynonymMode && q.synonym) ? `${q.synonym} (${q.m})` : q.m;
+                         this.missedWordsLog.push({ w: q.w, m: logMeaning, ex: q.ex });
                      }
                      
                      this.questions.push(q);
