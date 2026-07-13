@@ -323,7 +323,15 @@
                     </button>
 
                     <div id="strategy-panel" class="strategy-panel-mobile space-y-6">
-                        
+
+                    <!-- ▼ コース(モード)選択タブ ▼ -->
+<div class="flex border-b border-gray-700 bg-black/40 rounded-t-lg">
+    <button onclick="quiz.switchModeTab('vocab')" id="mode-vocab" class="flex-1 px-2 py-3 text-[10px] md:text-xs font-bold text-white border-b-2 border-red-500 hover:bg-white/5 transition-colors">VOCAB</button>
+    <button onclick="quiz.switchModeTab('synonym')" id="mode-synonym" class="flex-1 px-2 py-3 text-[10px] md:text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-white transition-colors">SYNONYM</button>
+    <button onclick="quiz.switchModeTab('grammar')" id="mode-grammar" class="flex-1 px-2 py-3 text-[10px] md:text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-white transition-colors">GRAMMAR</button>
+</div>
+<!-- ▲ ここまで ▲ -->
+
                         <div class="flex border-b border-gray-700">
                             <button onclick="quiz.switchStrategyTab('normal')" id="tab-normal" class="px-4 py-2 text-[10px] md:text-xs font-bold text-white border-b-2 border-red-500 hover:bg-white/5 transition-colors">NORMAL</button>
                             <button onclick="quiz.switchStrategyTab('random')" id="tab-random" class="px-4 py-2 text-[10px] md:text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-white transition-colors">RANDOM</button>
@@ -706,12 +714,17 @@
                 this.bookmarkedFilter = 'all';
                 this.compareList = [];
                 this.initCompareSearch();
+                // constructor() の中の適当な場所にこれを追加
+this.currentMode = 'vocab'; // デフォルトはVocabモード
 
                 this.isPitStopMode = false;
 this.isReverseMode = false;
 this.isSpellingMode = false;
 this.spellingAns = [];
 this.spellingPoolState = []; // 👈 ここを見つける
+this.vocabList = [];
+this.synonymList = [];
+this.grammarList = [];
 
 // --- キーボードタイピングによる自由入力 ＆ Enter進行サポート ---
 window.addEventListener('keydown', (e) => {
@@ -970,6 +983,17 @@ const radioCheck = document.getElementById('radio-mode');
                             exTr: parts[2] || "",
                             originalId: idCounter++ 
                         });
+
+                        // ▼ ここから追加：セクターごとの自動振り分け ▼
+const currentItem = this.masterList[this.masterList.length - 1]; // 今pushしたデータを取得
+if (currentItem.isFillIn) {
+    this.grammarList.push(currentItem);
+} else if (currentItem.synonym) {
+    this.synonymList.push(currentItem);
+} else {
+    this.vocabList.push(currentItem);
+}
+// ▲ ここまで ▲
                     }
                 });
             }
@@ -986,11 +1010,16 @@ const radioCheck = document.getElementById('radio-mode');
              }
 
           generateRounds() {
-                const wordCopy = [...this.masterList]; 
-                this.vocabRounds = [];
+                let sourceList = [];
+if (this.currentMode === 'grammar') sourceList = this.grammarList;
+else if (this.currentMode === 'synonym') sourceList = this.synonymList;
+else sourceList = this.vocabList;
+
+const wordCopy = [...sourceList]; 
+this.vocabRounds = [];
 
                 // ★追加：カスタム単語だけを集めた専用のテストコース（ラウンド）を生成
-                const customWords = this.masterList.filter(item => item.isCustom);
+                const customWords = sourceList.filter(item => item.isCustom);
                 if (customWords.length > 0) {
                     this.vocabRounds.push({ 
                         id: 'custom_only', 
@@ -1193,6 +1222,51 @@ const radioCheck = document.getElementById('radio-mode');
                     btn.disabled = false;
                 }
             }
+
+
+            switchModeTab(mode) {
+    this.currentMode = mode;
+    const tabs = ['vocab', 'synonym', 'grammar'];
+    
+    // タブのアクティブ状態を切り替え
+    tabs.forEach(t => {
+        const btn = document.getElementById(`mode-${t}`);
+        if (t === mode) {
+            btn.classList.add('text-white', 'border-red-500');
+            btn.classList.remove('text-gray-500', 'border-transparent');
+        } else {
+            btn.classList.remove('text-white', 'border-red-500');
+            btn.classList.add('text-gray-500', 'border-transparent');
+        }
+    });
+
+    // モードに応じたオプションスイッチのコントロール
+    const reverseOption = document.getElementById('reverse-mode').closest('label');
+    const spellOptionContainer = document.getElementById('spelling-option-container');
+    const synonymOption = document.getElementById('synonym-mode').closest('label');
+
+    if (mode === 'vocab') {
+        // Vocabモード: 全解放
+        reverseOption.style.display = 'flex';
+        synonymOption.style.display = 'flex';
+        this.toggleSpellingOption(); // Reverseの状態に合わせて再評価
+    } else {
+        // Synonym / Grammarモード: 不要なシステムをロック
+        reverseOption.style.display = 'none';
+        spellOptionContainer.classList.add('hidden');
+        synonymOption.style.display = 'none';
+        
+        // 強制的にチェックをオフにする
+        document.getElementById('reverse-mode').checked = false;
+        document.getElementById('spelling-mode').checked = false;
+        if(document.getElementById('synonym-mode')) document.getElementById('synonym-mode').checked = false;
+    }
+
+    // セッティング変更に合わせてラウンドを再生成し、UIを更新
+    this.generateRounds();
+    this.initUI();
+    this.updateSummary();
+}
 
             // --- ここから比較モードのエンジン ---
             openComparisonMode() {
@@ -1610,7 +1684,8 @@ const radioCheck = document.getElementById('radio-mode');
                 this.isReverseMode = document.getElementById('reverse-mode').checked;
                 this.isSpellingMode = document.getElementById('spelling-mode').checked && this.isReverseMode;
             this.isRadioMode = document.getElementById('radio-mode').checked;
-                this.isSynonymMode = document.getElementById('synonym-mode') && document.getElementById('synonym-mode').checked;
+                // ▼ これに書き換える ▼
+this.isSynonymMode = (this.currentMode === 'synonym') || (document.getElementById('synonym-mode') && document.getElementById('synonym-mode').checked);
 
                 let modeTitle = "";
                 if (this.isRadioMode) modeTitle = " [BLIND RADIO]";
@@ -1660,7 +1735,9 @@ const radioCheck = document.getElementById('radio-mode');
                         lastMissedSeconds: existingData.lastMissedSeconds || null 
                     };
                 });
-                this.questions.sort(() => Math.random() - 0.5);
+                if (this.currentMode === 'vocab') {
+    this.questions.sort(() => Math.random() - 0.5);
+}
                 this.showVocabQuestion();
             }
             
