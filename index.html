@@ -1011,14 +1011,13 @@ if (currentItem.isFillIn) {
 
           generateRounds() {
                 let sourceList = [];
-if (this.currentMode === 'grammar') sourceList = this.grammarList;
-else if (this.currentMode === 'synonym') sourceList = this.synonymList;
-else sourceList = this.vocabList;
+                if (this.currentMode === 'grammar') sourceList = this.grammarList;
+                else if (this.currentMode === 'synonym') sourceList = this.synonymList;
+                else sourceList = this.vocabList;
 
-const wordCopy = [...sourceList]; 
-this.vocabRounds = [];
+                const wordCopy = [...sourceList]; 
+                this.vocabRounds = [];
 
-                // ★追加：カスタム単語だけを集めた専用のテストコース（ラウンド）を生成
                 const customWords = sourceList.filter(item => item.isCustom);
                 if (customWords.length > 0) {
                     this.vocabRounds.push({ 
@@ -1028,14 +1027,61 @@ this.vocabRounds = [];
                     });
                 }
 
-                let roundNum = 1;
-                let currentWordIndex = 1; 
-                while (wordCopy.length > 0) {
-                    const chunk = wordCopy.splice(0, this.wordsPerRound);
-                    if (chunk.length > 0) {
-                        this.vocabRounds.push({ id: roundNum, name: `ROUND ${roundNum} (No.${currentWordIndex} - ${currentWordIndex + chunk.length - 1})`, words: chunk });
-                        roundNum++;
-                        currentWordIndex += chunk.length;
+                if (this.currentMode === 'grammar') {
+                    // 前置詞ごとにグループ化（[]の後ろの文字を抽出）
+                    const prepMap = {};
+                    sourceList.forEach(item => {
+                        if (item.isCustom) return;
+                        const match = item.w.match(/\]\s*(.+)$/);
+                        let prep = match ? match[1].trim() : "Others";
+                        if (!prepMap[prep]) prepMap[prep] = [];
+                        prepMap[prep].push(item);
+                    });
+                    Object.keys(prepMap).sort().forEach(prep => {
+                        this.vocabRounds.push({
+                            id: `prep_${prep}`,
+                            name: `【前置詞】 ${prep.toUpperCase()} (${prepMap[prep].length} Qs)`,
+                            words: prepMap[prep]
+                        });
+                    });
+                } else if (this.currentMode === 'synonym') {
+                    // アルファベット順でグループ化
+                    const groupMap = {
+                        'A-C': [], 'D-F': [], 'G-I': [], 'J-L': [], 'M-O': [], 'P-R': [], 'S-U': [], 'V-Z': [], 'Others': []
+                    };
+                    sourceList.forEach(item => {
+                        if (item.isCustom) return;
+                        const firstChar = item.w.charAt(0).toLowerCase();
+                        if (['a','b','c'].includes(firstChar)) groupMap['A-C'].push(item);
+                        else if (['d','e','f'].includes(firstChar)) groupMap['D-F'].push(item);
+                        else if (['g','h','i'].includes(firstChar)) groupMap['G-I'].push(item);
+                        else if (['j','k','l'].includes(firstChar)) groupMap['J-L'].push(item);
+                        else if (['m','n','o'].includes(firstChar)) groupMap['M-O'].push(item);
+                        else if (['p','q','r'].includes(firstChar)) groupMap['P-R'].push(item);
+                        else if (['s','t','u'].includes(firstChar)) groupMap['S-U'].push(item);
+                        else if (firstChar >= 'v' && firstChar <= 'z') groupMap['V-Z'].push(item);
+                        else groupMap['Others'].push(item);
+                    });
+                    for (const group in groupMap) {
+                        if (groupMap[group].length > 0) {
+                            this.vocabRounds.push({
+                                id: `syn_${group}`,
+                                name: `【類義語】 ${group} (${groupMap[group].length} Qs)`,
+                                words: groupMap[group]
+                            });
+                        }
+                    }
+                } else {
+                    // 通常VOCABモード：規定数ごとのラウンド分け
+                    let roundNum = 1;
+                    let currentWordIndex = 1; 
+                    while (wordCopy.length > 0) {
+                        const chunk = wordCopy.splice(0, this.wordsPerRound);
+                        if (chunk.length > 0) {
+                            this.vocabRounds.push({ id: roundNum, name: `ROUND ${roundNum} (No.${currentWordIndex} - ${currentWordIndex + chunk.length - 1})`, words: chunk });
+                            roundNum++;
+                            currentWordIndex += chunk.length;
+                        }
                     }
                 }
             }
@@ -1444,7 +1490,12 @@ this.vocabRounds = [];
                 this.updateSummary();
             }
 
-            createRandomRound() {
+           createRandomRound() {
+                // ▼ 現在のタブのリストをターゲットにする ▼
+                let sourceList = this.vocabList;
+                if (this.currentMode === 'synonym') sourceList = this.synonymList;
+                if (this.currentMode === 'grammar') sourceList = this.grammarList;
+
                 const sVal = document.getElementById('rand-start').value;
                 const eVal = document.getElementById('rand-end').value;
                 const qVal = document.getElementById('rand-qty').value;
@@ -1454,12 +1505,12 @@ this.vocabRounds = [];
                 let qty = parseInt(qVal);
 
                 if (isNaN(s)) s = 0;
-                if (isNaN(e)) e = this.masterList.length;
+                if (isNaN(e)) e = sourceList.length;
                 if (isNaN(qty) || qty <= 0) qty = this.wordsPerRound; 
 
-                if (s < 0 || e > this.masterList.length || s >= e) { alert("Invalid Range for Random GP"); return; }
+                if (s < 0 || e > sourceList.length || s >= e) { alert("Invalid Range for Random GP"); return; }
 
-                const rangePool = this.masterList.slice(s, e);
+                const rangePool = sourceList.slice(s, e);
                 this.shuffle(rangePool);
                 const selectedWords = rangePool.slice(0, qty);
                 
@@ -1536,7 +1587,18 @@ this.vocabRounds = [];
                 this.currentRoundIndex = parseInt(selector.value);
                 const selectedRound = this.vocabRounds[this.currentRoundIndex];
                 
-                this.questions = selectedRound.words.map(target => ({ w: target.w, m: target.m }));
+               
+                this.questions = selectedRound.words.map(target => ({ 
+                    w: target.w, 
+                    m: target.m, 
+                    synonym: target.synonym, 
+                    isFillIn: target.isFillIn, 
+                    dispW: target.dispW 
+                }));
+
+
+
+
                 this.currentIndex = 0;
                 this.isReverseMode = document.getElementById('reverse-mode').checked;
                 
@@ -1552,8 +1614,19 @@ this.vocabRounds = [];
                 const q = this.questions[this.currentIndex];
                 document.getElementById('fc-progress').innerText = `LAP ${this.currentIndex + 1} / ${this.questions.length}`;
                 
-                const displayWord = this.isReverseMode ? q.m : q.w;
-                const displayMeaning = this.isReverseMode ? q.w : q.m;
+               let displayWord = this.isReverseMode ? q.m : (q.dispW || q.w);
+                let displayMeaning = this.isReverseMode ? (q.dispW || q.w) : q.m;
+
+                if (q.isFillIn) {
+                    displayWord = this.isReverseMode ? q.m : q.dispW;
+                    displayMeaning = this.isReverseMode ? q.ansW : q.m;
+                } else if (this.currentMode === 'synonym' && q.synonym) {
+                    if (this.isReverseMode) {
+                        displayMeaning = `${q.w} (= ${q.synonym})`;
+                    } else {
+                        displayMeaning = `${q.m} (= ${q.synonym})`;
+                    }
+                }
 
                 const wordEl = document.getElementById('fc-word');
                 wordEl.innerText = displayWord;
@@ -2470,7 +2543,13 @@ this.isSynonymMode = (this.currentMode === 'synonym') || (document.getElementByI
                  const endVal = parseInt(document.getElementById('wb-end').value);
 
                  listEl.innerHTML = '';
-                 let dataSrc = this.masterList.length > 0 ? this.masterList : (this.allMistakes || []);
+                // ▼ 修正 ▼
+                 let sourceList = [];
+                 if (this.currentMode === 'grammar') sourceList = this.grammarList;
+                 else if (this.currentMode === 'synonym') sourceList = this.synonymList;
+                 else sourceList = this.vocabList;
+
+                 let dataSrc = sourceList.length > 0 ? sourceList : (this.allMistakes || []);
                  
                 let merged = dataSrc.map((item, idx) => {
                      const srs = this.allMistakes.find(m => m.word === item.w || m.w === item.w);
