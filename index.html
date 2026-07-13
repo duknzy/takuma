@@ -325,10 +325,13 @@
                     <div id="strategy-panel" class="strategy-panel-mobile space-y-6">
 
                     <!-- ▼ コース(モード)選択タブ ▼ -->
+<!-- 245行目付近の既存のHTML -->
 <div class="flex border-b border-gray-700 bg-black/40 rounded-t-lg">
     <button onclick="quiz.switchModeTab('vocab')" id="mode-vocab" class="flex-1 px-2 py-3 text-[10px] md:text-xs font-bold text-white border-b-2 border-red-500 hover:bg-white/5 transition-colors">VOCAB</button>
     <button onclick="quiz.switchModeTab('synonym')" id="mode-synonym" class="flex-1 px-2 py-3 text-[10px] md:text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-white transition-colors">SYNONYM</button>
     <button onclick="quiz.switchModeTab('grammar')" id="mode-grammar" class="flex-1 px-2 py-3 text-[10px] md:text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-white transition-colors">GRAMMAR</button>
+    <!-- ▼ これを追加 ▼ -->
+    <button onclick="quiz.switchModeTab('prep_guess')" id="mode-prep_guess" class="flex-1 px-2 py-3 text-[10px] md:text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-white transition-colors">PREP GUESS</button>
 </div>
 <!-- ▲ ここまで ▲ -->
 
@@ -722,9 +725,12 @@ this.isReverseMode = false;
 this.isSpellingMode = false;
 this.spellingAns = [];
 this.spellingPoolState = []; // 👈 ここを見つける
+// 527行目付近、リストを初期化している場所
 this.vocabList = [];
 this.synonymList = [];
 this.grammarList = [];
+// ▼ これを追加 ▼
+this.prepList = ['about', 'against', 'beyond', 'for', 'from', 'in', 'on', 'out', 'over', 'through', 'to', 'up', 'with'];
 
 // --- キーボードタイピングによる自由入力 ＆ Enter進行サポート ---
 window.addEventListener('keydown', (e) => {
@@ -1099,7 +1105,9 @@ if (currentItem.isFillIn) {
 
         generateRounds() {
                 let sourceList = [];
-                if (this.currentMode === 'grammar') sourceList = this.grammarList;
+                
+                // ▼ 変更箇所1：ここに || this.currentMode === 'prep_guess' を追加する ▼
+                if (this.currentMode === 'grammar' || this.currentMode === 'prep_guess') sourceList = this.grammarList;
                 else if (this.currentMode === 'synonym') sourceList = this.synonymList;
                 else sourceList = this.vocabList;
 
@@ -1116,12 +1124,14 @@ if (currentItem.isFillIn) {
                     });
                 }
 
-                if (this.currentMode === 'grammar') {
+                // ▼ 変更箇所2：ここにも || this.currentMode === 'prep_guess' を追加する ▼
+                if (this.currentMode === 'grammar' || this.currentMode === 'prep_guess') {
                     // 各前置詞を独立したグループに分割してシャープに保つ
                     const prepGroups = {
                         'about': [], 'against': [], 'beyond': [], 'for': [], 'from': [],
                         'in': [], 'on': [], 'out': [], 'over': [], 'through': [], 'to': [], 'up': [], 'with': [], 'others': []
                     };
+                
                     
                     sourceList.forEach(item => {
                         if (item.isCustom) return;
@@ -1400,9 +1410,11 @@ if (currentItem.isFillIn) {
             }
 
 
-            switchModeTab(mode) {
-                this.currentMode = mode;
-                const tabs = ['vocab', 'synonym', 'grammar'];
+            // 1032行目付近
+switchModeTab(mode) {
+    this.currentMode = mode;
+    // ▼ 配列に 'prep_guess' を追加する ▼
+    const tabs = ['vocab', 'synonym', 'grammar', 'prep_guess'];
                 
                 // タブのアクティブ状態を切り替え
                 tabs.forEach(t => {
@@ -1895,34 +1907,60 @@ if (currentItem.isFillIn) {
                 this.isSpellingMode = document.getElementById('spelling-mode').checked && this.isReverseMode;
             this.isRadioMode = document.getElementById('radio-mode').checked;
                 // ▼ これに書き換える ▼
-this.isSynonymMode = (this.currentMode === 'synonym') || (document.getElementById('synonym-mode') && document.getElementById('synonym-mode').checked);
 
-                let modeTitle = "";
-                if (this.isRadioMode) modeTitle = " [BLIND RADIO]";
-                else if (this.isSpellingMode) modeTitle = " [MANUAL SHIFT]";
-                else if (this.isSynonymMode) modeTitle = " [SYNONYM]";
-                else if (this.isReverseMode) modeTitle = " [REV]";
+                // 1475行目付近、モード判定のフラグを設定している場所
+this.isSynonymMode = (this.currentMode === 'synonym') || (document.getElementById('synonym-mode') && document.getElementById('synonym-mode').checked);
+// ▼ これを追加 ▼
+this.isPrepGuessMode = (this.currentMode === 'prep_guess');
+
+let modeTitle = "";
+if (this.isRadioMode) modeTitle = " [BLIND RADIO]";
+else if (this.isSpellingMode) modeTitle = " [MANUAL SHIFT]";
+else if (this.isSynonymMode) modeTitle = " [SYNONYM]";
+// ▼ これを追加 ▼
+else if (this.isPrepGuessMode) modeTitle = " [PREP GUESS]";
+else if (this.isReverseMode) modeTitle = " [REV]";
 
                 document.getElementById('circuit-name').innerText = selectedRound.name + modeTitle;
 
                 this.questions = selectedRound.words.map(target => {
-                    let qText = this.isReverseMode ? target.m : (target.dispW || target.w);
-                    let aText = this.isReverseMode ? (target.ansW || target.w) : target.m;
+                    // 1494行目付近からの target を処理するブロック
+let qText = this.isReverseMode ? target.m : (target.dispW || target.w);
+let aText = this.isReverseMode ? (target.ansW || target.w) : target.m;
 
-                    // 穴埋め問題の場合は強制的に英語を答えさせる
-                    if (target.isFillIn) {
-                        qText = target.dispW; 
-                        aText = target.ansW;  
-                    } 
-                    // 類義語モードの場合は英語を出題して類義語を答えさせる
-                    else if (this.isSynonymMode && target.synonym) {
-                        qText = target.w;
-                        aText = target.synonym;
-                    }
+// ▼ ここから処理をごっそり追加・変更する ▼
+if (this.isPrepGuessMode) {
+    // 正解の前置詞を特定し、問題文をくり抜く
+    const targetPrep = this.prepList.find(prep => new RegExp(`\\b${prep}\\b`, 'i').test(target.w)) || 'about';
+    qText = target.w.replace(new RegExp(`\\b${targetPrep}\\b`, 'i'), '___'); 
+    aText = targetPrep;
+} 
+// 穴埋め問題の場合は強制的に英語を答えさせる
+else if (target.isFillIn) {
+    qText = target.dispW; 
+    aText = target.ansW;  
+} 
+// 類義語モードの場合は英語を出題して類義語を答えさせる
+else if (this.isSynonymMode && target.synonym) {
+    qText = target.w;
+    aText = target.synonym;
+}
 
-                    const options = this.isSpellingMode 
-                        ? [] 
-                        : [aText, ...this.getDistractors(target, this.isReverseMode, this.isSynonymMode)].sort(() => Math.random() - 0.5);
+// 選択肢の生成ロジック
+let options = [];
+if (this.isSpellingMode) {
+    options = [];
+} else if (this.isPrepGuessMode) {
+    // 前置詞専用のデコイを生成してシャッフル
+    const availableDummies = this.prepList.filter(p => p !== aText).sort(() => Math.random() - 0.5);
+    options = [aText, availableDummies[0], availableDummies[1], availableDummies[2]].sort(() => Math.random() - 0.5);
+} else {
+    // 既存のデコイ生成ロジック
+    options = [aText, ...this.getDistractors(target, this.isReverseMode, this.isSynonymMode)].sort(() => Math.random() - 0.5);
+}
+// ▲ ここまで変更 ▲
+
+                    
                     
                     const existingData = (this.allMistakes || []).find(item => item.word === target.w || item.w === target.w) || {};
 
@@ -2026,13 +2064,15 @@ this.isSynonymMode = (this.currentMode === 'synonym') || (document.getElementByI
                  } else {
                      targetDisplay.innerText = q.qText;
 
-                     if (q.isFillIn) {
-                         document.getElementById('question-label').innerText = q.m;
-                     } else if (this.isSynonymMode && q.synonym) {
-                         document.getElementById('question-label').innerText = "CHOOSE SYNONYM";
-                     } else {
-                         document.getElementById('question-label').innerText = this.isReverseMode ? "TRANSLATE" : "MEANING";
-                     }
+                    if (this.isPrepGuessMode) {
+                        document.getElementById('question-label').innerText = "GUESS PREPOSITION";
+                    } else if (q.isFillIn) {
+                        document.getElementById('question-label').innerText = q.m;
+                    } else if (this.isSynonymMode && q.synonym) {
+                        document.getElementById('question-label').innerText = "CHOOSE SYNONYM";
+                    } else {
+                        document.getElementById('question-label').innerText = this.isReverseMode ? "TRANSLATE" : "MEANING";
+                    }
                      
                      if (q.ex && !this.isReverseMode) {
     exText.className = "text-2xl md:text-4xl lg:text-5xl text-gray-100 f1-font italic text-center leading-tight tracking-tight drop-shadow-lg";
