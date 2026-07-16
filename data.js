@@ -2447,6 +2447,159 @@ lest: ～しないように、～するといけないから｜lest he should fa
 [break] through: ～を突破する ｜ The researchers finally broke through the major barrier in genetic engineering. ｜ 研究者たちはついに遺伝子工学における大きな障壁を突破した。
 [follow] through: ～をやり通す、最後まで遂行する ｜ If you start a project, you must follow through until it is completed. ｜ プロジェクトを始めたなら、それが完了するまでやり通さなければならない。
 
+[aim] at: 〜を目指す | The new research aims at finding a cure for the disease. | その新しい研究は病気の治療法を見つけることを目指している。
+[arrive] at: 〜に到着する・（結論など）に達する | They arrived at the decision after a long and heated discussion. | 彼らは長時間の激しい議論の末、その決定に達した。
+[look] at: 〜を見る・〜を考慮する | We need to look at the environmental problems from a global perspective. | 私たちは地球規模の視点から環境問題を見る必要がある。
+[laugh] at: 〜をあざ笑う | It is impolite to laugh at other people's mistakes. | 他人の間違いをあざ笑うのは無作法である。
+[point] at: 〜を指し示す | The teacher pointed at the chart on the blackboard to explain the concept. | 先生はその概念を説明するために黒板の図表を指し示した。
+be [good] at: 〜が得意だ | He is very good at solving complex mathematical problems. | 彼は複雑な数学の問題を解くのが非常に得意です。
+be [bad] at: 〜が苦手だ | She is bad at remembering people's names and faces. | 彼女は人の名前と顔を覚えるのが苦手だ。
+be [clever] at: 〜が器用だ・〜に長けている | Humans are remarkably clever at adapting to new environments. | 人類は新しい環境に適応することに著しく長けている。
+be [surprised] at: 〜に驚く | Many people were surprised at the sudden economic policy changes. | 多くの人々が突然の経済政策の変更に驚いた。
+be [astonished] at: 〜にひどく驚く | The scientists were astonished at the rapid recovery of the ecosystem. | 科学者たちは生態系の急速な回復にひどく驚いた。
+be [startled] at: 〜に驚く・不意を突かれる | The bird was startled at the loud noise and flew away. | その鳥は大きな音に驚いて飛び去った。
+be [indignant] at: 〜に憤慨している | The citizens were indignant at the government's unfair treatment. | 市民たちは政府の不公平な扱いに憤慨していた。
+be [shocked] at: 〜に衝撃を受ける | Society was shocked at the corruption scandal involving the politician. | 社会はその政治家が関与する汚職スキャンダルに衝撃を受けた。
+[glance] at: 〜をちらりと見る | She glanced at her watch and realized she was late for the lecture. | 彼女は時計をちらりと見て、講義に遅れていることに気づいた。
+[stare] at: 〜をじっと見つめる・凝視する | The child stared at the strange insect with curiosity. | その子供は好奇心を持って奇妙な昆虫をじっと見つめた。
+[gaze] at: 〜をうっとり見つめる・熟視する | The astronomer spent hours gazing at the distant stars through the telescope. | 天文学者は望遠鏡を通して遠くの星をうっとり見つめるのに何時間も費やした。
+[grumble] at: 〜に不平を言う | The workers grumbled at the low wages and long working hours. | 労働者たちは低い賃金と長い労働時間に不平を言った。
+[hint] at: 〜をほのめかす | The CEO hinted at the possibility of expanding the business abroad. | 最高経営責任者は事業を海外に拡大する可能性をほのめかした。
+[work] at: 〜に取り組む・〜に努める | The researchers are working hard at developing a sustainable energy source. | 研究者たちは持続可能なエネルギー源の開発に懸命に取り組んでいる。
+[wonder] at: 〜に驚嘆する・不思議に思う | Philosophers often wonder at the complexity of human consciousness. | 哲学者たちはしばしば人間の意識の複雑さに驚嘆する。
+[shout] at: 〜に向かって大声を出す・〜を怒鳴りつける | The coach shouted at the players for losing concentration. | コーチは集中力を欠いた選手たちに向かって大声を出した。
+[marvel] at: 〜に驚嘆する | Tourists marvel at the majestic beauty of the ancient temple. | 観光客はその古代の寺院の荘厳な美しさに驚嘆する。
+[jeer] at: 〜を冷やかす・あざ笑う | The crowd jeered at the politician during his speech. | 演説中、群衆はその政治家を冷やかした。
+[frown] at: 〜に眉をひそめる・〜を不満に思う | The conservative professor frowned at the student's informal presentation style. | 保守的な教授は学生のカジュアルな発表スタイルに眉をひそめた。
+[rejoice] at: 〜を喜ぶ | The family rejoiced at the news of his safe return from the expedition. | 家族は彼の遠征からの無事な帰還の知らせを喜んだ。
+[peer] at: 〜を凝視する・じっと見る | The old man peered at the small print in the book through his glasses. | 老人は眼鏡越しに本の小さな活字をじっと見た。
+[mock] at: 〜をあざ笑う・ばかにする | We should not mock at the efforts of those who are trying their best. | 最善を尽くそうとしている人々の努力をあざ笑うべきではない。
+[sneer] at: 〜を冷笑する・鼻で笑う | Some critics sneered at the young artist's unconventional painting style. | 一部の批評家は、その若い芸術家の型破りな絵画スタイルを冷笑した。
+[scoff] at: 〜をあざ笑う・ばかにする | Many people scoffed at the idea of space travel in the early 20th century. | 20世紀初頭、多くの人々は宇宙旅行というアイデアをばかにした。
+[jump] at: 〜（機会など）に飛びつく・大喜びで応じる | She jumped at the opportunity to study at the prestigious university abroad. | 彼女は海外の名門大学で勉強する機会に飛びついた。
+[leap] at: 〜（機会など）にすぐに飛びつく | He leaped at the chance to work with the famous scientist. | 彼はその高名な科学者と一緒に働く機会にすぐに飛びついた。
+[catch] at: 〜をつかもうとする・〜（好機など）を捕えようとする | A drowning man will catch at a straw. | 溺れる者は藁をもつかもうとする。
+[grasp] at: 〜を（必死に）つかもうとする | The desperate politician grasped at any argument to defend his position. | 必死の政治家は、自分の立場を守るためにどんな議論でもつかもうとした。
+[gasp] at: 〜に息をのむ・あっと驚く | The audience gasped at the acrobat's daring performance. | 観客はアクロバットの不敵な演技に息をのんだ。
+[wink] at: 〜を見て見ぬふりをする・〜を黙認する | The local authorities turned a blind eye and winked at the illegal street vendors. | 地元の当局は見て見ぬふりをして、違法な路上販売を黙認した。
+[recoil] at: 〜にたじろぐ・〜を嫌悪する | Many citizens recoiled at the brutal violence depicted in the news. | 多くの市民がニュースで描写された残虐な暴力にたじろいだ。
+[strike] at: 〜を攻撃する・〜の根底を揺るがす | Inflation strikes at the very root of economic stability. | インフレは経済の安定の根底を揺るがす。
+be [amazed] at: 〜に驚嘆している | The audience was amazed at the young pianist's technical skills. | 観客はその若いピアニストの技術的な能力に驚嘆した。
+be [disappointed] at: 〜に失望している・がっかりしている | He was deeply disappointed at the cancellation of the project. | 彼はプロジェクトの中止に深く失望していた。
+be [furious] at: 〜に激怒している | The residents were furious at the factory for polluting the local river. | 住民たちは地元の川を汚染したとして工場に激怒していた。
+be [skillful] at: 〜が上手だ・熟練している | She is highly skillful at negotiating complex business contracts. | 彼女は複雑なビジネス契約を交渉するのが非常に上手だ。
+be [expert] at: 〜に熟達している | He is expert at identifying ancient pottery and historical artifacts. | 彼は古代の陶器や歴史的遺物を特定することに熟達している。
+be [quick] at: 〜が素早い・〜（理解など）が早い | Children are incredibly quick at learning how to use new technologies. | 子供たちは新しい技術の使い方を学ぶのが信じられないほど早い。
+be [slow] at: 〜が遅い・〜が苦手だ | Some students are slow at grasping abstract theoretical concepts. | 一部の学生は抽象的な理論的概念を理解するのが遅い。
+be [efficient] at: 〜が得意だ・〜を効率的に行う | The new software is very efficient at processing large amounts of data. | その新しいソフトウェアは大量のデータを処理するのが非常に効率的である。
+[attempt] at: 〜への試み | His first attempt at writing a novel was a huge success. | 彼の小説執筆への最初の試みは大成功を収めた。
+[anger] at: 〜に対する怒り | The citizens expressed deep anger at the government's new tax policy. | 市民たちは政府の新しい税制に対して深い怒りを表明した。
+be [disgusted] at: 〜に嫌悪感を抱いている・うんざりしている | Many voters were disgusted at the negative campaign tactics. | 多くの有権者がネガティブキャンペーンの手法に嫌悪感を抱いていた。
+[snap] at: 〜に食ってかかる | He was so stressed that he snapped at his colleagues during the meeting. | 彼はストレスがたまっていたので、会議中に同僚たちに食ってかかった。
+[grab] at: 〜をひったくろうとする・〜をつかもうとする | The suspect grabbed at the officer's weapon during the struggle. | もみ合いの最中、容疑者は警察官の武器をひったくろうとした。
+
+[abide] by: 〜を遵守する | All citizens must abide by the laws of the country. | すべての市民は国の法律を遵守しなければならない。
+[stand] by: 〜を支持する・〜の力になる | She promised to stand by her friend through difficult times. | 彼女は困難な時期を通じて友人を支持することを約束した。
+[pass] by: 〜を通り過ぎる | Time passes by so quickly when you are focused on studying. | 勉強に集中していると、時間は非常にあっという間に通り過ぎていく。
+[judge] by: 〜によって判断する | We should not judge people by their appearance alone. | 人を外見だけで判断すべきではない。
+[live] by: 〜（主義・規則など）に従って生きる | He lives by the principle of honesty in both his personal and professional life. | 彼は公先の生活において、誠実さという原則に従って生きている。
+[go] by: 〜（規則など）に従って行動する・〜に基づいて判断する | It is always safer to go by the official guidelines in this research. | この研究においては、公式のガイドラインに従って進めるのが常に安全である。
+[get] by: 何とかやっていく | With a limited budget, the college student had to get by on very little money. | 限られた予算の中で、その大学生はごくわずかなお金で何とかやっていかなければならなかった。
+[come] by: 〜を手に入れる | Rare historical documents like this are very difficult to come by. | このような珍しい歴史的文書を手に入れるのは非常に困難である。
+[lay] by: 〜を蓄える | It is wise to lay by some money for future emergencies. | 将来の緊急事態に備えて、いくらかのお金を蓄えておくのは賢明である。
+[run] by: 〜（意見など）をちょっと聞いてみる | I would like to run this new business plan by the committee first. | 私はまずこの新しい事業計画を委員会に諮って意見を聞いてみたい。
+by [means] of: 〜によって | Humans communicate their thoughts by means of language. | 人間は言語によって自分の考えを伝える。
+by [virtue] of: 〜のおかげで・〜の力で | She succeeded in the academic world by virtue of her hard work and dedication. | 彼女は猛勉強と献身のおかげで学術界での成功を収めた。
+by [way] of: 〜経由で・〜として | He went to Europe by way of New York to attend the conference. | 彼は会議に出席するためにニューヨーク経由でヨーロッパへ行った。
+by [turns]: 代わる代わるに・交互に | The two scientists observed the experiment by turns throughout the night. | その二人の科学者は、夜通し交互に実験を観察した。
+by [chance]: 偶然に | I met my former high school teacher by chance at the library. | 私は図書館で偶然高校時代の恩師に出会った。
+by [accident]: 偶然に・誤って | The discovery of penicillin was made by accident during a routine lab test. | ペニシリンの発見は、日常的な実験室の検査中に偶然になされた。
+by [degree]s: 徐々に・次第に | The local economy recovered by degrees after the industrial reform. | 産業改革の後、地域経済は徐々に回復した。
+step [by] step: 一歩一歩・着実に | You can improve your academic writing skills step by step with practice. | 練習を重ねることで、学術的なライティングの技術を一歩一歩向上させることができる。
+side [by] side: 並んで・協力して | The two nations worked side by side to solve the regional conflict. | その二国は地域の紛争を解決するために協力して取り組んだ。
+day [by] day: 日ごとに・日々 | The global climate change is becoming more obvious day by day. | 地球の気候変動は日ごとに明らかになってきている。
+be [surprised] by: 〜に驚く | Many scholars were surprised by the sudden announcement of the findings. | 多くの学者がその研究結果の突然の発表に驚いた。
+be [frightened] by: 〜を怖がる・〜に怯える | The children were frightened by the thunder during the storm. | 嵐の間、子供たちは雷を怖がった。
+be [accompanied] by: 〜を伴う・〜が同伴する | The lecture on molecular biology was accompanied by visual slides. | 分子生物学に関する講義には、視覚的なスライドが伴っていた。
+[multiply] A by B: AにBを掛ける | If you multiply ten by five, the result is fifty. | 10に5を掛けると、結果は50になる。
+[divide] A by B: AをBで割る | The total budget was divided by the number of departments in the school. | 総予算は学校の学科の数で割られた。
+[put] by: 〜を蓄える・脇に置く | He put by a portion of his monthly income for his children's education. | 彼は子供の教育のために毎月の収入の一部を蓄えた。
+by [all] means: ぜひとも、必ず | If you have any questions during the lecture, please ask them by all means. | 講義中に質問があれば、ぜひとも質問してください。
+by [no] means: 決して〜ない | This scientific problem is by no means easy to solve. | この科学的問題を解決するのは決して容易ではない。
+by [far]: はるかに、断然 | This textbook is by far the most informative resource for history students. | この教科書は、歴史を学ぶ学生にとって断然最も有益な情報源である。
+by [nature]: 生まれつき、本質的に | Some people are by nature more optimistic about the future than others. | 将来について、生まれつき他の人よりも楽観的な人もいる。
+by [mistake]: 誤って、間違えて | The confidential document was sent to the press by mistake. | その機密文書は誤って報道機関に送られてしまった。
+by [definition]: 定義上 | Science is, by definition, a process of seeking objective truth. | 科学とは、定義上、客観的な真理を追究するプロセスである。
+by [force]: 力ずくで | The protestors tried to enter the government building by force. | 抗議者たちは力ずくで政府の建物に入ろうとした。
+by [comparison]: 比較すると、それに比べて | The first experiment was complex, but the second one was simple by comparison. | 最初の実験は複雑だったが、2回目の実験はそれに比べると単純だった。
+by [heart]: 暗記して、そらで | Students were required to learn the entire poem by heart for the exam. | 学生たちは試験のためにその詩全体を暗記することを求められた。
+by [itself]: それ自体で、ひとりでに | Technology does not change society by itself; it requires human action. | 技術がそれ自体で社会を変えるわけではなく、人間の行動が必要である。
+by [themselves]: 彼ら（それら）自身で・独力で | Young children cannot complete these complex tasks by themselves. | 幼い子供たちはこれらの複雑な課題を自分たちだけで完了することはできない。
+by [birth]: 生まれは、生まれつき | Although she lives in Japan now, she is Canadian by birth. | 彼女は今日本に住んでいるが、生まれはカナダ人である。
+by [sight]: 顔は知っていて、見覚えがあって | I know the professor by sight, but I have never spoken to him. | 私はその教授の顔は知っているが、話したことは一度もない。
+by [name]: 名前で、名指しで | The professor called on the student by name to answer the question. | 教授は質問に答えさせるために、学生を名前で指名した。
+by [design]: 故意に、意図的に | The software was modified by design to improve user accessibility. | そのソフトウェアは、ユーザーのアクセシビリティを向上させるために意図的に修正された。
+by [hand]: 手書きで、手作業で | In the past, all copies of manuscripts had to be made slowly by hand. | 昔は、原稿の写しはすべて手作業でゆっくりと作られなければならなかった。
+[drop] by: 〜に立ち寄る | You should drop by the career office if you need advice on job hunting. | 就職活動のアドバイスが必要なら、キャリアオフィスに立ち寄るとよい。
+[stop] by: 〜に立ち寄る | He stopped by the laboratory to check the progress of the experiment. | 彼は実験の進捗を確認するために研究室に立ち寄った。
+[swear] by: 〜を絶対的に信頼する・〜に誓う | The ancient Greeks would swear by their gods to prove their honesty. | 古代ギリシャ人は、自分の誠実さを証明するために神々に誓ったものだった。
+be [impressed] by: 〜に感銘を受ける | The admissions committee was deeply impressed by her research proposal. | 入学選考委員会は彼女の研究計画書に深く感銘を受けた。
+be [influenced] by: 〜に影響を受ける | Modern Japanese literature is heavily influenced by Western culture. | 近代日本文学は西洋文化に強く影響を受けている。
+be [puzzled] by: 〜に当惑する | The medical experts were puzzled by the patient's unusual symptoms. | 医療専門家たちはその患者の珍しい症状に当惑した。
+be [confronted] by: 〜に直面する | Human society is currently confronted by various global challenges. | 人類社会は現在、さまざまな地球規模の課題に直面している。
+be [fascinated] by: 〜に魅了される | Children are often fascinated by the behavior of small animals. | 子供たちはしばしば小さな動物の行動に魅了される。
+
+[consist] of: 〜から構成される | The research committee consists of ten prominent scientists. | その研究委員会は10人の著名な科学者で構成されている。
+[approve] of: 〜に賛成する・〜を承認する | Most parents highly approve of the school's new educational policy. | ほとんどの保護者は学校の新しい教育方針に大いに賛成している。
+[disapprove] of: 〜に不賛成である・〜を認めない | The committee disapproved of the proposed plan due to budget constraints. | 委員会は予算の制約を理由に、提案された計画に不賛成を表明した。
+[die] of: 〜（病気・老衰など）で死ぬ | Millions of people in developing countries still die of preventable diseases. | 開発途上国の何百万人もの人々が、依然として予防可能な病気で亡くなっている。
+[dream] of: 〜を夢見る | Many young scientists dream of making a groundbreaking discovery. | 多くの若い科学者が画期的な発見をすることを夢見ている。
+[hear] of: 〜の噂を聞く・〜のことを耳にする | I have never heard of that particular author, but her books are very popular. | 私はその特定の作家について耳にしたことはないが、彼女の本は非常に人気がある。
+[think] of: 〜を思いつく・〜について考える | We must think of practical ways to reduce plastic waste in our daily lives. | 私たちは日常生活におけるプラスチック廃棄物を削減するための実用的な方法を考えなければならない。
+[remind] A of B: AにBを思い出させる | This historical museum reminds us of the tragic consequences of war. | この歴史博物館は私たちに戦争の悲劇的な結末を思い出させる。
+[deprive] A of B: AからB（権利・機会など）を奪う | Censorship can deprive citizens of their fundamental right to free speech. | 検閲は市民から言論の自由という基本的人権を奪う可能性がある。
+[rob] A of B: AからB（金品・価値など）を奪う | The sudden economic crisis robbed many families of their savings. | 突然の経済危機は多くの家族から貯蓄を奪った。
+[clear] A of B: AからBを取り除く・AのB（疑いなど）を晴らす | The lawyer worked hard to clear his client of all charges. | 弁護士は依頼人のすべての容疑を晴らすために懸命に働いた。
+[cure] A of B: AのB（病気・悪癖など）を治す | Modern medicine can cure patients of many previously fatal illnesses. | 現代医学は、かつては致命的だった多くの病気から患者を治療することができる。
+[inform] A of B: AにBを知らせる | The university will inform students of the tuition changes next week. | 大学は来週、学生に授業料の変更を通知する。
+[warn] A of B: AにBを警告する | Meteorologists warned the coastal residents of the approaching typhoon. | 気象学者たちは沿岸の住民に台風の接近を警告した。
+[accuse] A of B: AをBの理由で非難する・告訴する | The company was accused of violating environmental protection regulations. | その企業は環境保護規制に違反したとして非難された。
+be [proud] of: 〜を誇りに思う | The nation is proud of its rich cultural heritage and history. | その国は豊かな文化遺産と歴史を誇りに思っている。
+be [afraid] of: 〜を恐れる・〜が怖い | Many species are afraid of human activity and avoid urban areas. | 多くの種は人間の活動を恐れ、都市部を避けている。
+be [aware] of: 〜に気づいている・〜を知っている | Consumers should be aware of the environmental impact of their choices. | 消費者は自分たちの選択が環境に与える影響を意識すべきである。
+be [conscious] of: 〜を意識している | He was conscious of his responsibility as a leader of the research team. | 彼は研究チームのリーダーとしての責任を意識していた。
+be [ignorant] of: 〜を知らない・〜に無知である | We cannot afford to be ignorant of the political situation in neighboring countries. | 私たちは近隣諸国の政治情勢に無知でいるわけにはいかない。
+be [independent] of: 〜から独立している | The judiciary must be completely independent of the executive branch of government. | 司法は政府の行政部門から完全に独立していなければならない。
+be [short] of: 〜が不足している | Due to the drought, the agricultural sector is extremely short of water. | 干ばつのため、農業部門は極めて深刻な水不足に陥っている。
+be [tired] of: 〜に飽きている・〜にうんざりしている | Citizens are tired of hearing empty promises from politicians during elections. | 市民は選挙中に政治家から空虚な約束を聞かされることにうんざりしている。
+be [fond] of: 〜が好きである | The professor is fond of discussing philosophy during his lectures. | その教授は講義中に哲学を議論することを好む。
+be [worthy] of: 〜に値する | Her dedication to social justice is worthy of high praise and respect. | 社会正義に対する彼女の献身は、高い賞賛と敬意に値する。
+be [capable] of: 〜する能力がある | This advanced computer system is capable of processing complex calculations instantly. | この高度なコンピュータシステムは、複雑な計算を瞬時に処理する能力がある。
+be [devoid] of: 〜がまったくない・〜を欠いている | The landscape was completely devoid of trees after the massive wildfire. | 大規模な山火事の後、その風景には木がまったくなくなっていた。
+be [typical] of: 〜に特有である・〜を代表している | This behavior is typical of migratory birds during the autumn season. | この行動は秋の時期の渡り鳥に特有のものである。
+instead [of]: 〜の代わりに | We should use renewable energy instead of burning fossil fuels. | 私たちは化石燃料を燃やす代わりに、再生可能エネルギーを使用すべきである。
+because [of]: 〜のために・〜の理由で | The flight was delayed because of the heavy snow in the northern region. | 北部地域の大雪のため、飛行機の便が遅れた。
+in [spite] of: 〜にもかかわらず | In spite of the economic downturn, the tech company reported record profits. | 景気後退にもかかわらず、そのテック企業は過去最高の利益を報告した。
+in [case] of: 〜の場合には・〜に備えて | In case of an emergency, please use the stairs instead of the elevator. | 緊急の場合には、エレベーターの代わりに階段を使用してください。
+[complain] of: 〜（病気の症状など）を訴える・〜の不平を言う | The patient complained of severe chest pain and was rushed to the hospital. | 患者は激しい胸の痛みを訴え、病院に緊急搬送された。
+[speak] of: 〜について話す・言及する | Historically speaking, the text speaks of a time of great social change. | 歴史的に言えば、その文献は大きな社会変革の時代について語っている。
+[boast] of: 〜を自慢する | The city boasts of having one of the most efficient transport systems in the world. | その都市は世界で最も効率的な交通システムの一つを持っていることを自慢している。
+[dispose] of: 〜を処分する・廃棄する | Factories must safely dispose of hazardous chemical waste. | 工場は有害な化学廃棄物を安全に処分しなければならない。
+[convince] A of B: AにBを確信させる | The lawyer managed to convince the jury of the defendant's innocence. | 弁護士は陪審員に被告人の無罪を確信させることができた。
+[persuade] A of B: AにBを納得させる・信じさせる | It is difficult to persuade him of the necessity of academic reforms. | 彼に大学改革の必要性を納得させるのは難しい。
+[suspect] A of B: AにB（悪事など）の疑いをかける | The police suspect the former employee of leaking confidential data. | 警察は元従業員が機密データを漏洩した疑いを持っている。
+[rid] A of B: AからBを取り除く | The government launched a new campaign to rid the city of poverty. | 政府は都市から貧困を一掃するための新しいキャンペーンを開始した。
+[relieve] A of B: AからB（負担・苦痛など）を取り除いて和らげる | The nurse gave him some medicine to relieve him of the pain. | 看護師は彼の痛みを和らげるために薬を与えた。
+be [ashamed] of: 〜を恥じている | Society should be ashamed of the way it treats its most vulnerable members. | 社会は、最も脆弱な構成員を扱うその方法を恥じるべきである。
+be [jealous] of: 〜をねたんでいる・うらやんでいる | It is natural for children to be jealous of their siblings sometimes. | 子供たちが時にきょうだいをうらやむのは自然なことである。
+be [careless] of: 〜に不注意である・〜を気にかけない | He was careless of his health and worked late into the night every day. | 彼は健康を気にかけず、毎日夜遅くまで働いた。
+be [critical] of: 〜に批判的である | Academic journals are often highly critical of studies with weak methodologies. | 学術誌は、方法論が弱い研究に対して非常に批判的であることが多い。
+be [characteristic] of: 〜に特徴的である | A rich diversity of wildlife is characteristic of tropical rainforests. | 豊かな野生生物の多様性は、熱帯雨林に特徴的である。
+in [search] of: 〜を求めて・〜を探して | Many young people move to big cities in search of better job opportunities. | 多くの若者が、より良い雇用の機会を求めて大都市に移住する。
+regardless [of]: 〜に関係なく | Everyone has the right to quality education regardless of their economic background. | 経済的な背景に関係なく、誰もが質の高い教育を受ける権利がある。
+on [account] of: 〜の理由で・〜のために | The outdoor event was canceled on account of the approaching storm. | 嵐が接近しているという理由で、屋外イベントは中止された。
+for the [sake] of: 〜のために | We must preserve natural resources for the sake of future generations. | 私たちは将来の世代のために天然資源を保護しなければならない。
+
 abolish: 廃止する = do away with ｜ The government decided to abolish the tax. ｜ 政府はその税金を廃止することを決定した。
 abstract: 抽象的な = conceptual ｜ The concept is too abstract to understand. ｜ その概念は抽象的すぎて理解できない。
 absurd: 馬鹿げた = ridiculous ｜ It is absurd to believe such a rumor. ｜ そんな噂を信じるなんて馬鹿げている。
