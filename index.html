@@ -452,6 +452,18 @@
                                 <span class="text-xs font-bold text-gray-300 group-hover:text-yellow-400 transition-colors flex items-center gap-2"><span class="text-yellow-400">🔄</span> SYNONYM MODE</span>
                                 <input type="checkbox" id="synonym-mode" class="accent-f1 w-5 h-5 cursor-pointer" onchange="quiz.updateSummary()">
                             </label>
+
+                            <!-- ▼ ここを追加：言語選択セレクトボックス ▼ -->
+<label class="flex items-center justify-between cursor-pointer group bg-black/30 p-3 rounded-lg border border-gray-800 hover:border-gray-600 transition-colors">
+    <span class="text-xs font-bold text-gray-300 group-hover:text-amber-400 transition-colors flex items-center gap-2">
+        <span class="text-amber-400">🌐</span> SYSTEM LANG
+    </span>
+    <select id="lang-selector" class="bg-black text-white text-xs border border-gray-700 rounded p-1 outline-none font-mono cursor-pointer hover:border-gray-500" onchange="quiz.changeLanguage(this.value)">
+        <option value="en">ENGLISH</option>
+        <option value="ja">日本語</option>
+    </select>
+</label>
+<!-- ▲ ここまで ▲ -->
                             
                             <div id="spelling-option-container" class="hidden">
                                  <label class="flex items-center justify-between cursor-pointer group bg-black/30 p-3 rounded-lg border border-gray-800 hover:border-gray-600 transition-colors">
@@ -638,6 +650,79 @@
         document.addEventListener('dblclick', function(event) { event.preventDefault(); }, { passive: false });
         document.addEventListener('touchmove', function(event) { if (event.scale !== 1) { event.preventDefault(); } }, { passive: false });
 
+        // ▼ 翻訳辞書データの定義 ▼
+// ▼ 翻訳辞書データの定義（日本語は一般的な英単語帳アプリの表現に修正） ▼
+const translations = {
+    en: {
+        dailyLapsLabel: "Global Daily Laps",
+        telemetryBtn: "Telemetry Data",
+        freePracticeBtn: "■ Free Practice (Flashcards)",
+        startQualifyingBtn: "Start Qualifying",
+        raceStrategyHeader: "Race Strategy",
+        circuitLabel: "Circuit Selection",
+        customRangeLabel: "Custom Range",
+        setBtn: "SET",
+        randomGeneratorLabel: "Random Generator",
+        generateGridBtn: "🎲 Generate Grid",
+        flaggedTargetsLabel: "Flagged Targets",
+        generateFlaggedBtn: "🏁 Generate Flagged Grid",
+        tireStrategyLabel: "Tire Strategy (Questions per Lap)",
+        optimal: "OPTIMAL",
+        critical: "CRITICAL",
+        pitRequired: "PIT STOP REQUIRED",
+        // クイズ画面
+        targetComponent: "TARGET COMPONENT",
+        guessPrep: "GUESS PREPOSITION",
+        chooseSynonym: "CHOOSE SYNONYM",
+        translate: "TRANSLATE",
+        meaning: "MEANING",
+        visualizeMeaning: "VISUALIZE MEANING",
+        visualizeUnlock: "TAP TO UNLOCK",
+        decryptTranslation: "Decrypt Translation",
+        // フィードバック
+        perfectShift: "🟣 PERFECT SHIFT",
+        damage: "DAMAGE:",
+        slow: "🟡 SLOW",
+        purpleSector: "🟣 PURPLE SECTOR",
+        // 検索
+        quickScan: "Quick Scan (Search)..."
+    },
+    ja: {
+        dailyLapsLabel: "今日の全体学習数",
+        telemetryBtn: "学習データ分析",
+        freePracticeBtn: "■ 練習モード (単語カード)",
+        startQualifyingBtn: "テストを開始する",
+        raceStrategyHeader: "学習設定",
+        circuitLabel: "問題範囲の選択",
+        customRangeLabel: "カスタム範囲指定",
+        setBtn: "適用",
+        randomGeneratorLabel: "ランダム問題生成",
+        generateGridBtn: "🎲 ランダム問題を生成",
+        flaggedTargetsLabel: "ブックマークした苦手単語",
+        generateFlaggedBtn: "🏁 ブックマーク問題を開始",
+        tireStrategyLabel: "出題問題数設定",
+        optimal: "良好（復習なし）",
+        critical: "要復習",
+        pitRequired: "復習が必要な単語があります",
+        // クイズ画面
+        targetComponent: "出題単語",
+        guessPrep: "適切な前置詞を選択",
+        chooseSynonym: "適切な類義語を選択",
+        translate: "英訳してください",
+        meaning: "正しい意味を選択",
+        visualizeMeaning: "意味を表示",
+        visualizeUnlock: "タップして表示",
+        decryptTranslation: "和訳を表示",
+        // フィードバック
+        perfectShift: "🟣 正解（スピードボーナス！）",
+        damage: "不正解：",
+        slow: "🟡 少し時間がかかりました",
+        purpleSector: "🟣 素早く正解！",
+        // 検索
+        quickScan: "単語を検索..."
+    }
+};
+
         class HybridQuiz {
             constructor() {
                 this.wordsPerRound = 20; 
@@ -773,6 +858,14 @@ const radioCheck = document.getElementById('radio-mode');
                 this.initVisibilityListener();
                 
                 setTimeout(() => this.updateStintHUD(), 100);
+
+                // --- 言語設定の初期化 ---
+this.lang = localStorage.getItem('rb26_lang') || 'en';
+setTimeout(() => {
+    const langSel = document.getElementById('lang-selector');
+    if (langSel) langSel.value = this.lang;
+    this.updateLanguageUI();
+}, 150);
 
                 this.parseData();
                 this.generateRounds();
@@ -1732,13 +1825,14 @@ if (this.isSpellingMode) {
                  return distractors;
              }
 
-             showVocabQuestion() {
+            showVocabQuestion() {
                  const q = this.questions[this.currentIndex];
                  document.getElementById('question-number').innerText = `LAP ${this.currentIndex + 1} / ${this.questions.length}`;
                  
                  const targetDisplay = document.getElementById('target-word');
                  const exArea = document.getElementById('example-area');
                  const exText = document.getElementById('example-text');
+                 const t = translations[this.lang] || translations['en']; // 🌐 翻訳データ取得
 
                  exArea.className = "flex items-center justify-center p-2 my-2 w-full max-w-4xl mx-auto min-h-[100px]";
 
@@ -1753,37 +1847,35 @@ if (this.isSpellingMode) {
                      targetDisplay.innerText = q.qText;
 
                     if (this.isPrepGuessMode) {
-                        document.getElementById('question-label').innerText = "GUESS PREPOSITION";
+                        document.getElementById('question-label').innerText = t.guessPrep; // 🌐 GUESS PREPOSITION を翻訳
                     } else if (q.isFillIn) {
                         document.getElementById('question-label').innerText = q.m;
                     } else if (this.isSynonymMode && q.synonym) {
-                        document.getElementById('question-label').innerText = "CHOOSE SYNONYM";
+                        document.getElementById('question-label').innerText = t.chooseSynonym; // 🌐 CHOOSE SYNONYM を翻訳
                     } else {
-                        document.getElementById('question-label').innerText = this.isReverseMode ? "TRANSLATE" : "MEANING";
+                        document.getElementById('question-label').innerText = this.isReverseMode ? t.translate : t.meaning; // 🌐 TRANSLATE/MEANING を翻訳
                     }
                      
                      if (q.ex && !this.isReverseMode) {
-    exText.className = "text-2xl md:text-4xl lg:text-5xl text-gray-100 f1-font italic text-center leading-tight tracking-tight drop-shadow-lg";
+                        exText.className = "text-2xl md:text-4xl lg:text-5xl text-gray-100 f1-font italic text-center leading-tight tracking-tight drop-shadow-lg";
 
-    let displayExample = this.highlightIdiom(q.ex, q.w);
+                        let displayExample = this.highlightIdiom(q.ex, q.w);
                      
-                     // ▼ ここをごっそり書き換える ▼
-                     if (this.isPrepGuessMode) {
-                         // PREP GUESSモード: 前置詞（答え）だけをくり抜く
-                         const prepRegex = new RegExp(`\\b${q.aText}\\b`, 'gi');
-                         displayExample = displayExample.replace(prepRegex, '<span class="text-red-500 font-bold opacity-80">___</span>');
-                     } else if (q.isFillIn && q.ansW) {
-                         // 通常の穴埋めモード: 答えの単語（動詞の活用形含む）を伏せ字にする
-                         displayExample = this.maskConjugatedWord(displayExample, q.ansW);
-                     }
-                     // ▲ ここまで ▲
+                        if (this.isPrepGuessMode) {
+                            // PREP GUESSモード: 前置詞（答え）だけをくり抜く
+                            const prepRegex = new RegExp(`\\b${q.aText}\\b`, 'gi');
+                            displayExample = displayExample.replace(prepRegex, '<span class="text-red-500 font-bold opacity-80">___</span>');
+                        } else if (q.isFillIn && q.ansW) {
+                            // 通常の穴埋めモード: 答えの単語（動詞の活用形含む）を伏せ字にする
+                            displayExample = this.maskConjugatedWord(displayExample, q.ansW);
+                        }
 
-    exText.innerHTML = `
-        <div class="flex flex-col items-center gap-4">
-            <div>${displayExample}</div>
-            <div id="ex-translation-container">
+                        exText.innerHTML = `
+                            <div class="flex flex-col items-center gap-4">
+                                <div>${displayExample}</div>
+                                <div id="ex-translation-container">
                                     <button id="reveal-tr-btn" class="f1-font border border-gray-700 bg-black/20 text-gray-500 px-4 py-2 rounded text-[10px] tracking-widest hover:text-cyan-400 hover:border-cyan-400 transition-all uppercase active:scale-95">
-                                        Decrypt Translation
+                                        ${t.decryptTranslation} <!-- 🌐 Decrypt Translation を翻訳 -->
                                     </button>
                                 </div>
                             </div>
@@ -1954,7 +2046,7 @@ if (this.isSpellingMode) {
                  this.renderSpellingInterface(q);
              }
 
-                         checkSpellingWin(q) {
+              checkSpellingWin(q) {
                  const targetWordStr = q.ansW || q.w || "";
                  // ★ スペース区切りではなく、文字を詰めて結合する
                  const userWord = this.spellingAns.map(a => a.char).join('');
@@ -1962,11 +2054,12 @@ if (this.isSpellingMode) {
                  
                  const slotsEl = document.getElementById('spelling-slots');
                  const feedback = document.getElementById('feedback');
+                 const t = translations[this.lang] || translations['en']; // 🌐 翻訳データ取得
 
                  if (userWord === targetWord) {
                      this.isLocked = true;
                      slotsEl.classList.add('correct-lane');
-                     feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold animate-pulse">🟣 PERFECT SHIFT</span>`;
+                     feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold animate-pulse">${t.perfectShift}</span>`; // 🌐 PERFECT SHIFT を翻訳
                      this.speak(q.w);
                      
                      this.currentStreak++;
@@ -1990,7 +2083,7 @@ if (this.isSpellingMode) {
                      this.currentStreak = 0;
                      
                      slotsEl.classList.add('wrong-lane', 'animate-shake');
-                     feedback.innerHTML = `<span class="text-red-500 text-sm font-bold mr-2">DAMAGE:</span><span class="text-white text-base font-bold tracking-normal normal-case">${q.w}</span>`;
+                     feedback.innerHTML = `<span class="text-red-500 text-sm font-bold mr-2">${t.damage}</span><span class="text-white text-base font-bold tracking-normal normal-case">${q.w}</span>`; // 🌐 DAMAGE: を翻訳
 
                      if (!this.missedWordsLog.find(item => item.w === q.w)) this.missedWordsLog.push({ w: q.w, m: q.m, ex: q.ex });
                      
@@ -2014,6 +2107,7 @@ if (this.isSpellingMode) {
 
              renderStandardOptions(q, container) {
                  container.innerHTML = '';
+                 const t = translations[this.lang] || translations['en']; // 🌐 翻訳データ取得
                  
                  const renderBtns = () => {
                      container.innerHTML = '';
@@ -2032,7 +2126,8 @@ if (this.isSpellingMode) {
                  } else {
                      const revealBtn = document.createElement('button');
                      revealBtn.className = 'col-span-2 w-full h-32 bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-xl text-gray-400 f1-font text-2xl uppercase tracking-widest hover:border-yellow-500 hover:text-yellow-500 transition-all flex flex-col items-center justify-center gap-2 animate-pulse';
-                     revealBtn.innerHTML = `<span>VISUALIZE MEANING</span><span class="text-xs text-gray-500 font-mono">TAP TO UNLOCK</span>`;
+                     // 🌐 VISUALIZE MEANING と TAP TO UNLOCK を翻訳に差し替え
+                     revealBtn.innerHTML = `<span>${t.visualizeMeaning}</span><span class="text-xs text-gray-500 font-mono">${t.visualizeUnlock}</span>`;
                      revealBtn.onclick = () => { 
                          renderBtns();
                      };
@@ -2055,6 +2150,7 @@ if (this.isSpellingMode) {
                  const feedback = document.getElementById('feedback');
                  const timeTaken = (Date.now() - this.lapStartTime) / 1000;
                  const isCorrect = (selected === q.aText);
+                 const t = translations[this.lang] || translations['en']; // 🌐 翻訳データ取得
 
                  if (window.handleSRSUpdate) {
                      window.handleSRSUpdate({ ...q, timeTaken: timeTaken }, isCorrect);
@@ -2069,16 +2165,38 @@ if (this.isSpellingMode) {
                      if(this.isReverseMode) this.speak(q.w);
                      
                      if (timeTaken < 1.2) {
-                         feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold animate-pulse">🟣 PURPLE SECTOR (${timeTaken.toFixed(2)}s)</span>`;
+                         feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold animate-pulse">${t.purpleSector} (${timeTaken.toFixed(2)}s)</span>`; // 🌐 最速正解フィードバックを翻訳
                      } else if (timeTaken > 5.0) {
-                         feedback.innerHTML = `<span class="text-yellow-500 text-xs font-bold">🟡 SLOW (${timeTaken.toFixed(2)}s)</span>`;
+                         feedback.innerHTML = `<span class="text-yellow-500 text-xs font-bold">${t.slow} (${timeTaken.toFixed(2)}s)</span>`; // 🌐 スロー走行フィードバックを翻訳
                      }
 
-                     setTimeout(() => {
-                         this.currentIndex++;
-                         if (this.currentIndex < this.questions.length) this.showVocabQuestion();
-                         else this.finish();
-                     }, 400); 
+                     // ==========================================
+                     // ★ 【追加】前置詞モードまたは類義語モードの処理 ★
+                     // ==========================================
+                     if (this.isPrepGuessMode || this.isSynonymMode) {
+                         const container = document.getElementById('options-container');
+                         container.innerHTML = ''; // 4択の選択肢ボタンを消去
+                         
+                         // 「次の問題へ」進むためのカッコいいネオングリーンのボタンを生成
+                         const nextBtn = document.createElement('button');
+                         nextBtn.className = "col-span-2 w-full py-6 bg-[#39ff14]/20 hover:bg-[#39ff14]/30 text-[#39ff14] border-2 border-[#39ff14] rounded-xl font-bold text-xl tracking-widest uppercase transition-all transform active:scale-[0.98] shadow-lg animate-pulse";
+                         nextBtn.innerText = this.lang === 'ja' ? "次の問題へ ▶" : "NEXT LAP ▶";
+                         
+                         // タップされたら次の問題（またはリザルト）へ進む
+                         nextBtn.onclick = () => {
+                             this.currentIndex++;
+                             if (this.currentIndex < this.questions.length) this.showVocabQuestion();
+                             else this.finish();
+                         };
+                         container.appendChild(nextBtn);
+                     } else {
+                         // 通常のVOCABモードなどの時は、今まで通り0.4秒後に自動遷移
+                         setTimeout(() => {
+                             this.currentIndex++;
+                             if (this.currentIndex < this.questions.length) this.showVocabQuestion();
+                             else this.finish();
+                         }, 400); 
+                     }
 
                 } else {
                      this.missCount++;
@@ -2086,9 +2204,9 @@ if (this.isSpellingMode) {
                      
                      // ▼ 類義語モードなら英語と日本語を両方表示する ▼
                      if (this.isSynonymMode && q.synonym) {
-                         feedback.innerText = `WRONG: ${q.w} = ${q.synonym} (${q.m})`;
+                         feedback.innerText = `${t.damage.replace(':', '')} ${q.w} = ${q.synonym} (${q.m})`; // 🌐 不正解時の「DAMAGE:」を翻訳
                      } else {
-                         feedback.innerText = `WRONG: ${q.w} = ${q.m}`;
+                         feedback.innerText = `${t.damage.replace(':', '')} ${q.w} = ${q.m}`; // 🌐 不正解時の「DAMAGE:」を翻訳
                      }
                      feedback.className = "mt-4 text-center h-6 font-bold text-red-500 animate-pulse";
                      
@@ -2251,17 +2369,28 @@ if (this.isSpellingMode) {
                  if (window.fetchSRSItems) window.fetchSRSItems();
              }
             
-             updatePitStopButton(count) {
-                 const text = document.getElementById('mistake-count-display');
-                 const overlay = document.getElementById('pit-alert-overlay');
-                 if (count > 0) {
-                     text.innerText = "CRITICAL"; text.classList.remove('text-green-500'); text.classList.add('text-red-500');
-                     overlay.classList.remove('hidden'); overlay.onclick = () => this.startPitStop();
-                 } else {
-                     text.innerText = "OPTIMAL"; text.classList.add('text-green-500'); text.classList.remove('text-red-500');
-                     overlay.classList.add('hidden');
-                 }
-             }
+             // 元のコードを以下のように書き換えます
+updatePitStopButton(count) {
+    const text = document.getElementById('mistake-count-display');
+    const overlay = document.getElementById('pit-alert-overlay');
+    const t = translations[this.lang]; // 翻訳取得
+    
+    if (count > 0) {
+        text.innerText = t.critical; 
+        text.classList.remove('text-green-500'); 
+        text.classList.add('text-red-500');
+        overlay.classList.remove('hidden'); 
+        overlay.onclick = () => this.startPitStop();
+        
+        // オーバーレイ上のアラートテキスト
+        overlay.querySelector('span').innerText = t.pitRequired;
+    } else {
+        text.innerText = t.optimal; 
+        text.classList.add('text-green-500'); 
+        text.classList.remove('text-red-500');
+        overlay.classList.add('hidden');
+    }
+}
             
             startPitStop() {
                  if (!this.dueMistakes || this.dueMistakes.length === 0) return;
@@ -2375,6 +2504,73 @@ if (this.isSpellingMode) {
                  document.getElementById(id).classList.add('hidden');
                  document.getElementById('start-screen').classList.remove('hidden');
              }
+
+             changeLanguage(lang) {
+    this.lang = lang;
+    localStorage.setItem('rb26_lang', lang);
+    this.updateLanguageUI();
+    this.updateSummary();
+}
+
+updateLanguageUI() {
+    const t = translations[this.lang];
+    if (!t) return;
+
+    // 1. メインメニュー（start-screen）
+    const dailyLapsHeader = document.querySelector("#daily-laps-display").previousElementSibling;
+    if (dailyLapsHeader) dailyLapsHeader.innerText = t.dailyLapsLabel;
+    
+    const telemetryBtnSpan = document.querySelector("button[onclick='quiz.openTelemetry()'] span:last-child");
+    if (telemetryBtnSpan) telemetryBtnSpan.innerText = t.telemetryBtn;
+    
+    const fpBtn = document.querySelector("button[onclick='quiz.startFlashcardMode()']");
+    if (fpBtn) {
+        // 子要素の [■] や (Flashcards) テキストを壊さないように調整
+        fpBtn.innerHTML = `<span class="text-blue-400">■</span> ${t.freePracticeBtn.replace('■ ', '')}`;
+    }
+    
+    const startBtn = document.querySelector("button[onclick='quiz.start()']");
+    if (startBtn) startBtn.innerText = t.startQualifyingBtn;
+
+    // 2. レース戦略設定（Strategy Panel）
+    const strategyHeader = document.querySelector("#strategy-panel").previousElementSibling.querySelector("h3");
+    if (strategyHeader) strategyHeader.innerText = t.raceStrategyHeader;
+    
+    const circuitLabels = document.querySelectorAll("#strategy-panel label");
+    circuitLabels.forEach(label => {
+        if (label.innerText.includes("Circuit Selection") || label.innerText.includes("コース(セクター)選択")) {
+            label.innerText = t.circuitLabel;
+        }
+        if (label.innerText.includes("Custom Range") || label.innerText.includes("カスタム範囲指定")) {
+            label.innerText = t.customRangeLabel;
+        }
+        if (label.innerText.includes("Tire Strategy") || label.innerText.includes("タイヤ戦略")) {
+            label.innerText = t.tireStrategyLabel;
+        }
+    });
+    
+    const setBtn = document.querySelector("button[onclick='quiz.createCustomRound()']");
+    if (setBtn) setBtn.innerText = t.setBtn;
+    
+    const randLabel = document.querySelector("#strategy-random p");
+    if (randLabel) randLabel.innerText = t.randomGeneratorLabel;
+    
+    const generateBtn = document.querySelector("button[onclick='quiz.createRandomRound()']");
+    if (generateBtn) generateBtn.innerText = t.generateGridBtn;
+    
+    const flagLabel = document.querySelector("#strategy-flagged p");
+    if (flagLabel) flagLabel.innerHTML = `<span class="text-lg">🚩</span> ${t.flaggedTargetsLabel}`;
+    
+    const generateFlaggedBtn = document.querySelector("button[onclick='quiz.createFlaggedRound()']");
+    if (generateFlaggedBtn) generateFlaggedBtn.innerText = t.generateFlaggedBtn;
+
+    // 3. 検索プレースホルダー
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.placeholder = t.quickScan;
+
+    // 4. ピットストップ関連の現在の状態を再描画
+    this.updatePitStopButton(this.dueMistakes ? this.dueMistakes.length : 0);
+}
 
             openWordBook() {
                  document.getElementById('start-screen').classList.add('hidden');
