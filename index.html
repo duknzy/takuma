@@ -2142,7 +2142,7 @@ if (this.isSpellingMode) {
                  }
              }
 
-             handleVocabAnswer(selected, q) {
+           handleVocabAnswer(selected, q) {
                  const btns = document.querySelectorAll('.option-btn');
                  if (btns.length > 0 && btns[0].disabled) return;
                  btns.forEach(b => b.disabled = true);
@@ -2163,6 +2163,39 @@ if (this.isSpellingMode) {
                      window.handleSRSUpdate({ ...q, timeTaken: timeTaken }, isCorrect);
                  }
 
+                 // ==========================================
+                 // ★ 【新規】回答後の「答え・和訳」の自動表示アップデート ★
+                 // ==========================================
+                 if (this.isPrepGuessMode || this.isSynonymMode) {
+                     const targetDisplay = document.getElementById('target-word');
+                     const exText = document.getElementById('example-text');
+
+                     if (this.isPrepGuessMode) {
+                         // 前置詞モード：ターゲット表示の「___」を正解の前置詞で埋めてハイライト表示
+                         targetDisplay.innerHTML = q.w.replace(new RegExp(`\\b${q.aText}\\b`, 'i'), `<span class="text-[#39ff14] font-bold underline">${q.aText}</span>`);
+                         
+                         // 例文の空欄も正解で埋め、さらに和訳を最初から自動で表示（じっくり確認用）
+                         if (q.ex) {
+                             let displayExample = this.highlightIdiom(q.ex, q.w);
+                             const prepRegex = new RegExp(`\\b${q.aText}\\b`, 'gi');
+                             displayExample = displayExample.replace(prepRegex, `<span class="text-[#39ff14] font-bold underline">${q.aText}</span>`);
+                             exText.innerHTML = `
+                                <div class="flex flex-col items-center gap-4 animate-slide-in">
+                                    <div>${displayExample}</div>
+                                    <div id="ex-translation-container">
+                                        <div class="text-lg md:text-xl text-gray-400 font-normal not-italic">
+                                            ${q.exTr || "No translation data"}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                         }
+                     } else if (this.isSynonymMode) {
+                         // 類義語モード：ターゲット表示を「単語 ＝ 類義語 (日本語の意味)」に拡張して表示
+                         targetDisplay.innerHTML = `${q.w} <span class="text-gray-400">=</span> <span class="text-[#39ff14] font-bold">${q.synonym}</span> <span class="text-sm text-gray-400">(${q.m})</span>`;
+                     }
+                 }
+
                  if (isCorrect) {
                      this.currentStreak++;
                      if (this.currentStreak > this.maxStreak) {
@@ -2175,21 +2208,21 @@ if (this.isSpellingMode) {
                          feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold animate-pulse">${t.purpleSector} (${timeTaken.toFixed(2)}s)</span>`; // 🌐 最速正解フィードバックを翻訳
                      } else if (timeTaken > 5.0) {
                          feedback.innerHTML = `<span class="text-yellow-500 text-xs font-bold">${t.slow} (${timeTaken.toFixed(2)}s)</span>`; // 🌐 スロー走行フィードバックを翻訳
+                     } else {
+                         feedback.innerHTML = `<span class="text-[#39ff14] text-xs font-bold">${this.lang === 'ja' ? '🟣 正解！' : '🟣 CORRECT'}</span>`;
                      }
 
                      // ==========================================
-                     // ★ 【追加】前置詞モードまたは類義語モードの処理 ★
+                     // ★ 正解時：「次の問題へ」ボタンを表示（タップ待ち） ★
                      // ==========================================
                      if (this.isPrepGuessMode || this.isSynonymMode) {
                          const container = document.getElementById('options-container');
                          container.innerHTML = ''; // 4択の選択肢ボタンを消去
                          
-                         // 「次の問題へ」進むためのカッコいいネオングリーンのボタンを生成
                          const nextBtn = document.createElement('button');
                          nextBtn.className = "col-span-2 w-full py-6 bg-[#39ff14]/20 hover:bg-[#39ff14]/30 text-[#39ff14] border-2 border-[#39ff14] rounded-xl font-bold text-xl tracking-widest uppercase transition-all transform active:scale-[0.98] shadow-lg animate-pulse";
                          nextBtn.innerText = this.lang === 'ja' ? "次の問題へ ▶" : "NEXT LAP ▶";
                          
-                         // タップされたら次の問題（またはリザルト）へ進む
                          nextBtn.onclick = () => {
                              this.currentIndex++;
                              if (this.currentIndex < this.questions.length) this.showVocabQuestion();
@@ -2197,7 +2230,7 @@ if (this.isSpellingMode) {
                          };
                          container.appendChild(nextBtn);
                      } else {
-                         // 通常のVOCABモードなどの時は、今まで通り0.4秒後に自動遷移
+                         // 通常のVOCABモードなどは、0.4秒後にテンポよく自動遷移
                          setTimeout(() => {
                              this.currentIndex++;
                              if (this.currentIndex < this.questions.length) this.showVocabQuestion();
@@ -2224,13 +2257,34 @@ if (this.isSpellingMode) {
                      }
                      
                      this.questions.push(q);
-                     setTimeout(() => { 
-                         this.currentIndex++; 
-                         this.showVocabQuestion(); 
-                     }, 1500);
+
+                     // ==========================================
+                     // ★ 【新規】不正解時：赤色の「次の問題へ」ボタンを表示してタップ待ちに ★
+                     // ==========================================
+                     if (this.isPrepGuessMode || this.isSynonymMode) {
+                         const container = document.getElementById('options-container');
+                         container.innerHTML = ''; // 4択の選択肢ボタンを消去
+                         
+                         // ミスを伝える警告用のレッドボタンを生成
+                         const nextBtn = document.createElement('button');
+                         nextBtn.className = "col-span-2 w-full py-6 bg-red-600/20 hover:bg-red-600/30 text-red-500 border-2 border-red-500 rounded-xl font-bold text-xl tracking-widest uppercase transition-all transform active:scale-[0.98] shadow-lg animate-pulse";
+                         nextBtn.innerText = this.lang === 'ja' ? "次の問題へ ▶" : "NEXT LAP ▶";
+                         
+                         nextBtn.onclick = () => {
+                             this.currentIndex++; 
+                             this.showVocabQuestion(); 
+                         };
+                         container.appendChild(nextBtn);
+                     } else {
+                         // 通常モードの時は、テンポを崩さないよう従来通り1.5秒後に自動遷移
+                         setTimeout(() => { 
+                             this.currentIndex++; 
+                             this.showVocabQuestion(); 
+                         }, 1500);
+                     }
                  }
              }
-
+             
              startTimer() {
                  if (this.timerInterval) clearInterval(this.timerInterval);
                  this.timerInterval = setInterval(() => { document.getElementById('timer').innerText = ((Date.now() - this.startTime) / 1000).toFixed(2) + 's'; }, 50);
