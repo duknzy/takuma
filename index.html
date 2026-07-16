@@ -761,7 +761,7 @@ this.vocabList = [];
 this.synonymList = [];
 this.grammarList = [];
 // ▼ これを追加 ▼
-this.prepList = ['about', 'against', 'beyond', 'for', 'from', 'in', 'on', 'out', 'over', 'through', 'to', 'up', 'with'];
+this.prepList = ['about', 'against', 'at', 'beyond', 'by', 'for', 'from', 'in', 'of', 'on', 'out', 'over', 'through', 'to', 'under', 'up', 'with'];
 
 // --- キーボードタイピングによる自由入力 ＆ Enter進行サポート ---
 window.addEventListener('keydown', (e) => {
@@ -1054,59 +1054,84 @@ if (currentItem.isFillIn) {
                  return example.replace(regex, '____');
              }
 
-             // ▼ ここから追加：動詞の活用形を検知して伏せ字にするスマート機能 ▼
+             // ▼ 【超強化版】動詞のあらゆる活用形を自動検知して確実に伏せ字にする関数 ▼
             maskConjugatedWord(example, baseWord) {
                 if (!example || !baseWord) return example;
 
-                const b = baseWord.toLowerCase();
+                let b = baseWord.toLowerCase().trim();
                 
-                // 頻出する不規則動詞の活用形データベース
+                // すでに過去分詞や過去形（surprised, interestedなど）で登録されている場合の原形レスキュー
+                if (b.endsWith('ed') && b.length > 4) {
+                    const temp = b.slice(0, -2);
+                    if (temp.endsWith('i')) {
+                        b = temp.slice(0, -1) + 'y'; // implied -> imply
+                    } else if (!temp.endsWith('e') && !['o','a','u','i'].includes(temp.slice(-1))) {
+                        b = temp + 'e'; // surprised -> surprise
+                    } else {
+                        b = temp;
+                    }
+                }
+
+                // 頻出する不規則動詞 ＆ 子音が重なる規則動詞の超強力データベース（大学受験完全対応）
                 const irregulars = {
                     'bear': ['bears', 'bore', 'bearing'],
-'blow': ['blows', 'blew', 'blowing'],
-'break': ['breaks', 'broke', 'breaking'],
-'bring': ['brings', 'brought', 'bringing'],
-'catch': ['catches', 'caught', 'catching'],
-'cling': ['clings', 'clung', 'clinging'],
-'come': ['comes', 'came', 'coming'],
-'deal': ['deals', 'dealt', 'dealing'],
-'do': ['does', 'did', 'doing'],
-'draw': ['draws', 'drew', 'drawing'],
-'dwell': ['dwells', 'dwelt', 'dwelling'],
-'fall': ['falls', 'fell', 'falling'],
-'feed': ['feeds', 'fed', 'feeding'],
-'feel': ['feels', 'felt', 'feeling'],
-'give': ['gives', 'gave', 'giving'],
-'go': ['goes', 'went', 'going'],
-'hold': ['holds', 'held', 'holding'],
-'keep': ['keeps', 'kept', 'keeping'],
-'know': ['knows', 'knew', 'knowing'],
-'lead': ['leads', 'led', 'leading'],
-'leave': ['leaves', 'left', 'leaving'],
-'make': ['makes', 'made', 'making'],
-'mistake': ['mistakes', 'mistook', 'mistaking'],
-'pay': ['pays', 'paid', 'paying'],
-'put': ['puts', 'put', 'putting'],
-'run': ['runs', 'ran', 'running'],
-'see': ['sees', 'saw', 'seeing'],
-'send': ['sends', 'sent', 'sending'],
-'set': ['sets', 'set', 'setting'],
-'show': ['shows', 'showed', 'showing'],
-'shrink': ['shrinks', 'shrank', 'shrinking'],
-'speak': ['speaks', 'spoke', 'speaking'],
-'spell': ['spells', 'spelt', 'spelling'],
-'spring': ['springs', 'sprang', 'springing'],
-'stand': ['stands', 'stood', 'standing'],
-'strike': ['strikes', 'struck', 'striking'],
-'strive': ['strives', 'strove', 'striving'],
-'take': ['takes', 'took', 'taking'],
-'tell': ['tells', 'told', 'telling'],
-'wear': ['wears', 'wore', 'wearing'],
-'wind': ['winds', 'wound', 'winding'],
-'clothe': ['clothes', 'clad', 'clothing'],
-'lean': ['leans', 'leant', 'leaning'],
-'lie': ['lies', 'lay', 'lying'],
-'rise': ['rises', 'rose', 'rising'],
+                    'blow': ['blows', 'blew', 'blowing'],
+                    'break': ['breaks', 'broke', 'breaking'],
+                    'bring': ['brings', 'brought', 'bringing'],
+                    'catch': ['catches', 'caught', 'catching'],
+                    'cling': ['clings', 'clung', 'clinging'],
+                    'come': ['comes', 'came', 'coming'],
+                    'deal': ['deals', 'dealt', 'dealing'],
+                    'do': ['does', 'did', 'doing'],
+                    'draw': ['draws', 'drew', 'drawing'],
+                    'dwell': ['dwells', 'dwelt', 'dwelling'],
+                    'fall': ['falls', 'fell', 'falling'],
+                    'feed': ['feeds', 'fed', 'feeding'],
+                    'feel': ['feels', 'felt', 'feeling'],
+                    'give': ['gives', 'gave', 'giving'],
+                    'go': ['goes', 'went', 'going'],
+                    'hold': ['holds', 'held', 'holding'],
+                    'keep': ['keeps', 'kept', 'keeping'],
+                    'know': ['knows', 'knew', 'knowing'],
+                    'lead': ['leads', 'led', 'leading'],
+                    'leave': ['leaves', 'left', 'leaving'],
+                    'make': ['makes', 'made', 'making'],
+                    'mistake': ['mistakes', 'mistook', 'mistaking'],
+                    'pay': ['pays', 'paid', 'paying'],
+                    'put': ['puts', 'put', 'putting'],
+                    'run': ['runs', 'ran', 'running'],
+                    'see': ['sees', 'saw', 'seeing'],
+                    'send': ['sends', 'sent', 'sending'],
+                    'set': ['sets', 'set', 'setting'],
+                    'show': ['shows', 'showed', 'showing'],
+                    'shrink': ['shrinks', 'shrank', 'shrinking'],
+                    'speak': ['speaks', 'spoke', 'speaking'],
+                    'spell': ['spells', 'spelt', 'spelling'],
+                    'spring': ['springs', 'sprang', 'springing'],
+                    'stand': ['stands', 'stood', 'standing'],
+                    'strike': ['strikes', 'struck', 'striking'],
+                    'strive': ['strives', 'strove', 'striving'],
+                    'take': ['takes', 'took', 'taking'],
+                    'tell': ['tells', 'told', 'telling'],
+                    'wear': ['wears', 'wore', 'wearing'],
+                    'wind': ['winds', 'wound', 'winding'],
+                    'clothe': ['clothes', 'clad', 'clothing'],
+                    'lean': ['leans', 'leant', 'leaning'],
+                    'lie': ['lies', 'lay', 'lying'],
+                    'rise': ['rises', 'rose', 'rising'],
+                    // 🎓 大学受験熟語用（不規則動詞）
+                    'hear': ['hears', 'heard', 'hearing'],
+                    'think': ['thinks', 'thought', 'thinking'],
+                    'dream': ['dreams', 'dreamed', 'dreamt', 'dreaming'],
+                    'agree': ['agrees', 'agreed', 'agreeing'],
+                    // 🎓 子音が重なる特殊規則動詞
+                    'occur': ['occurs', 'occurred', 'occurring'],
+                    'refer': ['refers', 'referred', 'referring'],
+                    'submit': ['submits', 'submitted', 'submitting'],
+                    'rebel': ['rebels', 'rebelled', 'rebelling'],
+                    'deter': ['deters', 'deterred', 'deterring'],
+                    'rob': ['robs', 'robbed', 'robbing'],
+                    'commit': ['commits', 'committed', 'committing']
                 };
 
                 let variations = [b];
@@ -1114,7 +1139,7 @@ if (currentItem.isFillIn) {
                 if (irregulars[b]) {
                     variations = variations.concat(irregulars[b]);
                 } else {
-                    // 規則動詞の語尾変化を自動生成
+                    // 一般規則動詞の語尾変化を網羅
                     variations.push(b + 's', b + 'es', b + 'ed', b + 'd', b + 'ing');
                     if (b.endsWith('y')) {
                         const stem = b.slice(0, -1);
@@ -1130,22 +1155,19 @@ if (currentItem.isFillIn) {
                     }
                 }
 
-                // 長い単語から順にマッチさせる（例: boast より boasting を先に判定）
-                variations.sort((a, b) => b.length - a.length);
-                variations = [...new Set(variations)];
+                // 重複排除 ＆ 長いバリエーションから順にソート（マッチング精度向上）
+                variations = [...new Set(variations)].sort((a, b) => b.length - a.length);
 
-                // パターンを組み立てて一括置換
+                // 正規表現を組み立てて例文から伏せ字に置換
                 const pattern = '\\b(' + variations.join('|') + ')\\b';
                 const regex = new RegExp(pattern, 'gi');
 
                 return example.replace(regex, '<span class="text-red-500 font-bold opacity-80">___</span>');
             }
-            // ▲ 追加ここまで ▲
 
-        generateRounds() {
+            generateRounds() {
                 let sourceList = [];
                 
-                // ▼ 変更箇所1：ここに || this.currentMode === 'prep_guess' を追加する ▼
                 if (this.currentMode === 'grammar' || this.currentMode === 'prep_guess') sourceList = this.grammarList;
                 else if (this.currentMode === 'synonym') sourceList = this.synonymList;
                 else sourceList = this.vocabList;
@@ -1153,37 +1175,52 @@ if (currentItem.isFillIn) {
                 const wordCopy = [...sourceList]; 
                 this.vocabRounds = [];
 
-
-                // ▼ 変更箇所2：ここにも || this.currentMode === 'prep_guess' を追加する ▼
-                if (this.currentMode === 'grammar' || this.currentMode === 'prep_guess') {
-                    // 各前置詞を独立したグループに分割してシャープに保つ
+                // ==========================================
+                // ★ 【改善】前置詞当てモードはすべての前置詞をミックスして出題 ★
+                // ==========================================
+                if (this.currentMode === 'prep_guess') {
+                    // 前置詞当ては、グループ分けせずに全体をタイヤ設定（出題数）ごとに分割してラウンドを作る
+                    let part = 1;
+                    const totalParts = Math.ceil(wordCopy.length / this.wordsPerRound);
+                    
+                    while (wordCopy.length > 0) {
+                        const chunk = wordCopy.splice(0, this.wordsPerRound);
+                        const ptStr = totalParts > 1 ? ` Pt.${part}` : '';
+                        this.vocabRounds.push({
+                            id: `prep_mix_${part}`,
+                            name: this.lang === 'ja' ? `【前置詞混合】 総合テスト${ptStr} (${chunk.length}問)` : `【PREP MIX】 General${ptStr} (${chunk.length} Qs)`,
+                            words: chunk
+                        });
+                        part++;
+                    }
+                } 
+                // ==========================================
+                // ★ 文法モードの時だけ、これまで通り前置詞ごとのグループに分ける ★
+                // ==========================================
+                else if (this.currentMode === 'grammar') {
+                    // 進化した prepList に対応したグループ分け
                     const prepGroups = {
-                        'about': [], 'against': [], 'beyond': [], 'for': [], 'from': [],
-                        'in': [], 'on': [], 'out': [], 'over': [], 'through': [], 'to': [], 'up': [], 'with': [], 'others': []
+                        'about': [], 'against': [], 'at': [], 'beyond': [], 'by': [], 'for': [], 'from': [],
+                        'in': [], 'of': [], 'on': [], 'out': [], 'over': [], 'through': [], 'to': [], 'under': [], 'up': [], 'with': [], 'others': []
                     };
                 
-                    
                     sourceList.forEach(item => {
                         if (item.isCustom) return;
                         const wLower = item.w.toLowerCase();
                         
-                        if (/\babout\b/.test(wLower)) prepGroups['about'].push(item);
-                        else if (/\bfrom\b/.test(wLower)) prepGroups['from'].push(item);
-                        else if (/\bout\b/.test(wLower)) prepGroups['out'].push(item);
-                        else if (/\bup\b/.test(wLower)) prepGroups['up'].push(item);
-                        else if (/\bon\b/.test(wLower)) prepGroups['on'].push(item);
-                        else if (/\bin\b/.test(wLower)) prepGroups['in'].push(item);
-                        else if (/\bwith\b/.test(wLower)) prepGroups['with'].push(item);
-                        else if (/\bto\b/.test(wLower)) prepGroups['to'].push(item);
-                        else if (/\bfor\b/.test(wLower)) prepGroups['for'].push(item);
-                        else if (/\bagainst\b/.test(wLower)) prepGroups['against'].push(item);
-                        else if (/\bbeyond\b/.test(wLower)) prepGroups['beyond'].push(item);
-                        else if (/\bover\b/.test(wLower)) prepGroups['over'].push(item);
-                        else if (/\bthrough\b/.test(wLower)) prepGroups['through'].push(item);
-                        else prepGroups['others'].push(item);
+                        let found = false;
+                        for (const prep in prepGroups) {
+                            if (prep === 'others') continue;
+                            const regex = new RegExp(`\\b${prep}\\b`, 'i');
+                            if (regex.test(wLower)) {
+                                prepGroups[prep].push(item);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) prepGroups['others'].push(item);
                     });
 
-                    // ▼ 修正：タイヤ選択（問題数）に合わせて分割処理 ▼
                     Object.keys(prepGroups).forEach(prep => {
                         let groupWords = prepGroups[prep];
                         if (groupWords.length > 0) {
@@ -1196,7 +1233,7 @@ if (currentItem.isFillIn) {
                                 const ptStr = totalParts > 1 ? ` Pt.${part}` : '';
                                 this.vocabRounds.push({
                                     id: `prep_${prep.replace(/ /g, '_')}_${part}`,
-                                    name: `【前置詞】 ${displayName}${ptStr} (${chunk.length} Qs)`,
+                                    name: this.lang === 'ja' ? `【文法】 ${displayName}${ptStr} (${chunk.length}問)` : `【GRAMMAR】 ${displayName}${ptStr} (${chunk.length} Qs)`,
                                     words: chunk
                                 });
                                 part++;
@@ -1222,7 +1259,6 @@ if (currentItem.isFillIn) {
                         else groupMap['Others'].push(item);
                     });
                     
-                    // ▼ 修正：タイヤ選択（問題数）に合わせて分割処理 ▼
                     for (const group in groupMap) {
                         let groupWords = groupMap[group];
                         if (groupWords.length > 0) {
@@ -1255,6 +1291,8 @@ if (currentItem.isFillIn) {
                     }
                 }
             }
+
+
 
             initUI() {
                 const selector = document.getElementById('round-selector');
@@ -1551,12 +1589,20 @@ switchModeTab(mode) {
                 const q = this.questions[this.currentIndex];
                 document.getElementById('fc-progress').innerText = `LAP ${this.currentIndex + 1} / ${this.questions.length}`;
                 
-               let displayWord = this.isReverseMode ? q.m : (q.dispW || q.w);
+                let displayWord = this.isReverseMode ? q.m : (q.dispW || q.w);
                 let displayMeaning = this.isReverseMode ? (q.dispW || q.w) : q.m;
 
+                // ==========================================
+                // ★ 【修正】前置詞・穴埋めカードの表示ロジック ★
+                // ==========================================
                 if (q.isFillIn) {
-                    displayWord = this.isReverseMode ? q.m : q.dispW;
-                    displayMeaning = this.isReverseMode ? q.ansW : q.m;
+                    if (this.isReverseMode) {
+                        displayWord = q.m; // 表面：日本語の意味
+                        displayMeaning = q.w; // 裏面：正解の入った英文（例: [rebel] against）
+                    } else {
+                        displayWord = q.dispW; // 表面：空欄付きの英文（例: [   ] against）
+                        displayMeaning = `${q.w}\n(${q.m})`; // 裏面：正解の英文 ＋ 日本語の意味
+                    }
                 } else if (this.currentMode === 'synonym' && q.synonym) {
                     if (this.isReverseMode) {
                         displayMeaning = `${q.w} (= ${q.synonym})`;
@@ -2284,7 +2330,7 @@ if (this.isSpellingMode) {
                      }
                  }
              }
-             
+
              startTimer() {
                  if (this.timerInterval) clearInterval(this.timerInterval);
                  this.timerInterval = setInterval(() => { document.getElementById('timer').innerText = ((Date.now() - this.startTime) / 1000).toFixed(2) + 's'; }, 50);
