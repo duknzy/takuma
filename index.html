@@ -517,20 +517,21 @@
             </div>
 
             <!-- ① 【新規】ガレージ・ステータス・ヘッダー (HUDカウンター) -->
-            <div class="grid grid-cols-4 gap-2 mb-4 flex-shrink-0 text-center font-mono">
-                <div class="bg-black/40 border border-gray-800 rounded-xl p-2 flex flex-col justify-center">
+           <!-- ① ガレージ・ステータス・ヘッダー (HUDダイレクトフィルター仕様) -->
+            <div class="grid grid-cols-4 gap-2 mb-4 flex-shrink-0 text-center font-mono select-none">
+                <div onclick="quiz.setBookFilter('all')" class="bg-black/40 border border-gray-800 rounded-xl p-2 flex flex-col justify-center cursor-pointer hover:border-gray-500 hover:bg-black/60 transition-colors">
                     <div class="text-[8px] text-gray-500 uppercase tracking-tighter">TOTAL</div>
                     <div id="wb-total-counter" class="text-base md:text-xl font-bold text-white">0</div>
                 </div>
-                <div class="bg-red-950/20 border border-red-900/40 rounded-xl p-2 flex flex-col justify-center">
+                <div onclick="quiz.setBookFilter('red')" class="bg-red-950/20 border border-red-900/40 rounded-xl p-2 flex flex-col justify-center cursor-pointer hover:border-red-600 hover:bg-red-950/40 transition-colors">
                     <div class="text-[8px] text-red-400 uppercase tracking-tighter">🚩 CRIT</div>
                     <div id="wb-red-counter" class="text-base md:text-xl font-bold text-red-500">0</div>
                 </div>
-                <div class="bg-yellow-950/20 border border-yellow-900/40 rounded-xl p-2 flex flex-col justify-center">
+                <div onclick="quiz.setBookFilter('yellow')" class="bg-yellow-950/20 border border-yellow-900/40 rounded-xl p-2 flex flex-col justify-center cursor-pointer hover:border-yellow-600 hover:bg-yellow-950/40 transition-colors">
                     <div class="text-[8px] text-yellow-400 uppercase tracking-tighter">🟨 WARN</div>
                     <div id="wb-yellow-counter" class="text-base md:text-xl font-bold text-yellow-500">0</div>
                 </div>
-                <div class="bg-purple-950/20 border border-purple-900/40 rounded-xl p-2 flex flex-col justify-center">
+                <div onclick="quiz.setBookFilter('24h')" class="bg-purple-950/20 border border-purple-900/40 rounded-xl p-2 flex flex-col justify-center cursor-pointer hover:border-purple-600 hover:bg-purple-950/40 transition-colors">
                     <div class="text-[8px] text-purple-400 uppercase tracking-tighter">⏱️ 24H MISS</div>
                     <div id="wb-24h-counter" class="text-base md:text-xl font-bold text-purple-400">0</div>
                 </div>
@@ -2732,28 +2733,36 @@ updateLanguageUI() {
                  this.renderWordBook();
              }
 
-             toggleBookFilter() {
-                 if (this.bookmarkedFilter === 'all') {
-                     this.bookmarkedFilter = 'red';
-                     document.getElementById('wb-filter-btn').innerText = "🚩 RED";
-                     document.getElementById('wb-filter-btn').className = "bg-red-900/80 text-white px-3 rounded border border-red-500 text-xs font-bold uppercase hover:bg-red-800 transition-colors";
-                 } else if (this.bookmarkedFilter === 'red') {
-                     this.bookmarkedFilter = 'yellow';
-                     document.getElementById('wb-filter-btn').innerText = "🟨 YELLOW";
-                     document.getElementById('wb-filter-btn').className = "bg-yellow-900/80 text-white px-3 rounded border border-yellow-500 text-xs font-bold uppercase hover:bg-yellow-800 transition-colors";
-                 } else if (this.bookmarkedFilter === 'yellow') {
-                     this.bookmarkedFilter = '24h';
-                     document.getElementById('wb-filter-btn').innerText = "⏱️ 24H";
-                     document.getElementById('wb-filter-btn').className = "bg-purple-900/80 text-white px-3 rounded border border-purple-500 text-xs font-bold uppercase hover:bg-purple-800 transition-colors";
+          toggleBookFilter() {
+                 if (this.bookmarkedFilter === 'all') this.setBookFilter('red');
+                 else if (this.bookmarkedFilter === 'red') this.setBookFilter('yellow');
+                 else if (this.bookmarkedFilter === 'yellow') this.setBookFilter('24h');
+                 else this.setBookFilter('all');
+             }
+
+             // 🎯 【新規】HUDやボタンから直接フィルターを強制同期する関数
+             setBookFilter(filterType) {
+                 this.bookmarkedFilter = filterType;
+                 const btn = document.getElementById('wb-filter-btn');
+                 if (!btn) return;
+
+                 if (filterType === 'red') {
+                     btn.innerText = "🚩 RED";
+                     btn.className = "bg-red-900/80 text-white px-3 py-2 rounded border border-red-500 text-xs font-bold uppercase hover:bg-red-800 transition-colors shrink-0";
+                 } else if (filterType === 'yellow') {
+                     btn.innerText = "🟨 YELLOW";
+                     btn.className = "bg-yellow-900/80 text-white px-3 py-2 rounded border border-yellow-500 text-xs font-bold uppercase hover:bg-yellow-800 transition-colors shrink-0";
+                 } else if (filterType === '24h') {
+                     btn.innerText = "⏱️ 24H";
+                     btn.className = "bg-purple-900/80 text-white px-3 py-2 rounded border border-purple-500 text-xs font-bold uppercase hover:bg-purple-800 transition-colors shrink-0";
                  } else {
-                     this.bookmarkedFilter = 'all';
-                     document.getElementById('wb-filter-btn').innerText = "ALL";
-                     document.getElementById('wb-filter-btn').className = "bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors";
+                     btn.innerText = "ALL";
+                     btn.className = "bg-gray-800 text-white px-3 py-2 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors shrink-0";
                  }
                  this.renderWordBook();
              }
 
-         renderWordBook() {
+             renderWordBook() {
                  const listEl = document.getElementById('wb-list');
                  const query = document.getElementById('wb-search').value.toLowerCase().trim();
                  const startVal = parseInt(document.getElementById('wb-start').value);
@@ -2761,10 +2770,8 @@ updateLanguageUI() {
 
                  listEl.innerHTML = '';
                  
-                 let sourceList = [];
-                 if (this.currentMode === 'grammar') sourceList = this.grammarList;
-                 else if (this.currentMode === 'synonym') sourceList = this.synonymList;
-                 else sourceList = this.vocabList;
+                 // 🎯 【修正】クイズのモード状態に関わらず、ガレージ内は常に純粋な「英単語」のみに強制固定！
+                 let sourceList = this.vocabList;
 
                  let dataSrc = sourceList.length > 0 ? sourceList : (this.allMistakes || []);
                  
