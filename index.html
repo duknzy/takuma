@@ -1652,15 +1652,34 @@ switchModeTab(mode) {
                 let displayMeaning = this.isReverseMode ? (q.dispW || q.w) : q.m;
 
                 // ==========================================
-                // ★ 【修正】前置詞・穴埋めカードの表示ロジック ★
+                // 🎯 【新規】前置詞当てモード (PREP GUESS) 専用のマスク処理
                 // ==========================================
-                if (q.isFillIn) {
+                if (this.currentMode === 'prep_guess') {
+                    // 対象となる正解の前置詞を特定 (例: from)
+                    const targetPrep = this.prepList.find(prep => new RegExp(`\\b${prep}\\b`, 'i').test(q.w)) || 'about';
+                    
+                    // 語幹のカッコを外して動詞を露出させ、前置詞だけを [  ?  ] にくり抜く
+                    const fullPhrase = q.w.replace(/\[(.*?)\]/, '$1'); 
+                    const maskedPhrase = fullPhrase.replace(new RegExp(`\\b${targetPrep}\\b`, 'i'), '[  ?  ]');
+
                     if (this.isReverseMode) {
-                        displayWord = q.m; // 表面：日本語の意味
-                        displayMeaning = q.w; // 裏面：正解の入った英文（例: [rebel] against）
+                        displayWord = q.m;
+                        displayMeaning = `${fullPhrase}\n\n👉 GEAR SHIFT (正解): ${targetPrep.toUpperCase()}`;
                     } else {
-                        displayWord = q.dispW; // 表面：空欄付きの英文（例: [   ] against）
-                        displayMeaning = `${q.w}\n(${q.m})`; // 裏面：正解の英文 ＋ 日本語の意味
+                        displayWord = maskedPhrase;
+                        displayMeaning = `🟢 ANSWER: ${targetPrep.toUpperCase()}\n\n${fullPhrase}\n(${q.m})`;
+                    }
+                }
+                // ==========================================
+                // ★ 【既存】通常の穴埋め・文法カードの表示ロジック ★
+                // ==========================================
+                else if (q.isFillIn) {
+                    if (this.isReverseMode) {
+                        displayWord = q.m; 
+                        displayMeaning = q.w; 
+                    } else {
+                        displayWord = q.dispW; 
+                        displayMeaning = `${q.w}\n(${q.m})`; 
                     }
                 } else if (this.currentMode === 'synonym' && q.synonym) {
                     if (this.isReverseMode) {
