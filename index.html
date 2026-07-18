@@ -501,27 +501,54 @@
         </div>
 
         
-        <div id="wordbook-screen" class="hidden race-card p-6 rounded-2xl text-center border-t-4 border-yellow-500 h-[90%] my-auto z-50 flex flex-col absolute inset-4">
+        <!-- 🌐 完全にリニューアルされた MISSION CONTROL (DATA CENTER) UI -->
+        <div id="wordbook-screen" class="hidden race-card p-4 md:p-6 rounded-2xl text-center border-t-4 border-yellow-500 h-[92%] my-auto z-50 flex flex-col absolute inset-2 md:inset-4 animate-slide-in">
+            
+            <!-- 上部タイトルエリア -->
             <div class="flex justify-between items-center mb-4 flex-shrink-0">
-                <h2 class="f1-font text-2xl font-bold text-yellow-500 tracking-widest">DATA CENTER</h2>
-                <div class="flex items-center gap-2">
-                    <button onclick="quiz.closeOverlay('wordbook-screen')" class="text-gray-400 active:text-white text-3xl p-2 hover:text-white transition-colors leading-none">&times;</button>
+                <div class="text-left">
+                    <h2 class="f1-font text-xl md:text-2xl font-bold text-yellow-500 tracking-widest">MISSION CONTROL</h2>
+                    <p class="text-[9px] text-gray-500 font-mono uppercase tracking-wider leading-none mt-0.5">Garage Component Status & Telemetry</p>
+                </div>
+                <button onclick="quiz.closeOverlay('wordbook-screen')" class="text-gray-400 active:text-white text-3xl p-2 hover:text-white transition-colors leading-none">&times;</button>
+            </div>
+
+            <!-- ① 【新規】ガレージ・ステータス・ヘッダー (HUDカウンター) -->
+            <div class="grid grid-cols-4 gap-2 mb-4 flex-shrink-0 text-center font-mono">
+                <div class="bg-black/40 border border-gray-800 rounded-xl p-2 flex flex-col justify-center">
+                    <div class="text-[8px] text-gray-500 uppercase tracking-tighter">TOTAL</div>
+                    <div id="wb-total-counter" class="text-base md:text-xl font-bold text-white">0</div>
+                </div>
+                <div class="bg-red-950/20 border border-red-900/40 rounded-xl p-2 flex flex-col justify-center">
+                    <div class="text-[8px] text-red-400 uppercase tracking-tighter">🚩 CRIT</div>
+                    <div id="wb-red-counter" class="text-base md:text-xl font-bold text-red-500">0</div>
+                </div>
+                <div class="bg-yellow-950/20 border border-yellow-900/40 rounded-xl p-2 flex flex-col justify-center">
+                    <div class="text-[8px] text-yellow-400 uppercase tracking-tighter">🟨 WARN</div>
+                    <div id="wb-yellow-counter" class="text-base md:text-xl font-bold text-yellow-500">0</div>
+                </div>
+                <div class="bg-purple-950/20 border border-purple-900/40 rounded-xl p-2 flex flex-col justify-center">
+                    <div class="text-[8px] text-purple-400 uppercase tracking-tighter">⏱️ 24H MISS</div>
+                    <div id="wb-24h-counter" class="text-base md:text-xl font-bold text-purple-400">0</div>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-2 mb-2 flex-shrink-0 justify-center items-center">
-                <div class="bg-gray-900 p-2 rounded border border-gray-700 flex items-center gap-2">
-                    <span class="text-[9px] text-gray-500 uppercase tracking-widest font-bold">SECTOR</span>
-                    <input type="number" id="wb-start" placeholder="1" class="w-16 bg-black text-white p-1 text-sm rounded border border-gray-700 font-mono text-center focus:border-yellow-500 outline-none">
-                    <span class="text-gray-500">-</span>
-                    <input type="number" id="wb-end" placeholder="END" class="w-16 bg-black text-white p-1 text-sm rounded border border-gray-700 font-mono text-center focus:border-yellow-500 outline-none">
+
+            <!-- コントロールバー（検索＆フィルター） -->
+            <div class="flex flex-wrap gap-2 mb-4 flex-shrink-0 items-center bg-black/40 p-2 rounded-xl border border-gray-800">
+                <input type="text" id="wb-search" placeholder="Scan component spec (Search)..." class="flex-1 min-w-[160px] bg-black text-white p-2 text-xs rounded border border-gray-700 font-mono focus:border-yellow-500 outline-none placeholder-gray-600">
+                <button id="wb-filter-btn" class="bg-gray-800 text-white px-3 py-2 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors shrink-0" onclick="quiz.toggleBookFilter()">ALL</button>
+                
+                <div class="flex items-center gap-1 bg-black p-1 rounded border border-gray-700 shrink-0">
+                    <span class="text-[8px] text-gray-500 font-mono px-1">SECTOR</span>
+                    <input type="number" id="wb-start" placeholder="1" class="w-10 bg-transparent text-white text-xs text-center outline-none font-mono focus:text-yellow-400">
+                    <span class="text-gray-600 text-xs">-</span>
+                    <input type="number" id="wb-end" placeholder="MAX" class="w-12 bg-transparent text-white text-xs text-center outline-none font-mono focus:text-yellow-400">
                 </div>
-            </div>
-            <div class="flex gap-2 mb-4 flex-shrink-0">
-                <input type="text" id="wb-search" placeholder="Search components..." class="flex-1 bg-black text-white p-2 text-sm rounded border border-gray-700 font-mono focus:border-yellow-500 outline-none">
-                <button id="wb-filter-btn" class="bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors" onclick="quiz.toggleBookFilter()">ALL</button>
             </div>
             
+            <!-- ② メインリスト（アコーディオン検査窓） -->
             <div id="wb-list" class="flex-1 overflow-y-auto wb-scroll text-left space-y-2 pr-1">
+                <!-- JavaScriptで高精度パーツ情報がここに生成される -->
             </div>
         </div>
 
@@ -2723,14 +2750,14 @@ updateLanguageUI() {
                  this.renderWordBook();
              }
 
-             renderWordBook() {
+         renderWordBook() {
                  const listEl = document.getElementById('wb-list');
                  const query = document.getElementById('wb-search').value.toLowerCase().trim();
                  const startVal = parseInt(document.getElementById('wb-start').value);
                  const endVal = parseInt(document.getElementById('wb-end').value);
 
                  listEl.innerHTML = '';
-                // ▼ 修正 ▼
+                 
                  let sourceList = [];
                  if (this.currentMode === 'grammar') sourceList = this.grammarList;
                  else if (this.currentMode === 'synonym') sourceList = this.synonymList;
@@ -2738,29 +2765,58 @@ updateLanguageUI() {
 
                  let dataSrc = sourceList.length > 0 ? sourceList : (this.allMistakes || []);
                  
-                let merged = dataSrc.map((item, idx) => {
+                 let merged = dataSrc.map((item, idx) => {
                      const srs = this.allMistakes.find(m => m.word === item.w || m.w === item.w);
                      return { 
                          w: item.w || item.word, 
                          m: item.m || item.meaning, 
-                         synonym: item.synonym || null, // ← ★これを追加
+                         synonym: item.synonym || null, 
                          isCustom: item.isCustom || false,
                          originalId: item.originalId || null,
                          customId: item.customId || null,
-                         firestoreId: item.firestoreId || null, // ←★俺がこれを1行入れ忘れていた！！
+                         firestoreId: item.firestoreId || null, 
+                         ex: item.ex || (srs ? srs.ex : ""),
+                         exTr: item.exTr || (srs ? srs.exTr : ""),
                          id: idx, 
                          srs: srs || null 
                      };
                  });
 
-                const filtered = merged.filter(item => {
+                 // ==========================================
+                 // 📊 ① 【新規】ガレージ・リアルタイムHUDの集計処理
+                 // ==========================================
+                 let totalCount = merged.length;
+                 let redCount = 0;
+                 let yellowCount = 0;
+                 let h24Count = 0;
+                 const nowTs = Date.now() / 1000;
+
+                 merged.forEach(item => {
+                     const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
+                     const isYellow = item.srs && item.srs.flag === 'yellow';
+                     const is24hMiss = item.srs && (
+                         (item.srs.lastMissedSeconds && (nowTs - item.srs.lastMissedSeconds <= 86400)) ||
+                         (!item.srs.lastMissedSeconds && item.srs.interval <= 1 && item.srs.repetitions === 0)
+                     );
+                     if (isRed) redCount++;
+                     if (isYellow) yellowCount++;
+                     if (is24hMiss) h24Count++;
+                 });
+
+                 // HUDのデジタルカウンターに値をデプロイ
+                 document.getElementById('wb-total-counter').innerText = totalCount;
+                 document.getElementById('wb-red-counter').innerText = redCount;
+                 document.getElementById('wb-yellow-counter').innerText = yellowCount;
+                 document.getElementById('wb-24h-counter').innerText = h24Count;
+
+                 // フィルター条件の適用
+                 const filtered = merged.filter(item => {
                      const matchQ = item.w.toLowerCase().includes(query) || item.m.toLowerCase().includes(query);
                      
                      let matchBook = true;
                      const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
                      const isYellow = item.srs && item.srs.flag === 'yellow';
                      
-                     const nowTs = Date.now() / 1000;
                      const is24hMiss = item.srs && (
                          (item.srs.lastMissedSeconds && (nowTs - item.srs.lastMissedSeconds <= 86400)) ||
                          (!item.srs.lastMissedSeconds && item.srs.interval <= 1 && item.srs.repetitions === 0)
@@ -2778,22 +2834,30 @@ updateLanguageUI() {
                  });
 
                  if (filtered.length === 0) {
-                     listEl.innerHTML = `<div class="text-gray-500 text-xs text-center py-4">No components found.</div>`;
+                     listEl.innerHTML = `<div class="text-gray-500 text-xs text-center py-8 font-mono tracking-wider">NO COMPONENTS IN ATTACHED SECTOR</div>`;
                      return;
                  }
 
-                 const displayLimit = 100;
+                 const displayLimit = 150;
                  const viewData = filtered.slice(0, displayLimit);
 
                  viewData.forEach(item => {
                      const div = document.createElement('div');
-                     div.className = "flex items-center justify-between bg-gray-900/60 p-4 rounded-xl border border-gray-700 hover:border-blue-500 transition-all group shadow-md";
+                     // アコーディオン開閉をカード全体のクリックに紐付け（枠線アニメーション追加）
+                     div.className = "flex flex-col bg-gray-900/60 p-4 rounded-xl border border-gray-700/60 hover:border-yellow-500/80 transition-all duration-200 cursor-pointer shadow-md select-none group";
+                     
+                     // ユニークな要素ID用の文字列を生成
+                     const safeElementId = `wb-accordion-${item.w.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+                     div.onclick = () => {
+                         const targetDetail = document.getElementById(safeElementId);
+                         if (targetDetail) targetDetail.classList.toggle('hidden');
+                     };
                      
                      let statusColor = "bg-gray-700"; let statusText = "NEW";
                      if (item.srs) {
-                         if (item.srs.interval > 14) { statusColor = "bg-green-500"; statusText = "OK"; }
-                         else if (item.srs.interval > 3) { statusColor = "bg-yellow-500"; statusText = "WARN"; }
-                         else { statusColor = "bg-red-500"; statusText = "CRIT"; }
+                         if (item.srs.interval > 14) { statusColor = "bg-green-500 shadow-[0_0_8px_#22c55e]"; statusText = "OK"; }
+                         else if (item.srs.interval > 3) { statusColor = "bg-yellow-500 shadow-[0_0_8px_#eab308]"; statusText = "WARN"; }
+                         else { statusColor = "bg-red-500 shadow-[0_0_8px_#ef4444]"; statusText = "CRIT"; }
                      }
 
                      const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
@@ -2806,49 +2870,71 @@ updateLanguageUI() {
                          flagIcon = '🟨'; flagClass = 'text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]';
                      }
 
-                    const safeW = encodeURIComponent(item.w);
+                     const safeW = encodeURIComponent(item.w);
                      const safeM = encodeURIComponent(item.m);
                      const displayW = item.w.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                     let displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;"); // ← ★ const を let に変更
+                     let displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
 
-                     // ▼ ★ここから類義語の追加ロジック ▼
                      if (this.currentMode === 'synonym' && item.synonym) {
                          const dispSyn = item.synonym.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                          displayM = `${displayM} (= ${dispSyn})`;
                      }
-                     // ▲ ここまで ▲
 
-                     // ★ここでナンバリングの表示を分岐させている
-                     // ★ここでナンバリングの表示を分岐させている
                      let displayId = item.isCustom ? `C-${item.customId}` : `No.${item.originalId || item.id + 1}`;
 
-                     
+                     // SRSテレメトリー数値の取得（アコーディオン内部用）
+                     const intervalDays = item.srs ? item.srs.interval : 0;
+                     const reps = item.srs ? item.srs.repetitions : 0;
+                     const ef = item.srs ? (item.srs.easeFactor || 2.5).toFixed(2) : "2.50";
 
+                     // 💳 カードの表側（基本情報）と、②【新規】裏側（アコーディオン詳細エリア）の構築
                      div.innerHTML = `
-                         <div class="flex items-center gap-3 overflow-hidden w-full">
-                             <div class="w-2 h-16 ${statusColor} rounded-full shrink-0 shadow-[0_0_8px_currentColor]"></div>
-                             <div class="text-left overflow-hidden flex-grow py-1">
-                                 <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                                     <span class="text-xs md:text-sm text-yellow-500 font-mono opacity-90">${displayId}</span>
-                                     <span class="font-bold text-white text-2xl md:text-3xl f1-font tracking-wide leading-none">${displayW}</span>
-                                     <span class="text-[10px] md:text-xs text-gray-400 font-mono border border-gray-600 px-1.5 py-0.5 rounded">${statusText}</span>
+                         <!-- 通常表示レイアウト -->
+                         <div class="flex items-center justify-between w-full">
+                             <div class="flex items-center gap-3 overflow-hidden w-full">
+                                 <div class="w-1.5 h-10 ${statusColor} rounded-full shrink-0"></div>
+                                 <div class="text-left overflow-hidden flex-grow">
+                                     <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                         <span class="text-[10px] text-yellow-500/80 font-mono">${displayId}</span>
+                                         <span class="font-bold text-white text-xl md:text-2xl f1-font tracking-wide leading-none group-hover:text-yellow-400 transition-colors">${displayW}</span>
+                                         <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-1 rounded bg-black/30">${statusText}</span>
+                                     </div>
+                                     <p class="text-sm md:text-base text-gray-300 truncate font-medium">${displayM}</p>
                                  </div>
-                                 <p class="text-base md:text-lg text-gray-200 leading-snug break-words pr-2">${displayM}</p>
+                             </div>
+                             <div class="flex items-center gap-1 shrink-0 pl-2 border-l border-gray-800">
+                                 <button class="text-gray-400 hover:text-cyan-400 p-2 text-xl active:scale-95 transition-transform" onclick="event.stopPropagation(); quiz.speak(decodeURIComponent('${safeW}').replace(/'/g, '\\''))">🔊</button>
+                                 <button class="${flagClass} p-2 text-xl active:scale-95 transition-transform" onclick="event.stopPropagation(); window.toggleBookmark('${safeW}', '${safeM}')">
+                                     ${flagIcon}
+                                 </button>
                              </div>
                          </div>
-                         <div class="flex flex-col items-center justify-center gap-1 shrink-0 pl-2 border-l border-gray-700/50">
-                             <button class="text-gray-400 hover:text-cyan-400 p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="quiz.speak(decodeURIComponent('${safeW}').replace(/'/g, '\\''))">🔊</button>
-                             <button class="${flagClass} p-2 text-2xl md:text-3xl active:scale-95 transition-transform" onclick="window.toggleBookmark('${safeW}', '${safeM}')">
-                                 ${flagIcon}
-                             </button>
+                         
+                         <!-- ② 【新規】タップで展開する詳細アコーディオン窓 -->
+                         <div id="${safeElementId}" class="hidden mt-3 pt-3 border-t border-gray-800/80 text-xs md:text-sm animate-slide-in cursor-default" onclick="event.stopPropagation();">
+                             ${item.ex ? `
+                                 <div class="mb-3 bg-black/30 p-2.5 rounded-lg border border-gray-800">
+                                     <div class="text-[9px] text-red-500 font-bold font-mono tracking-widest uppercase mb-1">SPECIMEN EXAMPLE</div>
+                                     <p class="text-gray-100 font-serif italic text-sm md:text-base leading-relaxed mb-1">${item.ex}</p>
+                                     <p class="text-gray-400 font-sans text-xs">${item.exTr || "和訳データ同期なし"}</p>
+                                 </div>
+                             ` : ''}
+                             
+                             <!-- SRSパラメータ・テレメトリー -->
+                             <div class="grid grid-cols-3 gap-2 bg-gray-950/60 p-2 rounded-lg border border-gray-800/50 font-mono text-[10px] text-center text-gray-400">
+                                 <div><span class="text-gray-600 block text-[8px] uppercase">Interval</span><span class="text-white font-bold">${intervalDays}d</span></div>
+                                 <div><span class="text-gray-600 block text-[8px] uppercase">Repetitions</span><span class="text-white font-bold">${reps} Laps</span></div>
+                                 <div><span class="text-gray-600 block text-[8px] uppercase">Ease Factor</span><span class="text-cyan-400 font-bold">${ef}</span></div>
+                             </div>
                          </div>
                      `;
                      listEl.appendChild(div);
                  });
+                 
                  if(filtered.length > displayLimit) {
                       const more = document.createElement('div');
-                      more.className = "text-center text-xs text-gray-600 py-2";
-                      more.innerText = `...and ${filtered.length - displayLimit} more. Refine sector or search.`;
+                      more.className = "text-center text-[10px] text-gray-600 font-mono py-4 border-t border-gray-900";
+                      more.innerText = `...and ${filtered.length - displayLimit} more components. Refine filter or range to scan.`;
                       listEl.appendChild(more);
                  }
              }
