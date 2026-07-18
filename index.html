@@ -516,9 +516,8 @@
                 <button onclick="quiz.closeOverlay('wordbook-screen')" class="text-gray-400 active:text-white text-3xl p-2 hover:text-white transition-colors leading-none">&times;</button>
             </div>
 
-            <!-- ① 【新規】ガレージ・ステータス・ヘッダー (HUDカウンター) -->
-           <!-- ① ガレージ・ステータス・ヘッダー (HUDダイレクトフィルター仕様) -->
-            <div class="grid grid-cols-4 gap-2 mb-4 flex-shrink-0 text-center font-mono select-none">
+            <!-- ① ガレージ・ステータス・ヘッダー (全体ステータスHUDメーター) -->
+            <div class="grid grid-cols-4 gap-2 mb-3 flex-shrink-0 text-center font-mono select-none">
                 <div onclick="quiz.setBookFilter('all')" class="bg-black/40 border border-gray-800 rounded-xl p-2 flex flex-col justify-center cursor-pointer hover:border-gray-500 hover:bg-black/60 transition-colors">
                     <div class="text-[8px] text-gray-500 uppercase tracking-tighter">TOTAL</div>
                     <div id="wb-total-counter" class="text-base md:text-xl font-bold text-white">0</div>
@@ -537,7 +536,14 @@
                 </div>
             </div>
 
-            <!-- コントロールバー（検索＆フィルター） -->
+            <!-- ② ガレージ・コンポーネント・カテゴリー選択タブ（メーターの下へ移動） -->
+            <div class="flex bg-black/40 border border-gray-800 rounded-xl p-1 mb-3 flex-shrink-0 select-none">
+                <button onclick="quiz.switchWBCategory('vocab')" id="wb-cat-vocab" class="flex-1 py-1.5 text-[10px] font-bold font-mono text-white bg-yellow-600/30 border border-yellow-500/50 rounded-lg transition-all">VOCAB</button>
+                <button onclick="quiz.switchWBCategory('synonym')" id="wb-cat-synonym" class="flex-1 py-1.5 text-[10px] font-bold font-mono text-gray-500 border border-transparent rounded-lg hover:text-gray-300 transition-all">SYNONYM</button>
+                <button onclick="quiz.switchWBCategory('grammar')" id="wb-cat-grammar" class="flex-1 py-1.5 text-[10px] font-bold font-mono text-gray-500 border border-transparent rounded-lg hover:text-gray-300 transition-all">GRAMMAR</button>
+            </div>
+
+            <!-- ③ コントロールバー（検索＆フィルター） -->
             <div class="flex flex-wrap gap-2 mb-4 flex-shrink-0 items-center bg-black/40 p-2 rounded-xl border border-gray-800">
                 <input type="text" id="wb-search" placeholder="Scan component spec (Search)..." class="flex-1 min-w-[160px] bg-black text-white p-2 text-xs rounded border border-gray-700 font-mono focus:border-yellow-500 outline-none placeholder-gray-600">
                 <button id="wb-filter-btn" class="bg-gray-800 text-white px-3 py-2 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors shrink-0" onclick="quiz.toggleBookFilter()">ALL</button>
@@ -550,7 +556,7 @@
                 </div>
             </div>
             
-            <!-- ② メインリスト（アコーディオン検査窓） -->
+            <!-- ④ メインリスト（アコーディオン検査窓） -->
             <div id="wb-list" class="flex-1 overflow-y-auto wb-scroll text-left space-y-2 pr-1">
                 <!-- JavaScriptで高精度パーツ情報がここに生成される -->
             </div>
@@ -2724,23 +2730,44 @@ updateLanguageUI() {
                  this.updatePitStopButton(this.dueMistakes ? this.dueMistakes.length : 0);
              }
 
-            openWordBook() {
+          openWordBook() {
                  document.getElementById('start-screen').classList.add('hidden');
                  document.getElementById('wordbook-screen').classList.remove('hidden');
                  this.bookmarkedFilter = 'all';
                  document.getElementById('wb-filter-btn').innerText = "ALL";
-                 document.getElementById('wb-filter-btn').className = "bg-gray-800 text-white px-3 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors";
+                 document.getElementById('wb-filter-btn').className = "bg-gray-800 text-white px-3 py-2 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors shrink-0";
+                 
+                 // 🎯 【新規】ホーム画面の選択モードをガレージに自動同期（前置詞当てはGRAMMARに内包）
+                 let initialCat = this.currentMode;
+                 if (initialCat === 'prep_guess') initialCat = 'grammar';
+                 this.switchWBCategory(initialCat, false); // 初期化時は描画をスキップ
+                 
                  this.renderWordBook();
              }
 
-          toggleBookFilter() {
+             // 🎯 【新規】ガレージ内のカテゴリータブを切り替える関数
+             switchWBCategory(cat, shouldRender = true) {
+                 this.wbCurrentCategory = cat;
+                 const cats = ['vocab', 'synonym', 'grammar'];
+                 cats.forEach(c => {
+                     const btn = document.getElementById(`wb-cat-${c}`);
+                     if (!btn) return;
+                     if (c === cat) {
+                         btn.className = "flex-1 py-1.5 text-[10px] font-bold font-mono text-white bg-yellow-600/30 border border-yellow-500/50 rounded-lg transition-all";
+                     } else {
+                         btn.className = "flex-1 py-1.5 text-[10px] font-bold font-mono text-gray-500 border border-transparent rounded-lg hover:text-gray-300 transition-all";
+                     }
+                 });
+                 if (shouldRender) this.renderWordBook();
+             }
+
+             toggleBookFilter() {
                  if (this.bookmarkedFilter === 'all') this.setBookFilter('red');
                  else if (this.bookmarkedFilter === 'red') this.setBookFilter('yellow');
                  else if (this.bookmarkedFilter === 'yellow') this.setBookFilter('24h');
                  else this.setBookFilter('all');
              }
 
-             // 🎯 【新規】HUDやボタンから直接フィルターを強制同期する関数
              setBookFilter(filterType) {
                  this.bookmarkedFilter = filterType;
                  const btn = document.getElementById('wb-filter-btn');
@@ -2770,8 +2797,11 @@ updateLanguageUI() {
 
                  listEl.innerHTML = '';
                  
-                 // 🎯 【修正】クイズのモード状態に関わらず、ガレージ内は常に純粋な「英単語」のみに強制固定！
-                 let sourceList = this.vocabList;
+                 // 🎯 【修正】新設されたガレージ専用タブの状態を読み込んでリストを切り替え
+                 let sourceList = [];
+                 if (this.wbCurrentCategory === 'grammar') sourceList = this.grammarList;
+                 else if (this.wbCurrentCategory === 'synonym') sourceList = this.synonymList;
+                 else sourceList = this.vocabList;
 
                  let dataSrc = sourceList.length > 0 ? sourceList : (this.allMistakes || []);
                  
