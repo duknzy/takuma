@@ -305,11 +305,20 @@
                         </button>
                     </div>
 
+                    <!-- 🏁 左側：メインドライビング動線（3連コンボ仕様） -->
                     <div class="mt-auto flex flex-col gap-3">
+                        <!-- ① FREE PRACTICE (Flashcards) -->
                         <button onclick="quiz.startFlashcardMode()" class="w-full f1-font bg-gray-800 hover:bg-gray-700 text-gray-200 py-4 rounded-xl font-bold tracking-[0.2em] uppercase transition-all transform active:scale-[0.98] shadow-lg border border-gray-600 text-lg flex items-center justify-center gap-2">
                             <span class="text-blue-400">■</span> Free Practice <span class="text-[10px] text-gray-500 font-mono">(Flashcards)</span>
                         </button>
-                        <button onclick="quiz.start()" class="w-full f1-font bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-6 rounded-xl font-bold tracking-[0.2em] uppercase transition-all transform active:scale-[0.98] shadow-lg shadow-red-900/40 text-2xl border-b-4 border-red-900">
+                        
+                        <!-- ② MISSION CONTROL (新設・ガレージ主役ボタン) -->
+                        <button onclick="quiz.openWordBook()" class="w-full f1-font bg-gradient-to-r from-yellow-600/90 to-yellow-700/90 hover:from-yellow-500 hover:to-yellow-600 text-white py-4 rounded-xl font-bold tracking-[0.2em] uppercase transition-all transform active:scale-[0.98] shadow-lg shadow-yellow-950/40 text-lg flex items-center justify-center gap-2 border-b-4 border-yellow-900">
+                            <span class="text-yellow-400">📁</span> Mission Control <span class="text-[10px] text-yellow-300 font-mono">(Garage)</span>
+                        </button>
+                        
+                        <!-- ③ START QUALIFYING (Test) -->
+                        <button onclick="quiz.start()" class="w-full f1-font bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white py-5 rounded-xl font-bold tracking-[0.2em] uppercase transition-all transform active:scale-[0.98] shadow-lg shadow-red-900/40 text-xl border-b-4 border-red-900">
                             Start Qualifying
                         </button>
                     </div>
@@ -470,17 +479,11 @@
                             </div>
                         </div>
 
+                       <!-- 🔍 右側最下部：クイック検索スタンド（ボタンを撤去しスッキリ化） -->
                        <div class="pt-4 border-t border-gray-700 relative">
-                            <input type="text" id="search-input" placeholder="Quick Scan (Search)..." class="w-full bg-black text-white p-3 rounded-lg border border-gray-700 focus:border-red-500 outline-none font-mono text-sm mb-3 placeholder-gray-600">
-                             <div id="search-results" class="hidden absolute top-16 left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-50"></div>
-                            
-                            <div class="grid grid-cols-1 gap-2">
-    <button onclick="quiz.openWordBook()" class="bg-gray-700...
-                                    <span class="text-base leading-none">📁</span>
-                                    <span class="text-[9px]">DATA</span>
-                                </button>
-                            </div>
-                        </div>
+                            <input type="text" id="search-input" placeholder="Quick Scan (Search)..." class="w-full bg-black text-white p-3 rounded-lg border border-gray-700 focus:border-red-500 outline-none font-mono text-sm placeholder-gray-600">
+                            <div id="search-results" class="hidden absolute bottom-14 left-0 right-0 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-50"></div>
+                       </div>
                     </div>
                 </div>
             </div>
