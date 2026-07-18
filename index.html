@@ -543,9 +543,32 @@
                 <button onclick="quiz.switchWBCategory('grammar')" id="wb-cat-grammar" class="flex-1 py-1.5 text-[10px] font-bold font-mono text-gray-500 border border-transparent rounded-lg hover:text-gray-300 transition-all">GRAMMAR</button>
             </div>
 
-            <!-- ③ コントロールバー（検索＆フィルター） -->
+            <!-- ③ コントロールバー（検索＆フィルター / PREP SCANNER内蔵） -->
             <div class="flex flex-wrap gap-2 mb-4 flex-shrink-0 items-center bg-black/40 p-2 rounded-xl border border-gray-800">
                 <input type="text" id="wb-search" placeholder="Scan component spec (Search)..." class="flex-1 min-w-[160px] bg-black text-white p-2 text-xs rounded border border-gray-700 font-mono focus:border-yellow-500 outline-none placeholder-gray-600">
+                
+                <!-- 🎯 【新規】前置詞特化型ディープスキャナー（GRAMMAR選択時のみ自動出現） -->
+                <select id="wb-prep-filter" class="hidden bg-black text-white p-2 text-xs rounded border border-gray-700 font-mono focus:border-yellow-500 outline-none cursor-pointer shrink-0 hover:border-gray-500 transition-colors" onchange="quiz.renderWordBook()">
+                    <option value="all">ALL PREP</option>
+                    <option value="about">ABOUT</option>
+                    <option value="against">AGAINST</option>
+                    <option value="at">AT</option>
+                    <option value="beyond">BEYOND</option>
+                    <option value="by">BY</option>
+                    <option value="for">FOR</option>
+                    <option value="from">FROM</option>
+                    <option value="in">IN</option>
+                    <option value="of">OF</option>
+                    <option value="on">ON</option>
+                    <option value="out">OUT</option>
+                    <option value="over">OVER</option>
+                    <option value="through">THROUGH</option>
+                    <option value="to">TO</option>
+                    <option value="under">UNDER</option>
+                    <option value="up">UP</option>
+                    <option value="with">WITH</option>
+                </select>
+
                 <button id="wb-filter-btn" class="bg-gray-800 text-white px-3 py-2 rounded border border-gray-600 text-xs font-bold uppercase hover:bg-gray-700 transition-colors shrink-0" onclick="quiz.toggleBookFilter()">ALL</button>
                 
                 <div class="flex items-center gap-1 bg-black p-1 rounded border border-gray-700 shrink-0">
@@ -2745,7 +2768,7 @@ updateLanguageUI() {
                  this.renderWordBook();
              }
 
-             // 🎯 【新規】ガレージ内のカテゴリータブを切り替える関数
+            // 🎯 【修正】カテゴリーに応じて前置詞スキャナーの表示を自動制御
              switchWBCategory(cat, shouldRender = true) {
                  this.wbCurrentCategory = cat;
                  const cats = ['vocab', 'synonym', 'grammar'];
@@ -2758,6 +2781,18 @@ updateLanguageUI() {
                          btn.className = "flex-1 py-1.5 text-[10px] font-bold font-mono text-gray-500 border border-transparent rounded-lg hover:text-gray-300 transition-all";
                      }
                  });
+
+                 // GRAMMARセクターが選ばれた時だけ前置詞スキャナーのロックを解除（出現）させる
+                 const prepFilter = document.getElementById('wb-prep-filter');
+                 if (prepFilter) {
+                     if (cat === 'grammar') {
+                         prepFilter.classList.remove('hidden');
+                     } else {
+                         prepFilter.classList.add('hidden');
+                         prepFilter.value = 'all'; // タブを離れたらリセット
+                     }
+                 }
+
                  if (shouldRender) this.renderWordBook();
              }
 
@@ -2794,10 +2829,13 @@ updateLanguageUI() {
                  const query = document.getElementById('wb-search').value.toLowerCase().trim();
                  const startVal = parseInt(document.getElementById('wb-start').value);
                  const endVal = parseInt(document.getElementById('wb-end').value);
+                 
+                 // 🎯 【新規】前置詞フィルターの選択状態を取得
+                 const prepFilterEl = document.getElementById('wb-prep-filter');
+                 const prepQuery = prepFilterEl ? prepFilterEl.value : 'all';
 
                  listEl.innerHTML = '';
                  
-                 // 🎯 【修正】新設されたガレージ専用タブの状態を読み込んでリストを切り替え
                  let sourceList = [];
                  if (this.wbCurrentCategory === 'grammar') sourceList = this.grammarList;
                  else if (this.wbCurrentCategory === 'synonym') sourceList = this.synonymList;
@@ -2822,9 +2860,6 @@ updateLanguageUI() {
                      };
                  });
 
-                 // ==========================================
-                 // 📊 ① 【新規】ガレージ・リアルタイムHUDの集計処理
-                 // ==========================================
                  let totalCount = merged.length;
                  let redCount = 0;
                  let yellowCount = 0;
@@ -2843,7 +2878,6 @@ updateLanguageUI() {
                      if (is24hMiss) h24Count++;
                  });
 
-                 // HUDのデジタルカウンターに値をデプロイ
                  document.getElementById('wb-total-counter').innerText = totalCount;
                  document.getElementById('wb-red-counter').innerText = redCount;
                  document.getElementById('wb-yellow-counter').innerText = yellowCount;
@@ -2853,6 +2887,13 @@ updateLanguageUI() {
                  const filtered = merged.filter(item => {
                      const matchQ = item.w.toLowerCase().includes(query) || item.m.toLowerCase().includes(query);
                      
+                     // 🎯 【新規】前置詞の厳密マッチング判定（単語の一部ではなく独立した前置詞として判定）
+                     let matchPrep = true;
+                     if (this.wbCurrentCategory === 'grammar' && prepQuery !== 'all') {
+                         const regex = new RegExp(`\\b${prepQuery}\\b`, 'i');
+                         matchPrep = regex.test(item.w);
+                     }
+
                      let matchBook = true;
                      const isRed = item.srs && (item.srs.flag === 'red' || item.srs.bookmarked === true);
                      const isYellow = item.srs && item.srs.flag === 'yellow';
@@ -2870,9 +2911,10 @@ updateLanguageUI() {
                      const wordNum = item.id + 1;
                      const matchRange = (!startVal || wordNum >= startVal) && (!endVal || wordNum <= endVal);
 
-                     return matchQ && matchBook && matchRange;
+                     // 🎯 matchPrep を判定条件に結合
+                     return matchQ && matchPrep && matchBook && matchRange;
                  });
-
+                 
                  if (filtered.length === 0) {
                      listEl.innerHTML = `<div class="text-gray-500 text-xs text-center py-8 font-mono tracking-wider">NO COMPONENTS IN ATTACHED SECTOR</div>`;
                      return;
