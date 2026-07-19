@@ -2366,8 +2366,8 @@ switchModeTab(mode) {
                          const fontClass = this.isReverseMode ? "f1-font tracking-wider text-xl" : "text-lg";
                          btn.className = `option-btn w-full h-full flex items-center text-left p-5 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 active:border-red-500 font-bold shadow-lg ${fontClass} transition-all`;
                          
-                         // 🎯 ボタンの頭に [1] 〜 [4] のインジケーターを視覚デプロイ
-                         btn.innerText = `[${idx + 1}] ${opt}`;
+                         btn.innerText = opt;
+                        
                          btn.onclick = () => this.handleVocabAnswer(opt, q);
                          container.appendChild(btn);
                      });
@@ -3177,7 +3177,7 @@ updateLanguageUI() {
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-      import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+      import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
       import { 
           getFirestore, collection, addDoc, query, where, getDocs, doc, setDoc, updateDoc, deleteDoc, 
           Timestamp, orderBy, limit, runTransaction, onSnapshot, getDoc, increment,
@@ -3271,11 +3271,39 @@ updateLanguageUI() {
         }
       });
 
+      // リダイレクト後のサインイン結果を監視
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result?.user) {
+            console.log("Redirect sign-in successful:", result.user.displayName);
+          }
+        })
+        .catch((error) => {
+          console.error("Redirect Sign-in Error:", error);
+          loginStatus.innerText = "Access Denied (Redirect).";
+        });
+
+      // デバイスに応じた最適な認証戦略を実行
       gateLoginBtn.addEventListener('click', async () => {
         loginStatus.innerText = "Connecting to Paddock...";
         const provider = new GoogleAuthProvider();
-        try { await signInWithPopup(auth, provider); } 
-        catch (error) { console.error(error); loginStatus.innerText = "Access Denied."; }
+        
+        // スマホ環境かどうかを判定
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        try { 
+          if (isMobile) {
+            // スマホならポップアップブロックを回避してリダイレクトで確実に通す
+            await signInWithRedirect(auth, provider);
+          } else {
+            // PCなら最速のポップアップで処理
+            await signInWithPopup(auth, provider); 
+          }
+        } 
+        catch (error) { 
+          console.error(error); 
+          loginStatus.innerText = "Access Denied."; 
+        }
       });
 
       window.fetchSRSItems = async () => {
