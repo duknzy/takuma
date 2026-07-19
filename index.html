@@ -257,25 +257,34 @@
         <source src="./.mp4" type="video/mp4">
     </video>
 
-    <div id="app" class="w-full max-w-6xl mx-auto flex flex-col">
-        
-        <div id="gate-screen" class="race-card p-8 rounded-2xl shadow-2xl text-center relative overflow-hidden animate-slide-in my-auto max-w-md mx-auto w-full">
+    <div id="gate-screen" class="race-card p-8 rounded-2xl shadow-2xl text-center relative overflow-hidden animate-slide-in my-auto max-w-md mx-auto w-full">
             <h1 class="f1-font text-5xl mb-2 font-bold text-white tracking-wider">RB<span class="text-red-600">-28</span></h1>
             <p class="text-gray-400 font-mono text-xs uppercase tracking-[0.4em] mb-8">Hybrid Learning System</p>
             
-            <!-- フォームを追加 -->
-            <div class="space-y-4 mb-6">
+            <!-- 既存の最速ルート：Googleログインボタン（復活） -->
+            <button id="gate-login-btn" class="w-full f1-font bg-white hover:bg-gray-200 text-black px-8 py-4 rounded-xl font-bold tracking-widest uppercase transition-all shadow-lg flex items-center justify-center gap-3 active:scale-95 mb-6 text-xs">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" /></svg>
+                Sign In With Google
+            </button>
+
+            <div class="relative flex py-2 items-center my-4">
+                <div class="flex-grow border-t border-gray-700"></div>
+                <span class="flex-shrink mx-4 text-gray-500 font-mono text-[10px]">OR (BYPASS ROUTE)</span>
+                <div class="flex-grow border-t border-gray-700"></div>
+            </div>
+
+            <!-- バイパスルート：メール認証欄 -->
+            <div class="space-y-3 mb-4">
                 <input type="email" id="login-email" placeholder="Email Address" class="w-full bg-black text-white p-3 rounded-xl border border-gray-700 focus:border-red-500 outline-none font-mono text-sm placeholder-gray-600">
                 <input type="password" id="login-password" placeholder="Password" class="w-full bg-black text-white p-3 rounded-xl border border-gray-700 focus:border-red-500 outline-none font-mono text-sm placeholder-gray-600">
             </div>
 
-            <!-- サインインと新規登録の2ボタン戦略 -->
             <div class="grid grid-cols-2 gap-4">
-                <button id="gate-login-btn" class="f1-font bg-white hover:bg-gray-200 text-black py-4 rounded-xl font-bold tracking-widest uppercase transition-all shadow-lg text-xs active:scale-95">
-                    Sign In
+                <button id="gate-email-login-btn" class="f1-font bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold tracking-widest uppercase transition-all shadow-lg text-xs active:scale-95">
+                    Email Sign In
                 </button>
-                <button id="gate-signup-btn" class="f1-font bg-gray-800 hover:bg-gray-700 text-white py-4 rounded-xl font-bold tracking-widest uppercase transition-all shadow-lg border border-gray-600 text-xs active:scale-95">
-                    Sign Up
+                <button id="gate-signup-btn" class="f1-font bg-gray-900 hover:bg-gray-800 text-gray-400 py-3 rounded-xl font-bold tracking-widest uppercase transition-all shadow-lg border border-gray-700 text-xs active:scale-95">
+                    Register
                 </button>
             </div>
             <p id="login-status" class="mt-6 text-[10px] text-gray-600 font-mono">System Standby...</p>
@@ -3189,7 +3198,7 @@ updateLanguageUI() {
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-      import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
       import { 
           getFirestore, collection, addDoc, query, where, getDocs, doc, setDoc, updateDoc, deleteDoc, 
           Timestamp, orderBy, limit, runTransaction, onSnapshot, getDoc, increment,
@@ -3283,59 +3292,68 @@ updateLanguageUI() {
         }
       });
 
+     // ─── 新設パーツのDOM取得 ───
+      const gateEmailLoginBtn = document.getElementById('gate-email-login-btn');
       const gateSignupBtn = document.getElementById('gate-signup-btn');
 
-      // ─── 戦略1: サインイン（既存ユーザー） ───
+      // 🏎️ ルートA: Googleログイン（リダイレクト結果監視）
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result?.user) console.log("Google Redirect successful:", result.user.displayName);
+        })
+        .catch((error) => {
+          console.error("Google Redirect Error:", error);
+          loginStatus.innerText = "Google Auth Failed.";
+        });
+
+      // Googleボタン（gate-login-btn）が押された時
       gateLoginBtn.addEventListener('click', async () => {
+        loginStatus.innerText = "Connecting to Paddock (Google)...";
+        const provider = new GoogleAuthProvider();
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        try { 
+          if (isMobile) {
+            await signInWithRedirect(auth, provider);
+          } else {
+            await signInWithPopup(auth, provider); 
+          }
+        } catch (error) { 
+          console.error(error); 
+          loginStatus.innerText = "Google Login Blocked."; 
+        }
+      });
+
+      // 🛠️ ルートB: メールサインイン（gate-email-login-btn）
+      gateEmailLoginBtn.addEventListener('click', async () => {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
+        if (!email || !password) { loginStatus.innerText = "Missing Credentials."; return; }
 
-        if (!email || !password) {
-          loginStatus.innerText = "Missing Credentials.";
-          return;
-        }
-
-        loginStatus.innerText = "Connecting to Paddock...";
+        loginStatus.innerText = "Connecting to Paddock (Email)...";
         try {
           await signInWithEmailAndPassword(auth, email, password);
-          console.log("Sign-in successful!");
         } catch (error) {
-          console.error("Sign-in Error:", error);
+          console.error(error);
           loginStatus.innerText = "Invalid email or password.";
         }
       });
 
-      // ─── 戦略2: サインアップ（新規アカウント作成） ───
+      // 🛠️ ルートC: 新規アカウント登録（gate-signup-btn）
       gateSignupBtn.addEventListener('click', async () => {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
+        if (!email || !password) { loginStatus.innerText = "Enter credentials to register."; return; }
+        if (password.length < 6) { loginStatus.innerText = "Password must be >= 6 chars."; return; }
 
-        if (!email || !password) {
-          loginStatus.innerText = "Enter email and password to Register.";
-          return;
-        }
-        if (password.length < 6) {
-          loginStatus.innerText = "Password must be at least 6 characters.";
-          return;
-        }
-
-        loginStatus.innerText = "Creating New Driver Profile...";
+        loginStatus.innerText = "Registering New Driver...";
         try {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          
-          // メールアドレスのアカウント名部分（@の前）を自動でドライバー名に設定して無駄を省く
           const defaultName = email.split('@')[0].toUpperCase();
           await updateProfile(userCredential.user, { displayName: defaultName });
-          
-          console.log("Registration and profile update successful!");
-          location.reload(); // プロフィール反映のため一度リロード
+          location.reload();
         } catch (error) {
-          console.error("Sign-up Error:", error);
-          if (error.code === 'auth/email-already-in-check' || error.code === 'auth/email-already-in-use') {
-            loginStatus.innerText = "This email is already registered.";
-          } else {
-            loginStatus.innerText = "Registration failed.";
-          }
+          console.error(error);
+          loginStatus.innerText = "Registration failed.";
         }
       });
 
