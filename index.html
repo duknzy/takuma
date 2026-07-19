@@ -823,61 +823,84 @@ this.grammarList = [];
 // ▼ これを追加 ▼
 this.prepList = ['about', 'against', 'at', 'beyond', 'by', 'for', 'from', 'in', 'of', 'on', 'out', 'over', 'through', 'to', 'under', 'up', 'with'];
 
-// --- キーボードタイピングによる自由入力 ＆ Enter進行サポート ---
+// --- ⚙️ キーボードタイピング自由入力 ＆ 4択ショートカット ＆ 進行サポート ---
 window.addEventListener('keydown', (e) => {
-    // 1. スペリングモードではない、またはシステムがロックされている場合は処理しない
-    if (!this.isSpellingMode || this.isLocked) return;
-
-    // 2. 他の入力欄（検索バーなど）にフォーカスがある時はタイピングを邪魔しない
+    // 1. 検索窓など、他の入力欄にフォーカスがある時は挙動を邪魔しない
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-    // 3. 現在実行中の問題オブジェクトを取得
     const q = this.questions[this.currentIndex];
     if (!q) return;
 
-    const targetWordStr = q.ansW || q.w || "";
-    const targetLen = targetWordStr.trim().length;
+    // ─── 🏎️ パターンA: スペリングモード（タイピングモード）実行中の処理 ───
+    if (this.isSpellingMode) {
+        if (this.isLocked) return;
+        const targetWordStr = q.ansW || q.w || "";
+        const targetLen = targetWordStr.trim().length;
 
-    // ─── 【Enterキー】が押された場合：正誤判定を行う ───
-    if (e.key === 'Enter') {
-        // 文字数がターゲットと同じまで入力されている場合のみ、判定を実行して次へ進む
-        if (this.spellingAns.length === targetLen) {
-            this.checkSpellingWin(q);
+        if (e.key === 'Enter') {
+            if (this.spellingAns.length === targetLen) {
+                this.checkSpellingWin(q);
+            }
+            return;
         }
+
+        if (e.key === 'Backspace') {
+            if (this.spellingAns.length > 0) {
+                this.spellingAns.pop();
+                this.renderSpellingInterface(q);
+            }
+            return;
+        }
+
+        const pressedKey = e.key.toLowerCase();
+        if (pressedKey.length !== 1 || !/[a-z]/.test(pressedKey)) return;
+        if (this.spellingAns.length >= targetLen) return;
+
+        this.spellingAns.push({ 
+            id: 'kb-' + Date.now() + '-' + this.spellingAns.length, 
+            char: e.key 
+        });
+        
+        this.renderSpellingInterface(q);
         return;
     }
 
-    // ─── 【Backspaceキー】が押された場合：最後の1文字を消す ───
-    if (e.key === 'Backspace') {
-        if (this.spellingAns.length > 0) {
-            // 自由入力なので、単純に末尾の文字を削除
-            this.spellingAns.pop();
-            // 画面を再描画
-            this.renderSpellingInterface(q);
+    // ─── 🏎️ パターンB: 通常の4択 / 前置詞 / 類義語モード実行中の処理 ───
+    const container = document.getElementById('options-container');
+    if (!container) return;
+
+    // ① 回答後に「NEXT LAP ▶（次の問題へ）」ボタンが表示されている場合
+    const nextBtn = container.querySelector('button');
+    if (nextBtn && (nextBtn.innerText.includes('NEXT') || nextBtn.innerText.includes('次の問題へ'))) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            nextBtn.click(); // マウスの代わりにボタンを自動プッシュ
+            return;
         }
-        return;
     }
 
-    // ─── 【アルファベットキー】が押された場合（自由タイピング） ───
-    const pressedKey = e.key.toLowerCase();
+    // ② まだ未回答で、目隠し（VISUALIZE MEANING）ボタンが出ている場合
+    if (nextBtn && (nextBtn.innerText.includes('VISUALIZE') || nextBtn.innerText.includes('意味を表示'))) {
+        // 1〜4キー、Enter、Spaceのどれを押しても目隠しを即時アンロック
+        if (e.key === 'Enter' || e.key === ' ' || ['1', '2', '3', '4'].includes(e.key)) {
+            e.preventDefault();
+            nextBtn.click();
+            return;
+        }
+    }
 
-    // a〜z の1文字のアルファベットのみ入力を許可（必要に応じてハイフン等も含める場合は調整してください）
-    if (pressedKey.length !== 1 || !/[a-z]/.test(pressedKey)) return;
-
-    // すでに制限文字数に達している場合は、Enterを押すまでこれ以上入力させない
-    if (this.spellingAns.length >= targetLen) return;
-
-    // 選択肢（プール）の文字に関係なく、タイピングした文字をそのまま解答スロットに追加
-    this.spellingAns.push({ 
-        id: 'kb-' + Date.now() + '-' + this.spellingAns.length, 
-        char: e.key // 大文字小文字を保持
-    });
-    
-    // 画面を再描画して文字を表示
-    this.renderSpellingInterface(q);
-    
-    // 💡【ポイント】ここではあえて `this.checkSpellingWin(q)` を自動で呼び出しません。
-    // これにより、文字数が埋まってもEnterを押すまで画面が止まり、自分のミスを確認できるようになります。
+    // ③ 4択の選択肢ボタンがアクティブに並んでいる場合
+    if (!this.isLocked) {
+        if (['1', '2', '3', '4'].includes(e.key)) {
+            e.preventDefault();
+            const btnIdx = parseInt(e.key) - 1;
+            const buttons = container.querySelectorAll('.option-btn');
+            // 対応する数字のボタンが存在し、無効化されていなければクリック
+            if (buttons[btnIdx] && !buttons[btnIdx].disabled) {
+                buttons[btnIdx].click();
+            }
+        }
+    }
 });
 
 // BLIND RADIO
@@ -2266,15 +2289,18 @@ switchModeTab(mode) {
 
              renderStandardOptions(q, container) {
                  container.innerHTML = '';
-                 const t = translations[this.lang] || translations['en']; // 🌐 翻訳データ取得
+                 const t = translations[this.lang] || translations['en']; 
                  
                  const renderBtns = () => {
                      container.innerHTML = '';
-                     q.o.forEach(opt => {
+                     // 🎯 各選択肢に idx (0〜3) を紐づけてループ処理
+                     q.o.forEach((opt, idx) => { 
                          const btn = document.createElement('button');
                          const fontClass = this.isReverseMode ? "f1-font tracking-wider text-xl" : "text-lg";
                          btn.className = `option-btn w-full h-full flex items-center text-left p-5 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 active:border-red-500 font-bold shadow-lg ${fontClass} transition-all`;
-                         btn.innerText = opt;
+                         
+                         // 🎯 ボタンの頭に [1] 〜 [4] のインジケーターを視覚デプロイ
+                         btn.innerText = `[${idx + 1}] ${opt}`;
                          btn.onclick = () => this.handleVocabAnswer(opt, q);
                          container.appendChild(btn);
                      });
@@ -2285,7 +2311,6 @@ switchModeTab(mode) {
                  } else {
                      const revealBtn = document.createElement('button');
                      revealBtn.className = 'col-span-2 w-full h-32 bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-xl text-gray-400 f1-font text-2xl uppercase tracking-widest hover:border-yellow-500 hover:text-yellow-500 transition-all flex flex-col items-center justify-center gap-2 animate-pulse';
-                     // 🌐 VISUALIZE MEANING と TAP TO UNLOCK を翻訳に差し替え
                      revealBtn.innerHTML = `<span>${t.visualizeMeaning}</span><span class="text-xs text-gray-500 font-mono">${t.visualizeUnlock}</span>`;
                      revealBtn.onclick = () => { 
                          renderBtns();
