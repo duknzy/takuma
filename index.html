@@ -823,83 +823,150 @@ this.grammarList = [];
 // ▼ これを追加 ▼
 this.prepList = ['about', 'against', 'at', 'beyond', 'by', 'for', 'from', 'in', 'of', 'on', 'out', 'over', 'through', 'to', 'under', 'up', 'with'];
 
-// --- ⚙️ キーボードタイピング自由入力 ＆ 4択ショートカット ＆ 進行サポート ---
+// --- ⚙️ 全画面対応：グローバル・コックピット・キーボード管制システム ---
 window.addEventListener('keydown', (e) => {
-    // 1. 検索窓など、他の入力欄にフォーカスがある時は挙動を邪魔しない
+    // 検索バーや範囲入力欄など、インプット要素にフォーカスがある時は暴発を防ぐ
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-    const q = this.questions[this.currentIndex];
-    if (!q) return;
+    // 現在どの画面が開いているかを判定するインジケーターヘルパー
+    const isVisible = (id) => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains('hidden');
+    };
 
-    // ─── 🏎️ パターンA: スペリングモード（タイピングモード）実行中の処理 ───
-    if (this.isSpellingMode) {
-        if (this.isLocked) return;
-        const targetWordStr = q.ansW || q.w || "";
-        const targetLen = targetWordStr.trim().length;
+    // ─── 1. クイズ（テスト）画面実行中のコントロール ───
+    if (isVisible('quiz-screen')) {
+        const q = this.questions[this.currentIndex];
+        if (!q) return;
 
-        if (e.key === 'Enter') {
-            if (this.spellingAns.length === targetLen) {
-                this.checkSpellingWin(q);
+        // タイピング（スペリング）モード時
+        if (this.isSpellingMode) {
+            if (this.isLocked) return;
+            const targetWordStr = q.ansW || q.w || "";
+            const targetLen = targetWordStr.trim().length;
+
+            if (e.key === 'Enter') {
+                if (this.spellingAns.length === targetLen) this.checkSpellingWin(q);
+                return;
             }
-            return;
-        }
-
-        if (e.key === 'Backspace') {
-            if (this.spellingAns.length > 0) {
-                this.spellingAns.pop();
-                this.renderSpellingInterface(q);
+            if (e.key === 'Backspace') {
+                if (this.spellingAns.length > 0) {
+                    this.spellingAns.pop();
+                    this.renderSpellingInterface(q);
+                }
+                return;
             }
+            const pressedKey = e.key.toLowerCase();
+            if (pressedKey.length !== 1 || !/[a-z]/.test(pressedKey)) return;
+            if (this.spellingAns.length >= targetLen) return;
+
+            this.spellingAns.push({ id: 'kb-' + Date.now() + '-' + this.spellingAns.length, char: e.key });
+            this.renderSpellingInterface(q);
             return;
         }
 
-        const pressedKey = e.key.toLowerCase();
-        if (pressedKey.length !== 1 || !/[a-z]/.test(pressedKey)) return;
-        if (this.spellingAns.length >= targetLen) return;
+        // 通常の4択選択モード時
+        const container = document.getElementById('options-container');
+        if (!container) return;
 
-        this.spellingAns.push({ 
-            id: 'kb-' + Date.now() + '-' + this.spellingAns.length, 
-            char: e.key 
-        });
-        
-        this.renderSpellingInterface(q);
-        return;
-    }
-
-    // ─── 🏎️ パターンB: 通常の4択 / 前置詞 / 類義語モード実行中の処理 ───
-    const container = document.getElementById('options-container');
-    if (!container) return;
-
-    // ① 回答後に「NEXT LAP ▶（次の問題へ）」ボタンが表示されている場合
-    const nextBtn = container.querySelector('button');
-    if (nextBtn && (nextBtn.innerText.includes('NEXT') || nextBtn.innerText.includes('次の問題へ'))) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            nextBtn.click(); // マウスの代わりにボタンを自動プッシュ
-            return;
+        const nextBtn = container.querySelector('button');
+        if (nextBtn && (nextBtn.innerText.includes('NEXT') || nextBtn.innerText.includes('次の問題へ'))) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                nextBtn.click();
+                return;
+            }
         }
-    }
-
-    // ② まだ未回答で、目隠し（VISUALIZE MEANING）ボタンが出ている場合
-    if (nextBtn && (nextBtn.innerText.includes('VISUALIZE') || nextBtn.innerText.includes('意味を表示'))) {
-        // 1〜4キー、Enter、Spaceのどれを押しても目隠しを即時アンロック
-        if (e.key === 'Enter' || e.key === ' ' || ['1', '2', '3', '4'].includes(e.key)) {
-            e.preventDefault();
-            nextBtn.click();
-            return;
+        if (nextBtn && (nextBtn.innerText.includes('VISUALIZE') || nextBtn.innerText.includes('意味を表示'))) {
+            if (e.key === 'Enter' || e.key === ' ' || ['1', '2', '3', '4'].includes(e.key)) {
+                e.preventDefault();
+                nextBtn.click();
+                return;
+            }
         }
-    }
-
-    // ③ 4択の選択肢ボタンがアクティブに並んでいる場合
-    if (!this.isLocked) {
-        if (['1', '2', '3', '4'].includes(e.key)) {
+        if (!this.isLocked && ['1', '2', '3', '4'].includes(e.key)) {
             e.preventDefault();
             const btnIdx = parseInt(e.key) - 1;
             const buttons = container.querySelectorAll('.option-btn');
-            // 対応する数字のボタンが存在し、無効化されていなければクリック
-            if (buttons[btnIdx] && !buttons[btnIdx].disabled) {
-                buttons[btnIdx].click();
+            if (buttons[btnIdx] && !buttons[btnIdx].disabled) buttons[btnIdx].click();
+        }
+        return;
+    }
+
+    // ─── 2. メインメニュー（スタート画面）での画面遷移 ───
+    if (isVisible('start-screen')) {
+        const key = e.key.toLowerCase();
+        if (key === 'f') {
+            e.preventDefault();
+            this.startFlashcardMode();
+        } else if (key === 'm') {
+            e.preventDefault();
+            this.openWordBook();
+        } else if (key === 'q' || e.key === 'Enter') {
+            e.preventDefault();
+            this.start();
+        } else if (key === 't') {
+            e.preventDefault();
+            this.openTelemetry();
+        }
+        return;
+    }
+
+    // ─── 3. フリープラクティス（フラッシュカード）画面での操作 ───
+    if (isVisible('flashcard-screen')) {
+        const key = e.key.toLowerCase();
+        if (e.key === ' ') {
+            e.preventDefault(); // スペースキーによるブラウザスクロールを防止
+            this.flipFlashcard();
+        } else if (e.key === 'ArrowRight' || key === 'd') {
+            e.preventDefault();
+            this.nextFlashcard();
+        } else if (e.key === 'ArrowLeft' || key === 'a') {
+            e.preventDefault();
+            this.prevFlashcard();
+        } else if (key === 'v') {
+            e.preventDefault();
+            this.speakFlashcardWord();
+        } else if (key === 'f' || key === 'b') {
+            e.preventDefault();
+            const bookmarkBtn = document.getElementById('fc-bookmark-btn');
+            if (bookmarkBtn) bookmarkBtn.click();
+        } else if (e.key === 'Escape' || key === 'q') {
+            e.preventDefault();
+            this.exitFlashcardMode();
+        }
+        return;
+    }
+
+    // ─── 4. 各種オーバーレイ画面（単語帳・テレメトリー）を閉じる ───
+    if (isVisible('wordbook-screen')) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            this.closeOverlay('wordbook-screen');
+        }
+        return;
+    }
+    if (isVisible('telemetry-screen')) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            this.closeOverlay('telemetry-screen');
+        }
+        return;
+    }
+
+    // ─── 5. リザルト（結果発表）画面での次周進出 ───
+    if (isVisible('result-screen')) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const nextRoundBtn = document.getElementById('next-round-btn');
+            // 次のラウンドがある場合は進み、なければグリッド（ガレージ）に戻る
+            if (nextRoundBtn && !nextRoundBtn.classList.contains('hidden')) {
+                nextRoundBtn.click();
+            } else {
+                this.returnToGrid();
             }
         }
+        return;
     }
 });
 
