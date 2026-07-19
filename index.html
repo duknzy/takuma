@@ -27,10 +27,10 @@
         }
 
         html, body {
-    height: 100%;
-    width: 100%;
-   overflow: hidden; /* 👈 autoから元の「hidden」に戻す */
-    background-color: transparent;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; 
+            background-color: transparent;
             color: #e2e8f0;
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -257,36 +257,15 @@
         <source src="./.mp4" type="video/mp4">
     </video>
 
-         <div id="gate-screen" class="race-card p-8 rounded-2xl shadow-2xl text-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden animate-slide-in max-w-md w-full z-50">
-    <h1 class="f1-font text-5xl mb-2 font-bold text-white tracking-wider">RB<span class="text-red-600">-28</span></h1>
-            <p class="text-gray-400 font-mono text-xs uppercase tracking-[0.4em] mb-8">Hybrid Learning System</p>
-            
-            <!-- 既存の最速ルート：Googleログインボタン（復活） -->
-            <button id="gate-login-btn" class="w-full f1-font bg-white hover:bg-gray-200 text-black px-8 py-4 rounded-xl font-bold tracking-widest uppercase transition-all shadow-lg flex items-center justify-center gap-3 active:scale-95 mb-6 text-xs">
+    <div id="app" class="w-full max-w-6xl mx-auto flex flex-col">
+        
+        <div id="gate-screen" class="race-card p-8 rounded-2xl shadow-2xl text-center relative overflow-hidden animate-slide-in my-auto max-w-md mx-auto w-full">
+            <h1 class="f1-font text-5xl mb-2 font-bold text-white tracking-wider">RB<span class="text-red-600">-28</span></h1>
+            <p class="text-gray-400 font-mono text-xs uppercase tracking-[0.4em] mb-12">Hybrid Learning System</p>
+            <button id="gate-login-btn" class="w-full f1-font bg-white hover:bg-gray-200 text-black px-8 py-4 rounded-xl font-bold tracking-widest uppercase transition-all shadow-lg flex items-center justify-center gap-3 active:scale-95">
                 <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" /></svg>
-                Sign In With Google
+                Sign In
             </button>
-
-            <div class="relative flex py-2 items-center my-4">
-                <div class="flex-grow border-t border-gray-700"></div>
-                <span class="flex-shrink mx-4 text-gray-500 font-mono text-[10px]">OR (BYPASS ROUTE)</span>
-                <div class="flex-grow border-t border-gray-700"></div>
-            </div>
-
-            <!-- バイパスルート：メール認証欄 -->
-            <div class="space-y-3 mb-4">
-                <input type="email" id="login-email" placeholder="Email Address" class="w-full bg-black text-white p-3 rounded-xl border border-gray-700 focus:border-red-500 outline-none font-mono text-sm placeholder-gray-600">
-                <input type="password" id="login-password" placeholder="Password" class="w-full bg-black text-white p-3 rounded-xl border border-gray-700 focus:border-red-500 outline-none font-mono text-sm placeholder-gray-600">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <button id="gate-email-login-btn" class="f1-font bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold tracking-widest uppercase transition-all shadow-lg text-xs active:scale-95">
-                    Email Sign In
-                </button>
-                <button id="gate-signup-btn" class="f1-font bg-gray-900 hover:bg-gray-800 text-gray-400 py-3 rounded-xl font-bold tracking-widest uppercase transition-all shadow-lg border border-gray-700 text-xs active:scale-95">
-                    Register
-                </button>
-            </div>
             <p id="login-status" class="mt-6 text-[10px] text-gray-600 font-mono">System Standby...</p>
         </div>
 
@@ -2387,8 +2366,8 @@ switchModeTab(mode) {
                          const fontClass = this.isReverseMode ? "f1-font tracking-wider text-xl" : "text-lg";
                          btn.className = `option-btn w-full h-full flex items-center text-left p-5 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 active:border-red-500 font-bold shadow-lg ${fontClass} transition-all`;
                          
-                         btn.innerText = opt;
-                        
+                         // 🎯 ボタンの頭に [1] 〜 [4] のインジケーターを視覚デプロイ
+                         btn.innerText = `[${idx + 1}] ${opt}`;
                          btn.onclick = () => this.handleVocabAnswer(opt, q);
                          container.appendChild(btn);
                      });
@@ -3198,7 +3177,7 @@ updateLanguageUI() {
     
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-      import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
       import { 
           getFirestore, collection, addDoc, query, where, getDocs, doc, setDoc, updateDoc, deleteDoc, 
           Timestamp, orderBy, limit, runTransaction, onSnapshot, getDoc, increment,
@@ -3292,72 +3271,12 @@ updateLanguageUI() {
         }
       });
 
-     // ─── 新設パーツのDOM取得 ───
-      const gateEmailLoginBtn = document.getElementById('gate-email-login-btn');
-      const gateSignupBtn = document.getElementById('gate-signup-btn');
-
-      // 🏎️ ルートA: Googleログイン（リダイレクト結果監視）
-      getRedirectResult(auth)
-        .then((result) => {
-          if (result?.user) console.log("Google Redirect successful:", result.user.displayName);
-        })
-        .catch((error) => {
-          console.error("Google Redirect Error:", error);
-          loginStatus.innerText = "Google Auth Failed.";
-        });
-
-      // Googleボタン（gate-login-btn）が押された時
       gateLoginBtn.addEventListener('click', async () => {
-        loginStatus.innerText = "Connecting to Paddock (Google)...";
+        loginStatus.innerText = "Connecting to Paddock...";
         const provider = new GoogleAuthProvider();
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        try { 
-          if (isMobile) {
-            await signInWithRedirect(auth, provider);
-          } else {
-            await signInWithPopup(auth, provider); 
-          }
-        } catch (error) { 
-          console.error(error); 
-          loginStatus.innerText = "Google Login Blocked."; 
-        }
+        try { await signInWithPopup(auth, provider); } 
+        catch (error) { console.error(error); loginStatus.innerText = "Access Denied."; }
       });
-
-      // 🛠️ ルートB: メールサインイン（gate-email-login-btn）
-      gateEmailLoginBtn.addEventListener('click', async () => {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
-        if (!email || !password) { loginStatus.innerText = "Missing Credentials."; return; }
-
-        loginStatus.innerText = "Connecting to Paddock (Email)...";
-        try {
-          await signInWithEmailAndPassword(auth, email, password);
-        } catch (error) {
-          console.error(error);
-          loginStatus.innerText = "Invalid email or password.";
-        }
-      });
-
-      // 🛠️ ルートC: 新規アカウント登録（gate-signup-btn）
-      gateSignupBtn.addEventListener('click', async () => {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
-        if (!email || !password) { loginStatus.innerText = "Enter credentials to register."; return; }
-        if (password.length < 6) { loginStatus.innerText = "Password must be >= 6 chars."; return; }
-
-        loginStatus.innerText = "Registering New Driver...";
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const defaultName = email.split('@')[0].toUpperCase();
-          await updateProfile(userCredential.user, { displayName: defaultName });
-          location.reload();
-        } catch (error) {
-          console.error(error);
-          loginStatus.innerText = "Registration failed.";
-        }
-      });
-
-      
 
       window.fetchSRSItems = async () => {
         if (!window.currentUser) return;
