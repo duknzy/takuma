@@ -3130,7 +3130,8 @@ updateLanguageUI() {
                      const displayW = item.w.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                      let displayM = item.m.replace(/</g, "&lt;").replace(/>/g, "&gt;"); 
 
-                     if (this.currentMode === 'synonym' && item.synonym) {
+                     // 🎯 判定変数を this.wbCurrentCategory へ変更
+                     if (this.wbCurrentCategory === 'synonym' && item.synonym) {
                          const dispSyn = item.synonym.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                          displayM = `${displayM} (= ${dispSyn})`;
                      }
